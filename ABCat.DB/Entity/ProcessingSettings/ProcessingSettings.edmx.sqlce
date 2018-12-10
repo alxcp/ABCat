@@ -1,0 +1,53 @@
+
+-- --------------------------------------------------
+-- Entity Designer DDL Script for SQL Server Compact Edition
+-- --------------------------------------------------
+-- Date Created: 10/06/2013 11:42:43
+-- Generated from EDMX file: Y:\FromE\Documents\Work\Rutracker\ABCat.DB\Entity\ProcessingSettings\ProcessingSettings.edmx
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing FOREIGN KEY constraints
+-- NOTE: if the constraint does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing tables
+-- NOTE: if the table does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+    DROP TABLE [ReplacementStringSet];
+GO
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'ReplacementStringSet'
+CREATE TABLE [ReplacementStringSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [PossibleValue] nvarchar(4000)  NOT NULL,
+    [RecordPropertyName] nvarchar(4000)  NOT NULL,
+    [ReplaceValue] nvarchar(4000)  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [ID] in table 'ReplacementStringSet'
+ALTER TABLE [ReplacementStringSet]
+ADD CONSTRAINT [PK_ReplacementStringSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- --------------------------------------------------
+-- Creating all FOREIGN KEY constraints
+-- --------------------------------------------------
+
+-- --------------------------------------------------
+-- Script has ended
+-- --------------------------------------------------

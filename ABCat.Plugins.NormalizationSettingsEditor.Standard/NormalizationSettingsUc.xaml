@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="ABCat.Plugins.NormalizationSettingsEditor.Standard.NormalizationSettingsUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:standard="clr-namespace:ABCat.Plugins.NormalizationSettingsEditor.Standard"
+             d:DataContext="{d:DesignInstance standard:NormalizationSettingsViewModel}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Btvc" />
+
+    </UserControl.Resources>
+    <Grid>
+        <Grid Visibility="{Binding ViewerVisible, Converter={StaticResource Btvc}}">
+            <standard:NormalizationSettingsViewerUc DataContext="{Binding NormalizationViewerViewModel}" />
+        </Grid>
+        <Grid Visibility="{Binding EditorVisible, Converter={StaticResource Btvc}}">
+            <standard:NormalizationSettingsEditorUc DataContext="{Binding NormalizationEditorViewModel}" />
+        </Grid>
+    </Grid>
+</UserControl>

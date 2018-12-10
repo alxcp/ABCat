@@ -1,0 +1,123 @@
+﻿<UserControl x:Class="ABCat.Plugins.NormalizationSettingsEditor.Standard.NormalizationSettingsEditorUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:standard="clr-namespace:ABCat.Plugins.NormalizationSettingsEditor.Standard"
+             d:DataContext="{d:DesignInstance standard:NormalizationEditorViewModel}"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="Btvc" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0"
+                               Margin="2"
+                               TextWrapping="Wrap">
+                        Свойство для автозамены
+                    </TextBlock>
+                    <ComboBox Grid.Row="1"
+                              Margin="8,2,2,2"
+                              VerticalAlignment="Center"
+                              ItemsSource="{Binding AvailableProperties}"
+                              SelectedItem="{Binding SelectedProperty,
+                                                     Mode=TwoWay}" />
+                    <TextBlock Grid.Row="2"
+                               Margin="2"
+                               TextWrapping="Wrap">
+                        Оставьте в списке только те значения, которые необходимо автоматически заменять на правильное значение
+                    </TextBlock>
+                    <ListBox Grid.Row="3"
+                             Margin="8,2,2,2"
+                             HorizontalContentAlignment="Stretch"
+                             ItemsSource="{Binding ValuesForReplace}"
+                             SelectedItem="{Binding CurrentPossibleValue}">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseDoubleClick">
+                                <i:InvokeCommandAction
+                                    Command="{Binding CurrentAsReplacementValueCommand, Mode=OneWay}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Grid.Column="1"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Command="{Binding RelativeSource={RelativeSource AncestorType=standard:NormalizationSettingsEditorUc},
+                                                              Path=DataContext.RemoveItemCommand}"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource Self},
+                                                                       Path=DataContext}">
+                                        <Path Width="10"
+                                              Height="10"
+                                              Data="M51.527958,0L64,12.4741 44.47221,32.001027 64,51.52871 51.528,64.000001 32.000016,44.472668 12.471823,64.000001 0.0010004044,51.528802 19.528015,32.001088 0,12.473726 12.472,0.0010004044 31.999884,19.528773z"
+                                              Fill="#FF060044"
+                                              Stretch="Uniform" />
+                                    </Button>
+                                    <TextBlock Margin="5,0,0,0" Text="{Binding .}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBlock Grid.Row="4"
+                               Margin="2"
+                               TextWrapping="Wrap">
+                        Введите значение, на которое будут автоматически заменяться все значения, выбранные выше. Двойной щелчок на элементе списка - выбрать элемент как правильное значение.
+                    </TextBlock>
+                    <TextBox Grid.Row="5"
+                             Margin="8,2,2,2"
+                             Text="{Binding ReplacementValue,
+                                            Mode=TwoWay}" />
+                    <StackPanel Grid.Row="6"
+                                HorizontalAlignment="Center"
+                                Orientation="Horizontal">
+                        <Button Margin="5"
+                                Command="{Binding SaveCommand}"
+                                Content="Сохранить" />
+                        <Button Margin="5"
+                                Command="{Binding CancelCommand}"
+                                Content="Отмена" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <StackPanel Margin="10"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding IsOnWaitMode,
+                                             Converter={StaticResource Btvc}}">
+                <TextBlock
+                    Text="Для добавления значений в список автозамены выделите в списке записи, содержащие значения, которые нуждаются в автоматической замене."
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+                <TextBlock
+                    Text="После этого через контекстное меню списка выберите команду редактирования списка автозамены."
+                    TextAlignment="Center"
+                    TextWrapping="Wrap" />
+                <TextBlock Text="После этого откроется редактор автозамены."
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,345 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0996EC09-03F6-4BAB-AECE-AE5169489A29}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ABCat.DB</RootNamespace>
+    <AssemblyName>ABCat.DB</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Start\DEBUG\bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\Start\Release\bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>OpenKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.0.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.6.0.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServerCompact, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EntityFramework.SqlServerCompact.6.0.1\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zlib, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Ionic.Zlib.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MahApps.Metro">
+      <HintPath>..\packages\MahApps.Metro.0.10.1.1\lib\net45\MahApps.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data.SqlServerCe, Version=4.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.SqlServer.Compact.4.0.8876.1\lib\net40\System.Data.SqlServerCe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MahApps.Metro.0.10.1.1\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DBContainer.cs" />
+    <Compile Include="Entity\Catalog\AuthorPart.cs" />
+    <Compile Include="Entity\Catalog\Catalog.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Catalog.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\Catalog.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Catalog.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\Catalog.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Catalog.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\CatalogContainerPart.cs" />
+    <Compile Include="Entity\Catalog\GenrePart.cs" />
+    <Compile Include="Entity\Catalog\MyConfiguration.cs" />
+    <Compile Include="Entity\Catalog\RecordGroupPart.cs" />
+    <Compile Include="Entity\Catalog\RecordPart.cs" />
+    <Compile Include="Entity\Catalog\RecordType.cs">
+      <DependentUpon>Catalog.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\RecordUserData.cs">
+      <DependentUpon>Catalog.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\PageStorage\Page.cs">
+      <DependentUpon>PageStorage.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\PageStorage\PagePart.cs" />
+    <Compile Include="Entity\PageStorage\PageStorage.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PageStorage.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\PageStorage\PageStorage.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PageStorage.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\PageStorage\PageStorage.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PageStorage.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\ProcessingSettings\ProcessingSettings.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessingSettings.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\ProcessingSettings\ProcessingSettings.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessingSettings.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\ProcessingSettings\ProcessingSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ProcessingSettings.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\ProcessingSettings\ProcessingSettingsPart.cs" />
+    <Compile Include="Entity\ProcessingSettings\ReplacementString.cs">
+      <DependentUpon>ProcessingSettings.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\HiddenRecord.cs">
+      <DependentUpon>UserData.Entities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\HiddenRecord_Mapping.cs">
+      <DependentUpon>UserData.Mapping.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\RecordUserData.cs">
+      <DependentUpon>UserData.Entities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\RecordUserData_Mapping.cs">
+      <DependentUpon>UserData.Mapping.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\UserData.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserData.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\UserData.Entities.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserData.Entities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\UserData.Mapping.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserData.Mapping.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\UserData\UserDataContainerPart.cs" />
+    <Compile Include="ObjectContextFactory.cs" />
+    <Compile Include="Entity\UserData\UserData.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>UserData.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\RecordGroup.cs">
+      <DependentUpon>Catalog.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\Catalog\Record.cs">
+      <DependentUpon>Catalog.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EntityDeploy Include="Entity\UserData\UserData.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>UserData.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <EntityDeploy Include="Entity\Catalog\Catalog.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>Catalog.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="App.Config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Entity\Catalog\Catalog.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Catalog.Context.cs</LastGenOutput>
+      <DependentUpon>Catalog.edmx</DependentUpon>
+    </None>
+    <None Include="Entity\Catalog\Catalog.edmx.diagram">
+      <DependentUpon>Catalog.edmx</DependentUpon>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Entity\Catalog\Catalog.edmx.sqlce" />
+    <None Include="Entity\Catalog\Catalog.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Catalog.cs</LastGenOutput>
+      <DependentUpon>Catalog.edmx</DependentUpon>
+    </None>
+    <EntityDeploy Include="Entity\ProcessingSettings\ProcessingSettings.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>ProcessingSettings.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <EntityDeploy Include="Entity\PageStorage\PageStorage.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>PageStorage.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Entity\PageStorage\PageStorage.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>PageStorage.edmx</DependentUpon>
+      <LastGenOutput>PageStorage.Context.cs</LastGenOutput>
+    </None>
+    <None Include="Entity\PageStorage\PageStorage.edmx.diagram">
+      <DependentUpon>PageStorage.edmx</DependentUpon>
+    </None>
+    <None Include="Entity\PageStorage\PageStorage.edmx.sqlce" />
+    <None Include="Entity\PageStorage\PageStorage.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>PageStorage.edmx</DependentUpon>
+      <LastGenOutput>PageStorage.cs</LastGenOutput>
+    </None>
+    <None Include="Entity\ProcessingSettings\ProcessingSettings.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ProcessingSettings.edmx</DependentUpon>
+      <LastGenOutput>ProcessingSettings.Context.cs</LastGenOutput>
+    </None>
+    <None Include="Entity\ProcessingSettings\ProcessingSettings.edmx.diagram">
+      <DependentUpon>ProcessingSettings.edmx</DependentUpon>
+    </None>
+    <None Include="Entity\ProcessingSettings\ProcessingSettings.edmx.sqlce" />
+    <None Include="Entity\ProcessingSettings\ProcessingSettings.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>ProcessingSettings.edmx</DependentUpon>
+      <LastGenOutput>ProcessingSettings.cs</LastGenOutput>
+    </None>
+    <None Include="Entity\UserData\Layouts.edmx.sqlce" />
+    <None Include="Entity\UserData\UserData.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UserData.Context.cs</LastGenOutput>
+      <DependentUpon>UserData.edmx</DependentUpon>
+    </None>
+    <None Include="Entity\UserData\UserData.edmx.sqlce" />
+    <None Include="Entity\UserData\UserData.Entities.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UserData.Entities.cs</LastGenOutput>
+      <DependentUpon>UserData.edmx</DependentUpon>
+    </None>
+    <None Include="Entity\UserData\UserData.Mapping.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>UserData.Mapping.cs</LastGenOutput>
+      <DependentUpon>UserData.edmx</DependentUpon>
+    </None>
+    <None Include="OpenKey.snk" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.3.5">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 3.5 SP2</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ABCat.Shared\ABCat.Shared.csproj">
+      <Project>{1639e1b7-3160-4d42-a455-9d1b50968882}</Project>
+      <Name>ABCat.Shared</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    if not exist "$(TargetDir)x86" md "$(TargetDir)x86"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\x86\*.*" "$(TargetDir)x86"
+    if not exist "$(TargetDir)amd64" md "$(TargetDir)amd64"
+    xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
