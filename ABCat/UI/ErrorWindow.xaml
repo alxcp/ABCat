@@ -1,0 +1,87 @@
+﻿<Window x:Class="ABCat.UI.WPF.UI.ErrorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:ABCat.Core.Converters;assembly=ABCat.Core"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:shared="clr-namespace:ABCat.Shared;assembly=ABCat.Shared"
+        Title="ErrorWindow"
+        Width="730"
+        Height="236">
+    <i:Interaction.Behaviors>
+        <shared:ModernWindowBehavior />
+    </i:Interaction.Behaviors>
+
+    <Window.Resources>
+        <converters:ValueToVisibilityConverter x:Key="Vvc" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="559*" />
+            </Grid.ColumnDefinitions>
+            <ContentPresenter Width="36"
+                              Margin="10"
+                              Content="{StaticResource BugIcon}" />
+            <ContentPresenter Grid.Row="1"
+                              Grid.Column="0"
+                              Width="36"
+                              Margin="10"
+                              Content="{StaticResource InfoIcon}"
+                              Visibility="{Binding ExceptionType,
+                                             Converter={StaticResource Vvc},
+                                             ConverterParameter=Info}" />
+            <ContentPresenter Grid.Row="1"
+                              Grid.Column="0"
+                              Width="36"
+                              Margin="10"
+                              Content="{StaticResource WarningIcon}"
+                              Visibility="{Binding ExceptionType,
+                                             Converter={StaticResource Vvc},
+                                             ConverterParameter=Warning}" />
+            <ContentPresenter Grid.Row="1"
+                              Grid.Column="0"
+                              Width="36"
+                              Margin="10"
+                              Content="{StaticResource StopIcon}"
+                              Visibility="{Binding ExceptionType,
+                                             Converter={StaticResource Vvc},
+                                             ConverterParameter=Stop}" />
+        </Grid>
+        <Grid Grid.Row="0" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+        </Grid>
+        <StackPanel Grid.Row="1"
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Orientation="Horizontal">
+            <Button MinWidth="80"
+                    Margin="5"
+                    Command="{Binding OpenLogCommand}">
+                Лог
+            </Button>
+            <Button MinWidth="80"
+                    Margin="5"
+                    Command="{Binding CloseCommand}">
+                Закрыть
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>

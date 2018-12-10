@@ -1,0 +1,161 @@
+
+-- --------------------------------------------------
+-- Entity Designer DDL Script for SQL Server Compact Edition
+-- --------------------------------------------------
+-- Date Created: 10/21/2013 22:54:17
+-- Generated from EDMX file: Y:\FromE\Documents\Work\ABCat\ABCat.DB\Entity\Catalog\Catalog.edmx
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing FOREIGN KEY constraints
+-- NOTE: if the constraint does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+    ALTER TABLE [RecordGroupSet] DROP CONSTRAINT [FK_RecordTypeRecordGroup];
+GO
+    ALTER TABLE [RecordSet] DROP CONSTRAINT [FK_RecordGroupRecord];
+GO
+    ALTER TABLE [RecordUserDataSet] DROP CONSTRAINT [FK_RecordUserDataRecord];
+GO
+
+-- --------------------------------------------------
+-- Dropping existing tables
+-- NOTE: if the table does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+    DROP TABLE [RecordSet];
+GO
+    DROP TABLE [RecordGroupSet];
+GO
+    DROP TABLE [RecordTypeSet];
+GO
+    DROP TABLE [RecordUserDataSet];
+GO
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'RecordSet'
+CREATE TABLE [RecordSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [Key] nvarchar(50)  NOT NULL,
+    [Bitrate] nvarchar(100)  NULL,
+    [Title] nvarchar(1000)  NOT NULL,
+    [Description] nvarchar(4000)  NULL,
+    [Reader] nvarchar(500)  NULL,
+    [Publisher] nvarchar(500)  NULL,
+    [Lenght] nvarchar(500)  NULL,
+    [LastUpdate] datetime  NULL,
+    [RecordGroupID] int  NOT NULL,
+    [Author] nvarchar(500)  NOT NULL,
+    [Genre] nvarchar(200)  NOT NULL
+);
+GO
+
+-- Creating table 'RecordGroupSet'
+CREATE TABLE [RecordGroupSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [Key] nvarchar(50)  NOT NULL,
+    [Title] nvarchar(4000)  NOT NULL,
+    [LastUpdate] datetime  NULL,
+    [RecordTypeID] int  NOT NULL
+);
+GO
+
+-- Creating table 'RecordTypeSet'
+CREATE TABLE [RecordTypeSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [Title] nvarchar(4000)  NOT NULL
+);
+GO
+
+-- Creating table 'RecordUserDataSet'
+CREATE TABLE [RecordUserDataSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [LocalPath] nvarchar(4000)  NULL,
+    [IsLoaded] bit  NOT NULL,
+    [IsHidden] bit  NOT NULL,
+    [RecordID] int  NOT NULL,
+    [Record_ID] int  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [ID] in table 'RecordSet'
+ALTER TABLE [RecordSet]
+ADD CONSTRAINT [PK_RecordSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- Creating primary key on [ID] in table 'RecordGroupSet'
+ALTER TABLE [RecordGroupSet]
+ADD CONSTRAINT [PK_RecordGroupSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- Creating primary key on [ID] in table 'RecordTypeSet'
+ALTER TABLE [RecordTypeSet]
+ADD CONSTRAINT [PK_RecordTypeSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- Creating primary key on [ID] in table 'RecordUserDataSet'
+ALTER TABLE [RecordUserDataSet]
+ADD CONSTRAINT [PK_RecordUserDataSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- --------------------------------------------------
+-- Creating all FOREIGN KEY constraints
+-- --------------------------------------------------
+
+-- Creating foreign key on [RecordTypeID] in table 'RecordGroupSet'
+ALTER TABLE [RecordGroupSet]
+ADD CONSTRAINT [FK_RecordTypeRecordGroup]
+    FOREIGN KEY ([RecordTypeID])
+    REFERENCES [RecordTypeSet]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_RecordTypeRecordGroup'
+CREATE INDEX [IX_FK_RecordTypeRecordGroup]
+ON [RecordGroupSet]
+    ([RecordTypeID]);
+GO
+
+-- Creating foreign key on [RecordGroupID] in table 'RecordSet'
+ALTER TABLE [RecordSet]
+ADD CONSTRAINT [FK_RecordGroupRecord]
+    FOREIGN KEY ([RecordGroupID])
+    REFERENCES [RecordGroupSet]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_RecordGroupRecord'
+CREATE INDEX [IX_FK_RecordGroupRecord]
+ON [RecordSet]
+    ([RecordGroupID]);
+GO
+
+-- Creating foreign key on [Record_ID] in table 'RecordUserDataSet'
+ALTER TABLE [RecordUserDataSet]
+ADD CONSTRAINT [FK_RecordUserDataRecord]
+    FOREIGN KEY ([Record_ID])
+    REFERENCES [RecordSet]
+        ([ID])
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_RecordUserDataRecord'
+CREATE INDEX [IX_FK_RecordUserDataRecord]
+ON [RecordUserDataSet]
+    ([Record_ID]);
+GO
+
+-- --------------------------------------------------
+-- Script has ended
+-- --------------------------------------------------

@@ -1,0 +1,308 @@
+﻿<UserControl x:Class="ABCat.Plugins.RecordsList.WpfToolKit.RecordsListWpfToolkitUc"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:wpfToolKit="clr-namespace:ABCat.Plugins.RecordsList.WpfToolKit"
+             xmlns:xcdg="http://schemas.xceed.com/wpf/xaml/datagrid"
+             d:DesignHeight="300"
+             d:DesignWidth="300"
+             mc:Ignorable="d">
+    <Grid>
+
+        <Grid.Resources>
+            <wpfToolKit:CustomConverter x:Key="MyConverter" />
+
+            <Style TargetType="{x:Type xcdg:DataCell}">
+                <Setter Property="Background">
+                    <Setter.Value>
+                        <MultiBinding Converter="{StaticResource MyConverter}">
+                            <Binding Path="(xcdg:DataRow.IsSelected)"
+                                     RelativeSource="{RelativeSource AncestorType={x:Type xcdg:DataRow}}" />
+                            <Binding Path="(xcdg:DataRow.DataContext)"
+                                     RelativeSource="{RelativeSource AncestorType={x:Type xcdg:DataRow}}" />
+                            <Binding Path="(xcdg:DataGridVirtualizingPanel.ItemIndex)"
+                                     RelativeSource="{RelativeSource AncestorType={x:Type xcdg:DataRow}}" />
+                        </MultiBinding>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="InvisibleThumbStyle" TargetType="Thumb">
+
+                <Setter Property="MinWidth"
+                        Value="{DynamicResource {x:Static SystemParameters.ResizeFrameVerticalBorderWidthKey}}" />
+
+                <Setter Property="MinHeight"
+                        Value="{DynamicResource {x:Static SystemParameters.ResizeFrameHorizontalBorderHeightKey}}" />
+
+                <Setter Property="Template">
+                    <Setter.Value>
+
+                        <ControlTemplate TargetType="Thumb">
+                            <Grid Background="Transparent" />
+                        </ControlTemplate>
+
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <xcdg:ThicknessConverter x:Key="InverseThicknessConverter" InverseValue="True" />
+
+            <xcdg:ThicknessConverter x:Key="ThicknessConverter" />
+            <ControlTemplate x:Key="MyColumnManagerCellTemplate" TargetType="xcdg:ColumnManagerCell">
+
+                <!--
+                    We don't use the base Cell Template for the ColumnManagerCell because it need more elements
+                    to function properly: a Thumb named "PART_ColumnResizerThumb" that is used to resize the
+                    ColumnManagerCells's ParentColumn.Width and a glyph that represents the Column's SortDirection.
+                -->
+                <Grid>
+
+                    <Border x:Name="gridLinesBorder" />
+
+                    <Border BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+
+                        <!--  This Grid is used to position the resizer Thumb over the ColumnManagerCell  -->
+                        <Grid>
+                            <Rectangle Width="1"
+                                       Margin="0,2,0,2"
+                                       HorizontalAlignment="Right"
+                                       VerticalAlignment="Stretch"
+                                       Fill="Gray" />
+
+                            <DockPanel>
+                                <Border x:Name="thumbToggleBackgroundBorder" DockPanel.Dock="Right">
+
+                                    <Grid>
+
+                                        <Border x:Name="toggleDelimeterBorder"
+                                                Margin="0,4,0,4"
+                                                Background="Transparent"
+                                                BorderBrush="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}"
+                                                BorderThickness="1,0,0,0"
+                                                Visibility="Collapsed">
+
+                                            <Border x:Name="toggleDelimeterBorder2"
+                                                    Margin="0,0,0,0"
+                                                    Background="Transparent"
+                                                    BorderBrush="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                                                    BorderThickness="1,0,0,0"
+                                                    Visibility="Collapsed" />
+
+                                        </Border>
+
+                                        <ToggleButton x:Name="toggleButton"
+                                                      Margin="2,0,0,0"
+                                                      VerticalAlignment="Stretch"
+                                                      Focusable="False"
+                                                      Opacity="0.5"
+                                                      Visibility="Collapsed" />
+
+                                    </Grid>
+
+                                </Border>
+
+                                <Border Background="{TemplateBinding Background}">
+
+                                    <!--  This Grid is used to layout the delimiter lines on top of the ContentPresenter  -->
+                                    <Grid>
+
+                                        <Border Padding="{TemplateBinding Padding}">
+
+                                            <!--  This StackPanel is used to layout the ContentPresenter and the Sort Glyph (when present).  -->
+                                            <StackPanel x:Name="contentPanel" Orientation="Horizontal">
+
+                                                <!--  Same ContentPresenter as in the base Cell Template.  -->
+                                                <xcdg:CellContentPresenter
+                                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+
+                                                <!--
+                                                    ContentPresenter that is used to display the sort glyph.
+                                                    We explicitly set its Content property to Null to prevent the XAML parser
+                                                    from implicitly setting it to its TemplatedParent's Content.
+                                                -->
+                                                <ContentPresenter x:Name="sortGlyphPresenter"
+                                                                  Content="{x:Null}"
+                                                                  ContentTemplate="{x:Null}" />
+
+                                            </StackPanel>
+                                        </Border>
+
+                                    </Grid>
+
+                                </Border>
+
+                            </DockPanel>
+
+                            <!--  Thumb that is used to resize the Column.  -->
+                            <Thumb x:Name="PART_ColumnResizerThumbLeft"
+                                   Width="6"
+                                   HorizontalAlignment="Left"
+                                   Style="{StaticResource InvisibleThumbStyle}" />
+
+                            <!--  Thumb that is used to resize the Column.  -->
+                            <Thumb x:Name="PART_ColumnResizerThumb"
+                                   Width="6"
+                                   HorizontalAlignment="Right"
+                                   Style="{StaticResource InvisibleThumbStyle}" />
+
+                        </Grid>
+
+                    </Border>
+                </Grid>
+
+                <ControlTemplate.Triggers>
+
+                    <!--  Trigger related to the filteringToggleButton  -->
+                    <Trigger SourceName="toggleButton" Property="IsMouseOver" Value="True">
+
+                        <Setter TargetName="toggleButton" Property="Opacity" Value="1" />
+                    </Trigger>
+
+                    <Trigger Property="IsPressed" Value="True">
+
+                        <Setter TargetName="contentPanel" Property="Margin" Value="1,1,-1,-1" />
+
+                    </Trigger>
+
+                    <!--
+                        The following 2 triggers allow the appropriate Sort Glyph to be displayed
+                        depending on the ParentColumn's SortDirection.
+                    -->
+
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentColumn.SortDirection}"
+                        Value="Ascending">
+
+                        <Setter TargetName="sortGlyphPresenter" Property="ContentPresenter.ContentTemplate"
+                                Value="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).AscendingSortGlyph}" />
+
+                        <Setter TargetName="sortGlyphPresenter" Property="Margin" Value="6,0,0,0" />
+
+                    </DataTrigger>
+
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentColumn.SortDirection}"
+                        Value="Descending">
+
+                        <Setter TargetName="sortGlyphPresenter" Property="ContentPresenter.ContentTemplate"
+                                Value="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).DescendingSortGlyph}" />
+
+                        <Setter TargetName="sortGlyphPresenter" Property="Margin" Value="6,0,0,0" />
+
+                    </DataTrigger>
+
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition
+                                Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentColumn.HasFixedWidth}"
+                                Value="True" />
+
+                            <!--
+                                Don't disable resizing if ColumnStretching can be disabled by an
+                                end-user resize.
+                            -->
+                            <Condition
+                                Binding="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).RemoveColumnStretchingOnResize}"
+                                Value="False" />
+                        </MultiDataTrigger.Conditions>
+
+                        <Setter TargetName="PART_ColumnResizerThumb" Property="IsEnabled" Value="False" />
+                    </MultiDataTrigger>
+
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition
+                                Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentColumn.PreviousVisibleColumn.HasFixedWidth}"
+                                Value="True" />
+
+                            <!--
+                                Don't disable resizing if ColumnStretching can be disabled by an
+                                end-user resize.
+                            -->
+                            <Condition
+                                Binding="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).RemoveColumnStretchingOnResize}"
+                                Value="False" />
+                        </MultiDataTrigger.Conditions>
+
+                        <Setter TargetName="PART_ColumnResizerThumbLeft" Property="IsEnabled" Value="False" />
+                    </MultiDataTrigger>
+
+                    <DataTrigger
+                        Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentRow.AllowColumnResize}"
+                        Value="False">
+                        <Setter TargetName="PART_ColumnResizerThumb" Property="IsEnabled" Value="False" />
+                        <Setter TargetName="PART_ColumnResizerThumbLeft" Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+
+                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self}, Path=ParentColumn.Visible}"
+                                 Value="False">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                    </DataTrigger>
+
+                    <!--  To display the left vertical grid line when doing animated Column reordering  -->
+                    <MultiDataTrigger>
+                        <MultiDataTrigger.Conditions>
+                            <Condition
+                                Binding="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).AreColumnsBeingReordered}"
+                                Value="True" />
+                        </MultiDataTrigger.Conditions>
+
+                        <Setter TargetName="gridLinesBorder" Property="BorderBrush"
+                                Value="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).VerticalGridLineBrush}" />
+
+                        <Setter TargetName="gridLinesBorder" Property="BorderThickness"
+                                Value="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).VerticalGridLineThickness, Converter={StaticResource ThicknessConverter}, ConverterParameter='Left'}" />
+
+                        <Setter TargetName="gridLinesBorder" Property="Margin"
+                                Value="{Binding RelativeSource={RelativeSource Self}, Path=(xcdg:DataGridControl.DataGridContext).VerticalGridLineThickness, Converter={StaticResource InverseThicknessConverter}, ConverterParameter='Left'}" />
+
+                    </MultiDataTrigger>
+                </ControlTemplate.Triggers>
+
+            </ControlTemplate>
+
+            <DataTemplate x:Key="RowSelectorTemplate">
+                <TextBlock Text="dd" />
+            </DataTemplate>
+            <SolidColorBrush x:Key="DefaultForegroundBrush" Color="Green" />
+
+            <Style TargetType="{x:Type xcdg:HierarchicalGroupByControl}">
+                <Setter Property="NoGroupContent" Value="Перетащите сюда колонки для группировки" />
+                <Setter Property="Background" Value="WhiteSmoke" />
+                <Setter Property="BorderThickness" Value="0" />
+            </Style>
+
+            <Style TargetType="{x:Type xcdg:GroupHeaderControl}">
+                <Setter Property="MinWidth"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ScrollContentPresenter}}, Path=ActualWidth}" />
+            </Style>
+            <Style TargetType="{x:Type xcdg:ColumnManagerRow}">
+                <Setter Property="MinWidth"
+                        Value="{Binding RelativeSource={RelativeSource AncestorType={x:Type ScrollContentPresenter}}, Path=ActualWidth}" />
+                <Setter Property="Background" Value="WhiteSmoke" />
+                <Setter Property="BorderBrush" Value="LightGray" />
+            </Style>
+            <Style TargetType="{x:Type xcdg:ColumnManagerCell}">
+                <Setter Property="HorizontalContentAlignment" Value="Center" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="Template" Value="{StaticResource MyColumnManagerCellTemplate}" />
+            </Style>
+        </Grid.Resources>
+        <xcdg:DataGridControl x:Name="Grid"
+                              AlternationCount="1"
+                              BorderThickness="0"
+                              NavigationBehavior="RowOnly"
+                              ReadOnly="True"
+                              SynchronizeSelectionWithCurrent="True">
+            <xcdg:DataGridControl.View>
+
+                <xcdg:TableflowView ShowRowSelectorPane="False" />
+            </xcdg:DataGridControl.View>
+
+        </xcdg:DataGridControl>
+    </Grid>
+</UserControl>

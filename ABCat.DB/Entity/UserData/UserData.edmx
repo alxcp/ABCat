@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?><edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="UserData.Store" Alias="Self" Provider="System.Data.SqlServerCe.4.0" ProviderManifestToken="4.0" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="UserDataStoreContainer">
+    <EntitySet Name="RecordUserDataSet" EntityType="UserData.Store.RecordUserDataSet" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="HiddenRecordSet" EntityType="UserData.Store.HiddenRecordSet" store:Type="Tables" Schema="dbo" />
+  </EntityContainer>
+  <EntityType Name="RecordUserDataSet">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="RecordKey" Type="nvarchar" Nullable="false" />
+    <Property Name="RecordGroupKey" Type="nvarchar" Nullable="false" />
+    <Property Name="LocalPath" Type="nvarchar" Nullable="true" />
+  </EntityType>
+  <EntityType Name="HiddenRecordSet">
+    <Key>
+      <PropertyRef Name="ID" />
+    </Key>
+    <Property Name="ID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="RecordKey" Type="nvarchar" Nullable="false" />
+    <Property Name="RecordGroupKey" Type="nvarchar" Nullable="false" />
+  </EntityType>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="UserData" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="UserDataContainer" annotation:LazyLoadingEnabled="true" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation">
+          <EntitySet Name="RecordUserDataSet" EntityType="UserData.RecordUserData" />
+          <EntitySet Name="HiddenRecordSet" EntityType="UserData.HiddenRecord" />
+        </EntityContainer>
+        <EntityType Name="RecordUserData">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" a:StoreGeneratedPattern="Identity" xmlns:a="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="RecordKey" Nullable="false" />
+          <Property Type="String" Name="RecordGroupKey" Nullable="false" />
+          <Property Type="String" Name="LocalPath" Nullable="true" />
+        </EntityType>
+        <EntityType Name="HiddenRecord">
+          <Key>
+            <PropertyRef Name="ID" />
+          </Key>
+          <Property Type="Int32" Name="ID" Nullable="false" a:StoreGeneratedPattern="Identity" xmlns:a="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="RecordKey" Nullable="false" a:StoreGeneratedPattern="None" xmlns:a="http://schemas.microsoft.com/ado/2009/02/edm/annotation" />
+          <Property Type="String" Name="RecordGroupKey" Nullable="false" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="UserDataStoreContainer" CdmEntityContainer="UserDataContainer">
+    <EntitySetMapping Name="RecordUserDataSet">
+      <EntityTypeMapping TypeName="IsTypeOf(UserData.RecordUserData)">
+        <MappingFragment StoreEntitySet="RecordUserDataSet">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="RecordKey" ColumnName="RecordKey" />
+          <ScalarProperty Name="RecordGroupKey" ColumnName="RecordGroupKey" />
+          <ScalarProperty Name="LocalPath" ColumnName="LocalPath" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="HiddenRecordSet">
+      <EntityTypeMapping TypeName="IsTypeOf(UserData.HiddenRecord)">
+        <MappingFragment StoreEntitySet="HiddenRecordSet">
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="RecordKey" ColumnName="RecordKey" />
+          <ScalarProperty Name="RecordGroupKey" ColumnName="RecordGroupKey" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer>
+    <edmx:Connection>
+      <DesignerInfoPropertySet xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram Name="Layouts" xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+        <EntityTypeShape EntityType="UserData.RecordUserData" Width="1.5" PointX="1.875" PointY="2.25" />
+        <EntityTypeShape EntityType="UserData.HiddenRecord" Width="1.5" PointX="4.375" PointY="2.625" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,69 @@
+
+-- --------------------------------------------------
+-- Entity Designer DDL Script for SQL Server Compact Edition
+-- --------------------------------------------------
+-- Date Created: 10/12/2013 12:50:47
+-- Generated from EDMX file: Y:\FromE\Documents\Work\Rutracker\ABCat.DB\Entity\UserData\UserData.edmx
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing FOREIGN KEY constraints
+-- NOTE: if the constraint does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+
+-- --------------------------------------------------
+-- Dropping existing tables
+-- NOTE: if the table does not exist, an ignorable error will be reported.
+-- --------------------------------------------------
+
+    DROP TABLE [RecordUserDataSet];
+GO
+    DROP TABLE [HiddenRecordSet];
+GO
+
+-- --------------------------------------------------
+-- Creating all tables
+-- --------------------------------------------------
+
+-- Creating table 'RecordUserDataSet'
+CREATE TABLE [RecordUserDataSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [RecordKey] nvarchar(4000)  NOT NULL,
+    [RecordGroupKey] nvarchar(4000)  NOT NULL,
+    [LocalPath] nvarchar(4000)  NULL
+);
+GO
+
+-- Creating table 'HiddenRecordSet'
+CREATE TABLE [HiddenRecordSet] (
+    [ID] int IDENTITY(1,1) NOT NULL,
+    [RecordKey] nvarchar(4000)  NOT NULL,
+    [RecordGroupKey] nvarchar(4000)  NOT NULL
+);
+GO
+
+-- --------------------------------------------------
+-- Creating all PRIMARY KEY constraints
+-- --------------------------------------------------
+
+-- Creating primary key on [ID] in table 'RecordUserDataSet'
+ALTER TABLE [RecordUserDataSet]
+ADD CONSTRAINT [PK_RecordUserDataSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- Creating primary key on [ID] in table 'HiddenRecordSet'
+ALTER TABLE [HiddenRecordSet]
+ADD CONSTRAINT [PK_HiddenRecordSet]
+    PRIMARY KEY ([ID] );
+GO
+
+-- --------------------------------------------------
+-- Creating all FOREIGN KEY constraints
+-- --------------------------------------------------
+
+-- --------------------------------------------------
+-- Script has ended
+-- --------------------------------------------------
