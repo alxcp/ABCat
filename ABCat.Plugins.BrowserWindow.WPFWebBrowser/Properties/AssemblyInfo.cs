@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using ABCat.Shared;
+using Shared.Everywhere;
 
 [assembly: AssemblyTitle(AssemblyInfoContainer.AssemblyName + ".Plugins.BrowserWindow.WPFWebBrowser")]
 [assembly: AssemblyDescription("")]

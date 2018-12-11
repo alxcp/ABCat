@@ -77,6 +77,10 @@
       <Project>{CE1868D3-A465-4CB6-A9A4-4BD7E546E08E}</Project>
       <Name>Component.Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Shared.Everywhere\Shared.Everywhere.csproj">
+      <Project>{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}</Project>
+      <Name>Shared.Everywhere</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="OpenKey.snk" />

@@ -67,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ABCatException.cs" />
-    <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Backup.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Crypt.cs" />
