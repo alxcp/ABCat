@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 using ABCat.Shared;
+using Shared.Everywhere;
 
 [assembly: AssemblyTitle(AssemblyInfoContainer.AssemblyName + ".Plugins.GrouppingLogics.Standard")]
 [assembly: AssemblyDescription("")]
