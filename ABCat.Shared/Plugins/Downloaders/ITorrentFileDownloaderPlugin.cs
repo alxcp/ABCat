@@ -1,6 +1,6 @@
 ﻿using Component.Infrastructure;
 
-namespace ABCat.Plugins.Parsers.Rutracker
+namespace ABCat.Shared.Plugins.Downloaders
 {
     /// <summary>
     /// An interface for torrent files downloader implementations

@@ -3,7 +3,7 @@ using System.Linq;
 using ABCat.Shared;
 using Component.Infrastructure.Factory;
 
-namespace ABCat.Plugins.Parsers.Rutracker
+namespace ABCat.Plugins.TorrentFileDownloaders
 {
     [PerCallComponentInfo("2.2")]
     public class QBitTorrentFileDownloader : ExternalAppTorrentFileDownloaderBase

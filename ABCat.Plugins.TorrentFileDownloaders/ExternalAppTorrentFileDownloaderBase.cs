@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using ABCat.Shared.Plugins.Downloaders;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 
-namespace ABCat.Plugins.Parsers.Rutracker
+namespace ABCat.Plugins.TorrentFileDownloaders
 {
     public abstract class ExternalAppTorrentFileDownloaderBase : ITorrentFileDownloaderPlugin
     {

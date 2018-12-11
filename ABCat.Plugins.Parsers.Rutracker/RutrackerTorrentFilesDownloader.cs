@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
+using ABCat.Shared.Plugins.Downloaders;
 using ABCat.Shared.Plugins.Sites;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;

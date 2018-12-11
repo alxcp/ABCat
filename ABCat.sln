@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat", "ABCat\ABCat.csproj", "{DEC46B6A-84B0-445F-8CFC-0DDC43C4CD98}"
 EndProject
@@ -42,6 +42,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Component.Infrastructure", "Component.Infrastructure\Component.Infrastructure.csproj", "{CE1868D3-A465-4CB6-A9A4-4BD7E546E08E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Everywhere", "Shared.Everywhere\Shared.Everywhere.csproj", "{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downloaders", "Downloaders", "{111803D1-F920-443C-AE15-B26F77A5B27D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.TorrentFileDownloaders", "ABCat.Plugins.TorrentFileDownloaders\ABCat.Plugins.TorrentFileDownloaders.csproj", "{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -221,6 +225,18 @@ Global
 		{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}.x86|Any CPU.Build.0 = Release|Any CPU
 		{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}.x86|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}.x86|Mixed Platforms.Build.0 = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Any CPU.ActiveCfg = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Any CPU.Build.0 = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -240,5 +256,10 @@ Global
 		{500C131E-9EA4-4658-ABA0-8D42FCCD3ADD} = {966E7B82-7F4D-4787-B123-B64CF5D50B61}
 		{D75A5FE6-6544-467B-A767-90A38BB298A4} = {9961D052-EF38-4043-9A5C-F84B5483DF96}
 		{E4D90D53-76B7-4FF2-98BF-E59A14B9BADD} = {D75A5FE6-6544-467B-A767-90A38BB298A4}
+		{111803D1-F920-443C-AE15-B26F77A5B27D} = {9961D052-EF38-4043-9A5C-F84B5483DF96}
+		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F} = {111803D1-F920-443C-AE15-B26F77A5B27D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8444EB21-2B3F-4370-AC5A-51442C05D6B0}
 	EndGlobalSection
 EndGlobal
