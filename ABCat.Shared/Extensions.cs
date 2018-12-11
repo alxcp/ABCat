@@ -551,7 +551,8 @@ namespace ABCat.Shared
                     {
                         DisplayName = displayName,
                         DisplayVersion = subKey.GetValue("DisplayVersion").ToStringOrEmpty(),
-                        InstallLocation = subKey.GetValue("InstallLocation").ToStringOrEmpty()
+                        InstallLocation = subKey.GetValue("InstallLocation").ToStringOrEmpty(),
+                        UninstallString = subKey.GetValue("UninstallString").ToStringOrEmpty()
                     });
                 });
             }
@@ -565,6 +566,7 @@ namespace ABCat.Shared
             public string DisplayVersion { get; set; }
             public string ExePath { get; set; }
             public string InstallLocation { get; set; }
+            public string UninstallString { get; set; }
 
             public bool CheckExists()
             {
