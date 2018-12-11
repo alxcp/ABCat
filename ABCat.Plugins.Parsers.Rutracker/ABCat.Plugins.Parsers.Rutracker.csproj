@@ -84,16 +84,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BitTorrentFileDownloader.cs" />
-    <Compile Include="ExternalAppTorrentFileDownloaderBase.cs" />
-    <Compile Include="ITorrentFileDownloaderPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ParserRutrackerAudioBooks.cs" />
-    <Compile Include="QBitTorrentFileDownloader.cs" />
     <Compile Include="RutrackerTorrentFilesDownloader.cs" />
     <Compile Include="RutrackerTorrentFilesDownloaderConfig.cs" />
-    <Compile Include="UBitTorrentFileDownloaderBase.cs" />
-    <Compile Include="UTorrentFileDownloader.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ABCat.Plugins.Core\ABCat.Core.csproj">

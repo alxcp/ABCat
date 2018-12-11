@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using ABCat.Core.Editors;
 using ABCat.Shared;
+using ABCat.Shared.Plugins.Downloaders;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 

@@ -1,4 +1,4 @@
-﻿namespace ABCat.Plugins.Parsers.Rutracker
+﻿namespace ABCat.Plugins.TorrentFileDownloaders
 {
     public abstract class UBitTorrentFileDownloaderBase : ExternalAppTorrentFileDownloaderBase
     {
