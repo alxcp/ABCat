@@ -1,27 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.Linq;
 using System.Text;
 using System.Threading;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
-using JetBrains.Annotations;
 
 namespace ABCat.Plugins.Parsers.Rutracker
 {
-    [SingletoneComponentInfo("1.0")]
+    [SingletoneComponentInfo("2.2")]
     public class RutrackerTorrentFilesDownloader : RecordTargetDownloaderBase
     {
         private RutrackerTorrentFilesDownloaderConfig _config;
-
-        protected override string LoginUrl => "http://login.rutracker.org/forum/login.php";
 
         public override void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer,
             Action<int, int, string> progressCallback, CancellationToken cancellationToken)
@@ -36,9 +30,13 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
             var targetLibraryPath = GetAbsoluteLibraryPath(record);
             userData.LocalPath = targetLibraryPath;
-            var commandLineArguments = "/directory \"{0}\" \"{1}\"".F(targetLibraryPath, record.MagnetLink);
-            var ia = config.GetTorrentClient();
-            Process.Start(ia.ExePath, commandLineArguments);
+
+            var downloader = Context.I.ComponentFactory.GetCreators<ITorrentFileDownloaderPlugin>()
+                .Select(item => item.GetInstance<ITorrentFileDownloaderPlugin>())
+                .FirstOrDefault(item => item.DisplayName == config.TorrentClientName);
+
+            if (downloader != null && downloader.IsExists)
+                downloader.Download(record.MagnetLink, targetLibraryPath);
 
             dbContainer.UserDataSet.AddUserData(userData);
             dbContainer.SaveChanges();
@@ -51,102 +49,10 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return Path.Combine(config.AudioCatalogFolder, bookPath);
         }
 
-        public override string GetRecordPageUrl(IAudioBook record)
-        {
-            return @"http://rutracker.org/forum/viewtopic.php?t={0}".F(record.Key);
-        }
-
         public override string GetRecordTargetLibraryPath(IAudioBook record)
         {
-            string result;
-            if (record.Author != null)
-            {
-                result = GetFileName(record.Author);
-            }
-            else
-            {
-                result = GetFileName(record.Title);
-            }
-
+            var result = GetFileName(record.Author ?? record.Title);
             return result;
-        }
-
-        /// <summary>
-        ///     Пришлось перегрузить этот метод, поскольку рутрекер высылает куки
-        ///     для авторизации одновременно с 302ым редиректом. WebClient
-        ///     автоматически переходит на новый урл и теряет нужные нам куки.
-        /// </summary>
-        /// <returns></returns>
-        protected override string GetLoginCookies([CanBeNull] LoginInfo loginInfo)
-        {
-            var config = Config.Load<RutrackerTorrentFilesDownloaderConfig>();
-
-            if (loginInfo == null && config.SaveCoockies && File.Exists(config.CoockieFileName))
-            {
-                LoginCookies = File.ReadAllText(config.CoockieFileName);
-            }
-            else if (loginInfo != null)
-            {
-                var sb = new StringBuilder();
-                var loginData = GetLoginData(loginInfo);
-
-                if (loginData != null)
-                {
-                    for (var i = 0; i < loginData.Count; i++)
-                    {
-                        sb.Append(string.Format("{0}={1}", loginData.AllKeys[i], loginData[i]));
-                        if (i + 1 < loginData.Count) sb.Append('&');
-                    }
-                }
-
-                var dataBytes = Encoding.UTF8.GetBytes(sb.ToString());
-
-                var request = (HttpWebRequest) WebRequest.Create(LoginUrl);
-                request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded";
-                request.ContentLength = dataBytes.Length;
-
-                var requestStream = request.GetRequestStream();
-                requestStream.Write(dataBytes, 0, dataBytes.Length);
-                requestStream.Close();
-
-                //ОЧЕНЬ ВАЖНО
-                request.AllowAutoRedirect = false;
-
-                var response = request.GetResponse();
-                LoginCookies = RemoveSetCookiesAttributes(response.Headers["Set-Cookie"]);
-            }
-
-            if (!LoginCookies.IsNullOrEmpty() && LoginCookies.Length == 1) LoginCookies = null;
-
-            if (!LoginCookies.IsNullOrEmpty())
-            {
-                var mainPage = DownloadData("http://rutracker.org/forum/index.php", LoginCookies);
-                var pageText = Context.I.DefaultEncoding.GetString(mainPage);
-                if (pageText.Contains("<form method=\"post\" action=\"http://login.rutracker.org/forum/login.php\">"))
-                    LoginCookies = null;
-                else
-                {
-                    if (config.SaveCoockies) File.WriteAllText(config.CoockieFileName, LoginCookies);
-                }
-            }
-
-            return LoginCookies;
-        }
-
-        protected override NameValueCollection GetLoginData(LoginInfo loginInfo)
-        {
-            return new NameValueCollection
-            {
-                {"login_username", loginInfo.Login},
-                {"login_password", loginInfo.GetPassword()},
-                {"login", "Вход"}
-            };
-        }
-
-        protected string GetTorrentFileUrl(IAudioBook record)
-        {
-            return @"http://dl.rutracker.org/forum/dl.php?t={0}".F(record.Key);
         }
 
         private string GetFileName(string rawFileName)

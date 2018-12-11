@@ -25,21 +25,19 @@ namespace ABCat.Plugins.Parsers.Rutracker
             SystemAction
         }
 
-        private readonly IEnumerable<Extensions.InstalledApplication> _torrentClients;
+        private readonly IEnumerable<ITorrentFileDownloaderPlugin> _torrentFileDownloaders;
         private string _audioCatalogFolder;
-        private bool _saveCoockies;
         private string _torrentClientName;
         private TorrentFileActionEnum _torrentFileAction;
         private string _torrentFilesFolder;
 
         public RutrackerTorrentFilesDownloaderConfig()
         {
-            var knownClients = new HashSet<string> {"BitTorrent", "µTorrent"};
-            _torrentClients =
-                Extensions.GetInstalledApplications().Where(item => knownClients.Contains(item.DisplayName)).ToArray();
+            _torrentFileDownloaders = Context.I.ComponentFactory.GetCreators<ITorrentFileDownloaderPlugin>()
+                .Select(item => item.GetInstance<ITorrentFileDownloaderPlugin>()).Where(item => item.IsExists);
+
             ComboBoxEditor.Register("TorrentClientName",
-                new ObservableCollection<object>(_torrentClients.Select(GetTorrentClientName)));
-            SaveCoockies = true;
+                new ObservableCollection<object>(_torrentFileDownloaders.Select(item => item.DisplayName)));
         }
 
         [DisplayName("Каталог контента")]
@@ -64,19 +62,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             "Coockies", "rutracker");
 
         public override string DisplayName => "Загрузка торрент-файлов";
-
-        [DisplayName("Сохранять куки")]
-        [Description("Сохранять куки для повторной авторизации на rutracker")]
-        public bool SaveCoockies
-        {
-            get => _saveCoockies;
-            set
-            {
-                if (value.Equals(_saveCoockies)) return;
-                _saveCoockies = value;
-                OnPropertyChanged("SaveCoockies");
-            }
-        }
 
         [DisplayName("Torrent-клиент")]
         [Description("Найденные установки Torrent-клиентов, поддерживаемые ABCat")]
@@ -120,11 +105,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             }
         }
 
-        private string GetTorrentClientName(Extensions.InstalledApplication installedApplication)
-        {
-            return installedApplication.DisplayName;
-        }
-
         public override bool Check(bool correct)
         {
             var result = true;
@@ -136,12 +116,15 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 TorrentFilesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
                     "ABCat", "TorrentFiles");
 
-            if (Extensions.IsNullOrEmpty(TorrentClientName))
+            var downloaders = Context.I.ComponentFactory.GetCreators<ITorrentFileDownloaderPlugin>()
+                .Select(item => item.GetInstance<ITorrentFileDownloaderPlugin>()).ToArray();
+
+            if (TorrentClientName.IsNullOrEmpty())
             {
-                if (_torrentClients.AnySafe())
+                if (downloaders.AnySafe())
                 {
-                    var firstClient = _torrentClients.First();
-                    TorrentClientName = GetTorrentClientName(firstClient);
+                    var firstClient = downloaders.First();
+                    TorrentClientName = firstClient.DisplayName;
                 }
             }
             else
@@ -176,37 +159,13 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 if (Extensions.IsNullOrEmpty(TorrentClientName)) result = false;
                 else
                 {
-                    var torrentClient = GetTorrentClient();
-                    if (torrentClient == null || !File.Exists(torrentClient.ExePath))
-                    {
-                        result = false;
-                    }
+                    var selected = downloaders.FirstOrDefault(item => item.DisplayName == TorrentClientName);
+
+                    result = result && selected != null && selected.IsExists;
                 }
             }
 
             return result;
-        }
-
-        [CanBeNull]
-        public Extensions.InstalledApplication GetTorrentClient()
-        {
-            var ia =
-                Extensions.GetInstalledApplications()
-                    .FirstOrDefault(item => item.DisplayName == TorrentClientName);
-            if (ia != null)
-            {
-                switch (ia.DisplayName.ToLower())
-                {
-                    case "bittorrent":
-                        ia.ExePath = Path.Combine(ia.InstallLocation, "bittorrent.exe");
-                        break;
-                    case "µtorrent":
-                        ia.ExePath = Path.Combine(ia.InstallLocation, "utorrent.exe");
-                        break;
-                }
-            }
-
-            return ia;
         }
     }
 }
