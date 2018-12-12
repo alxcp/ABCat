@@ -65,7 +65,7 @@ namespace ABCat.Shared.Plugins.Sites
             });
         }
 
-        public void BeginDownloadRecordsAsync(HashSet<string> recordsKeys, bool cacheFirst,
+        public void BeginDownloadRecordsAsync(HashSet<string> recordsKeys, PageSources pageSource,
             Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
             Action<Exception> completedCallback, CancellationToken cancellationToken)
         {
@@ -83,7 +83,7 @@ namespace ABCat.Shared.Plugins.Sites
 
                         if (recordsKeys == null)
                         {
-                            if (cacheFirst)
+                            if (pageSource == PageSources.CacheOnly)
                             {
                                 records = dbContainer.AudioBookSet.GetRecordsAll().ToList();
                             }
@@ -99,15 +99,7 @@ namespace ABCat.Shared.Plugins.Sites
                             records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsKeys).ToList();
                         }
 
-                        //records =
-                        //    records.Where(item => item.LastUpdate > DateTime.Now.Subtract(TimeSpan.FromDays(3)))
-                        //        .ToList();
-
-                        records =
-                            records.Where(item => item.MagnetLink.IsNullOrEmpty()).ToList();
-
-
-                        var savePerCount = cacheFirst ? 1000 : 5;
+                        var savePerCount = pageSource == PageSources.CacheOnly ? 1000 : 5;
 
                         var normalizerPlugin =
                             Context.I.ComponentFactory.GetCreators<INormalizationLogicPlugin>()
@@ -120,8 +112,18 @@ namespace ABCat.Shared.Plugins.Sites
                             {
                                 var record = records[z];
                                 totalProgressCallback(z, records.Count, "{0} из {1}".F(z, records.Count()));
-                                DownloadRecord(dbContainer, record, cacheFirst, smallProgressCallback,
+                                DownloadRecord(dbContainer, record, pageSource, smallProgressCallback,
                                     cancellationToken);
+                                record.LastUpdate = DateTime.Now;
+
+                                //var are = new AutoResetEvent(false);
+
+                                //BeginDownloadRecordSourcePageAsync(record, (s, exception) =>
+                                //{
+                                //    are.Set();
+                                //}, cancellationToken);
+
+                                //are.WaitOne();
 
                                 if (record.Created == default(DateTime))
                                 {
@@ -133,6 +135,7 @@ namespace ABCat.Shared.Plugins.Sites
                                 {
                                     var waitForResolve = records.Skip(z - savePerCount).Take(savePerCount).ToArray();
                                     normalizerPlugin.Normalize(waitForResolve, dbContainer);
+
                                     if (cancellationToken.IsCancellationRequested) break;
                                     dbContainer.AudioBookSet.AddChangedRecords(waitForResolve);
                                     dbContainer.SaveChanges();
@@ -169,7 +172,7 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 try
                 {
-                    completedCallback(GetRecordSourcePageString(audioBook, true, cancellationToken), null);
+                    completedCallback(GetRecordSourcePageString(audioBook, PageSources.CacheOnly, cancellationToken), null);
                 }
                 catch (Exception ex)
                 {
@@ -234,15 +237,22 @@ namespace ABCat.Shared.Plugins.Sites
             }
         }
 
-        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, bool cacheFirst,
+        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource,
             Action<int, int, string> progressCallback, CancellationToken cancellationToken);
 
         protected abstract void DownloadRecordGroup(IDbContainer db, IAudioBookGroup recordGroup,
             Action<int, int, string> progressCallback, CancellationToken cancellationToken);
 
-        protected abstract string GetRecordSourcePageString(IAudioBook audioBook, bool cacheFirst,
+        protected abstract string GetRecordSourcePageString(IAudioBook audioBook, PageSources pageSource,
             CancellationToken cancellationToken);
 
         protected abstract void ParseRecord(IDbContainer db, IAudioBook record, string postBodyHtml);
+    }
+
+    public enum PageSources
+    {
+        CacheOnly,
+        WebOnly,
+        CacheOrWeb
     }
 }

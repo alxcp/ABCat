@@ -50,7 +50,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         {
             lock (_lockContext)
             {
-                return Table<BinaryData>().FirstOrDefault(row => row.Key == key);
+                return FindWithQuery<BinaryData>(@"
+SELECT * FROM BinaryData
+WHERE Key = ?
+LIMIT 1;", key);
             }
         }
 

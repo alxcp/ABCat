@@ -162,7 +162,9 @@ WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => item.Key
         {
             lock (_lockContext)
             {
-                return Table<AudioBook>().Where(audioBook => audioBook.GroupKey == linkedObjectString);
+                return Query<AudioBook>(@"
+SELECT * FROM AudioBook
+WHERE GroupKey = ?;", linkedObjectString);
             }
         }
 
@@ -261,15 +263,10 @@ WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => item.Key))));
         {
             lock (_lockContext)
             {
-                return RecordFirstOrDefault(record => record.Key == key);
-            }
-        }
-
-        public IAudioBook RecordFirstOrDefault(Func<IAudioBook, bool> filterPredicate)
-        {
-            lock (_lockContext)
-            {
-                return Table<AudioBook>().FirstOrDefault(audioBook => filterPredicate(audioBook));
+                return FindWithQuery<AudioBook>(@"
+SELECT * FROM AudioBook
+WHERE Key = ?
+LIMIT 1;", key);
             }
         }
     }

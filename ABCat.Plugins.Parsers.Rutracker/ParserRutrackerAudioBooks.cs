@@ -53,7 +53,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             if (magnetDiv != null)
             {
                 magnetA = magnetDiv.ChildNodes.First();
-                magnetA.Id = "magnet";
+                //magnetA.Id = "magnet";
             }
 
             var pageHeader = document.GetElementbyId("page_header");
@@ -86,16 +86,21 @@ namespace ABCat.Plugins.Parsers.Rutracker
         }
 
         [CanBeNull]
-        protected override string GetRecordSourcePageString([NotNull] IAudioBook audioBook, bool cacheFirst,
+        protected override string GetRecordSourcePageString([NotNull] IAudioBook audioBook, PageSources pageSource,
             CancellationToken cancellationToken)
         {
-            string result;
+            string result = null;
 
             using (var dbContainer = Context.I.CreateDbContainer(true))
             {
                 var recordPageKey = audioBook.GetPageKey();
-                var pageData = dbContainer.BinaryDataSet.GetByKey(recordPageKey);
-                if (pageData == null)
+                var pageData = pageSource == PageSources.WebOnly ? null : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
+
+                if (pageData != null)
+                {
+                    result = pageData.GetString();
+                }
+                else if (pageSource != PageSources.CacheOnly)
                 {
                     using (var webClient = WebClientPool.GetPoolItem())
                     {
@@ -116,18 +121,17 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         dbContainer.BinaryDataSet.AddChangedBinaryData(pageData);
                     }
                 }
-                else result = pageData.GetString();
             }
 
             return result;
         }
 
-        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, bool cacheFirst,
+        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource,
             Action<int, int, string> progressCallback, CancellationToken cancellationToken)
         {
             string pageHtml = null;
 
-            if (cacheFirst)
+            if (pageSource == PageSources.CacheOnly)
             {
                 var pageMetaId = record.GetPageMetaKey();
                 var metaPage = dbContainer.BinaryDataSet.GetByKey(pageMetaId);
