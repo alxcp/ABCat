@@ -45,7 +45,7 @@ namespace ABCat.UI.WPF.Models
 
             SiteParserPlugin.BeginDownloadRecordsAsync(
                 new HashSet<string>(_getSelectedItems().Select(item => item.Key).Distinct()),
-                true,
+                PageSources.WebOnly,
                 ReportProgressSmall,
                 ReportProgressTotal,
                 DownloadRecordsAsyncCompleted,
@@ -78,7 +78,7 @@ namespace ABCat.UI.WPF.Models
             CancellationTokenSource = new CancellationTokenSource();
 
             SiteParserPlugin.BeginDownloadRecordsAsync(null,
-                false,
+                PageSources.WebOnly,
                 ReportProgressSmall,
                 ReportProgressTotal,
                 DownloadRecordsAsyncCompleted,

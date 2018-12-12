@@ -20,7 +20,7 @@ namespace ABCat.Shared.Plugins.Sites
             Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
             Action<Exception> completedCallback, CancellationToken cancellationToken);
 
-        void BeginDownloadRecordsAsync(HashSet<string> recordsIds, bool cacheFirst,
+        void BeginDownloadRecordsAsync(HashSet<string> recordsIds, PageSources pageSource,
             Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
             Action<Exception> completedCallback, CancellationToken cancellationToken);
 
