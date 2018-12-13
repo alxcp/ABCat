@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using System.Windows.Controls;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
@@ -37,50 +39,25 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
-        private string GetRecordPageUrl([NotNull] string key)
-        {
-            return @"http://rutracker.org/forum/viewtopic.php?t={0}".F(key);
-        }
-
         protected override void ClearRecordPage(HtmlDocument document)
         {
             base.ClearRecordPage(document);
-
-            var magnetDiv = document.DocumentNode.GetNodesByClass("div", "attach_link guest").FirstOrDefault();
-
-            HtmlNode magnetA = null;
-
-            if (magnetDiv != null)
-            {
-                magnetA = magnetDiv.ChildNodes.First();
-                //magnetA.Id = "magnet";
-            }
-
             var pageHeader = document.GetElementbyId("page_header");
             pageHeader?.ParentNode.RemoveChild(pageHeader);
             var pageFooter = document.GetElementbyId("page_footer");
             pageFooter?.ParentNode.RemoveChild(pageFooter);
-            var mainContentWrap = document.GetElementbyId("main_content_wrap");
+            var attachComment = document.GetNodesByClass("div", "attach_comment med").FirstOrDefault();
+            attachComment?.ParentNode.RemoveChild(attachComment);
+            var boldTCenter = document.GetNodesByClass("div", "bold tCenter mrg_8").FirstOrDefault();
+            boldTCenter?.ParentNode.RemoveChild(boldTCenter);
 
-            if (mainContentWrap != null)
+            var nodeNames = new[] {"td", "p", "tbody", "div"};
+
+            foreach (var nodeName in nodeNames)
             {
-                var topicMain = document.GetElementbyId("topic_main");
-                if (topicMain != null)
+                foreach (var hideForPrintNode in document.GetNodes(nodeName, "class", cls=>!cls.IsNullOrEmpty() && cls.Contains("hide-for-print")).ToList())
                 {
-                    var attach = topicMain.GetNodesByClass("fieldset", "attach").FirstOrDefault();
-
-                    attach?.ParentNode.RemoveChild(attach);
-
-                    if (magnetA != null)
-                    {
-                        topicMain.ChildNodes.Add(magnetA);
-                    }
-
-                    foreach (var htmlNode in
-                        mainContentWrap.ChildNodes.Where(item => item.Name == "table" && item != topicMain).ToArray())
-                    {
-                        htmlNode.ParentNode.RemoveChild(htmlNode);
-                    }
+                    hideForPrintNode.ParentNode.RemoveChild(hideForPrintNode);
                 }
             }
         }
@@ -98,13 +75,28 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
                 if (pageData != null)
                 {
-                    result = pageData.GetString();
+                    var data = pageData.GetData();
+                    using (var ms = new MemoryStream(data))
+                    {
+                        var document = new HtmlDocument();
+                        document.Load(ms);
+                        if (cancellationToken.IsCancellationRequested) return null;
+
+                        ClearRecordPage(document);
+                        result = document.DocumentNode.InnerHtml;
+
+                        if (cancellationToken.IsCancellationRequested) return null;
+                        pageData = dbContainer.BinaryDataSet.CreateBinaryData();
+                        pageData.Key = recordPageKey;
+                        pageData.SetString(result, true);
+                        dbContainer.BinaryDataSet.AddChangedBinaryData(pageData);
+                    }
                 }
                 else if (pageSource != PageSources.CacheOnly)
                 {
                     using (var webClient = WebClientPool.GetPoolItem())
                     {
-                        var pageUrl = GetRecordPageUrl(audioBook.Key);
+                        var pageUrl = audioBook.GetRecordPageUrl();
                         result = webClient.Target.DownloadString(pageUrl);
 
                         var document = new HtmlDocument();
@@ -131,7 +123,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
         {
             string pageHtml = null;
 
-            if (pageSource == PageSources.CacheOnly)
+            if (pageSource != PageSources.WebOnly)
             {
                 var pageMetaId = record.GetPageMetaKey();
                 var metaPage = dbContainer.BinaryDataSet.GetByKey(pageMetaId);
@@ -140,16 +132,19 @@ namespace ABCat.Plugins.Parsers.Rutracker
                     pageHtml = metaPage.GetString();
                 }
 
-                var page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
+                IBinaryData page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
 
                 if (page != null)
                 {
-                    var doc = new HtmlDocument();
-                    doc.Load(new MemoryStream(page.GetData()));
-                    ClearRecordPage(doc);
-                    page.SetString(doc.DocumentNode.InnerHtml, true);
-                    dbContainer.BinaryDataSet.AddChangedBinaryData(page);
-                    dbContainer.BinaryDataSet.SaveBinaryData();
+                    using (var ms = new MemoryStream(page.GetData()))
+                    {
+                        var doc = new HtmlDocument();
+                        doc.Load(ms);
+                        ClearRecordPage(doc);
+                        page.SetString(doc.DocumentNode.InnerHtml, true);
+                        dbContainer.BinaryDataSet.AddChangedBinaryData(page);
+                        pageHtml = doc.DocumentNode.InnerHtml;
+                    }
                 }
             }
 
@@ -284,7 +279,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             string page;
             using (var webClient = WebClientPool.GetPoolItem())
             {
-                var pageUrl = GetRecordPageUrl(record.Key);
+                var pageUrl = record.GetRecordPageUrl();
                 page = webClient.Target.DownloadString(pageUrl);
                 _lastLoadFromInternet.Restart();
                 if (cancellationToken.IsCancellationRequested) return null;

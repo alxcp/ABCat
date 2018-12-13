@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataSets;
+using ABCat.Shared.Properties;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 
@@ -22,19 +23,6 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
         protected FilteringLogicPluginBase()
         {
             FilterFields = new FilterFields();
-            var ff = new FilterFields
-            {
-                Name = "Кинг"
-            };
-            ff.SetValue("Author", "Кинг");
-            FiltersList.Add(ff);
-
-            ff = new FilterFields
-            {
-                Name = "Стругацкие"
-            };
-            ff.SetValue("Author", "Струг");
-            FiltersList.Add(ff);
         }
 
         [Browsable(false)] public Config Config { get; set; }
@@ -86,7 +74,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
             }
         }
 
-        public virtual async Task<IEnumerable<IAudioBook>> BeginFilterAsync(IEnumerable<IAudioBook> records,
+        public virtual async Task<IEnumerable<IAudioBook>> Filter(IEnumerable<IAudioBook> records,
             CancellationToken cancellationToken)
         {
             return await Task.Factory.StartNew(

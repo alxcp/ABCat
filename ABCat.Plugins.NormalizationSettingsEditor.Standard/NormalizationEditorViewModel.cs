@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
 using JetBrains.Annotations;
 

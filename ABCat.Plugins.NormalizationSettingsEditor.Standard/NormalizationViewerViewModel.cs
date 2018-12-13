@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
 using JetBrains.Annotations;
 

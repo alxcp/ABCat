@@ -38,7 +38,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
         /// </summary>
         /// <param name="records">Записи</param>
         /// <param name="cancellationToken">Токен для отмены операции</param>
-        Task<IEnumerable<IAudioBook>> BeginFilterAsync(IEnumerable<IAudioBook> records,
+        Task<IEnumerable<IAudioBook>> Filter(IEnumerable<IAudioBook> records,
             CancellationToken cancellationToken);
 
         /// <summary>

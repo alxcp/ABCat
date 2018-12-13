@@ -83,6 +83,11 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             return "TPM_{0}_{1}".F(GroupKey, Key);
         }
 
+        public Uri GetRecordPageUrl()
+        {
+            return new Uri($"http://rutracker.org/forum/viewtopic.php?t={Key}");
+        }
+
         public override string ToString()
         {
             return "[{0}] {1}".F(Key, Title);

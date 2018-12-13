@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 
 namespace ABCat.UI.WPF.Models
 {

@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using JetBrains.Annotations;
 

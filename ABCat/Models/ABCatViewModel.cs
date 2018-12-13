@@ -8,18 +8,21 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using ABCat.Shared.Plugins.UI;
+using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class AbCatViewModel : INotifyPropertyChanged, IDisposable
+    public sealed class AbCatViewModel : ViewModelBase, IDisposable
     {
         private IBrowserWindowPlugin _browserWindowPlugin;
         private IDbContainer _dbContainer4Ui;
@@ -79,6 +82,17 @@ namespace ABCat.UI.WPF.Models
                 ShowCachedInBrowserCommandCanExecute);
             ConfigCommand = new DelegateCommand(parameter => ConfigViewModel.ShowConfigWindow(null));
         }
+
+        public ICommand OpenOriginalUrlCommand =>
+            CommandFactory.Get(() =>
+            {
+                var selectedItem = SelectedItems.FirstOrDefault();
+                if (selectedItem != null)
+                {
+                    var url = selectedItem.GetRecordPageUrl();
+                    Process.Start(url.AbsoluteUri);
+                }
+            }, () => SelectedItems.AnySafe());
 
         public IBrowserWindowPlugin BrowserWindowPlugin
         {
@@ -178,7 +192,6 @@ namespace ABCat.UI.WPF.Models
         public bool IsCanCancelAsyncOperation(object parameter)
         {
             return true;
-            //return RecordTargetDownloaderModel.IsAsyncOperationExecuting || SiteParserModel.IsAsyncOperationExecuting;
         }
 
         public async void RefreshRecordsListData()
@@ -207,10 +220,6 @@ namespace ABCat.UI.WPF.Models
                         record.OpenCounter++;
                         dbContainer.AudioBookSet.AddChangedRecords(record);
                     }
-
-
-                    //BrowserWindowPlugin.ShowRecordPage(record.Title, pageHtml);
-                    //if (!BrowserWindowPlugin.IsDisplayed) _browserWindowPlugin.Display();
                 });
             }, CancellationToken.None);
         }
@@ -236,7 +245,6 @@ namespace ABCat.UI.WPF.Models
         {
             if (currentGroup == null) return null;
 
-            //Thread.Sleep(500);
             cancellationToken.ThrowIfCancellationRequested();
 
             var grouppedRecords = await currentGroup.BeginGetRecordsAsync(dbContainer, cancellationToken);
@@ -245,7 +253,7 @@ namespace ABCat.UI.WPF.Models
 
             if (filteringLogicPlugin.IsEnabled)
             {
-                var result = await filteringLogicPlugin.BeginFilterAsync(grouppedRecords, cancellationToken);
+                var result = await filteringLogicPlugin.Filter(grouppedRecords, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 return result;
             }
@@ -258,7 +266,7 @@ namespace ABCat.UI.WPF.Models
             try
             {
                 if (e.PropertyName == "IsOnUpdate") return;
-                if (_getRecordsCancellationTokenSource != null) _getRecordsCancellationTokenSource.Cancel();
+                _getRecordsCancellationTokenSource?.Cancel();
                 _getRecordsCancellationTokenSource = new CancellationTokenSource();
 
                 var dbContainer = Context.I.CreateDbContainer(false);
@@ -274,12 +282,12 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        private bool HideSelectedRecordsCommandCanExecute(object parameter)
+        private bool HideSelectedRecordsCommandCanExecute()
         {
             return SelectedItems.AnySafe();
         }
 
-        private void HideSelectedRecordsCommandExecute(object parameter)
+        private void HideSelectedRecordsCommandExecute()
         {
             var selected = SelectedItems.ToDictionary(item => item.GroupKey + "\\" + item.Key, item => item);
 
@@ -307,8 +315,7 @@ namespace ABCat.UI.WPF.Models
 
                 foreach (var selectedItem in selected)
                 {
-                    IHiddenRecord existed;
-                    if (!existedHidden.TryGetValue(selectedItem.Key, out existed))
+                    if (!existedHidden.TryGetValue(selectedItem.Key, out _))
                     {
                         var hiddenRecord = dbContainer.HiddenRecordSet.CreateHiddenRecord();
                         hiddenRecord.RecordGroupKey = selectedItem.Value.GroupKey;

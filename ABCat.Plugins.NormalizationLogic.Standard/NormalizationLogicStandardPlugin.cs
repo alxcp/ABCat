@@ -41,7 +41,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
             Disposed.Fire(this);
         }
 
-        public void Normalize(IEnumerable<IAudioBook> records, IDbContainer dbContainer)
+        public void Normalize(IReadOnlyCollection<IAudioBook> records, IDbContainer dbContainer)
         {
             var recordArray = records as IAudioBook[] ?? records.ToArray();
             var cache = dbContainer.ReplacementStringSet.GetReplacementStringsAll().ToArray();
