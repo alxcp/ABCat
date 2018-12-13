@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 
@@ -29,7 +30,6 @@ namespace ABCat.UI.WPF.Models
 
         public DelegateCommand DownloadRecordsCommand { get; }
 
-
         public DelegateCommand ReparseCommand { get; }
 
         public ISiteParserPlugin SiteParserPlugin { get; set; }
@@ -43,13 +43,21 @@ namespace ABCat.UI.WPF.Models
         {
             CancellationTokenSource = new CancellationTokenSource();
 
+            var keys = _getSelectedItems().Select(item => item.Key).Distinct().ToHashSet();
+
             SiteParserPlugin.BeginDownloadRecordsAsync(
-                new HashSet<string>(_getSelectedItems().Select(item => item.Key).Distinct()),
-                PageSources.WebOnly,
+                keys,
+                PageSources.CacheOrWeb,
                 ReportProgressSmall,
                 ReportProgressTotal,
                 DownloadRecordsAsyncCompleted,
                 CancellationTokenSource.Token);
+
+            //foreach (var record in _getSelectedItems())
+            //{
+            //    SiteParserPlugin.BeginDownloadRecordSourcePageAsync(record, (s, ex) => { },
+            //        CancellationTokenSource.Token);
+            //}
         }
 
         public bool CanDownloadRecordGroups(object parameter)

@@ -1,6 +1,9 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using ABCat.Shared.Plugins.DataSets;
 using SQLite.Net;
 using SQLite.Net.Platform.Win32;
@@ -14,6 +17,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         private readonly object _lockContext;
 
         private volatile bool _isTablesCreated;
+        private readonly Timer _saveTimer;
+        private readonly TimeSpan _savePeriod = TimeSpan.FromSeconds(30);
 
         public BinaryDataSet(string databasePath, object lockContext)
             : base(new SQLitePlatformWin32(), databasePath)
@@ -31,6 +36,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                     }
                 }
             }
+
+            _saveTimer = new Timer(SaveBinaryDataByTimer, null, _savePeriod, _savePeriod);
         }
 
         public void AddChangedBinaryData(params IBinaryData[] audioBooks)
@@ -57,13 +64,19 @@ LIMIT 1;", key);
             }
         }
 
+        private void SaveBinaryDataByTimer(object o = null)
+        {
+            if (_addedBinaryData.Any() || _changedBinaryData.Any())
+                SaveBinaryData();
+        }
+
         public void SaveBinaryData()
         {
             lock (_lockContext)
             {
                 var data4Add = new List<BinaryData>();
 
-                while (_addedBinaryData.Count > 0)
+                while (_addedBinaryData.Any())
                 {
                     if (_addedBinaryData.TryDequeue(out var data))
                     {
@@ -73,7 +86,7 @@ LIMIT 1;", key);
 
                 var data4Replace = new List<BinaryData>();
 
-                while (_changedBinaryData.Count > 0)
+                while (_changedBinaryData.Any())
                 {
                     if (_changedBinaryData.TryDequeue(out var data))
                     {

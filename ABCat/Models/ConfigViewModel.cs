@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.UI.WPF.UI;
 using Component.Infrastructure;
 using JetBrains.Annotations;

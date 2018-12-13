@@ -15,6 +15,6 @@ namespace ABCat.Shared.Plugins.Catalog
         /// </summary>
         /// <param name="records">Группа записей</param>
         /// <param name="dbContainer">Контейнер БД</param>
-        void Normalize(IEnumerable<IAudioBook> records, IDbContainer dbContainer);
+        void Normalize(IReadOnlyCollection<IAudioBook> records, IDbContainer dbContainer);
     }
 }

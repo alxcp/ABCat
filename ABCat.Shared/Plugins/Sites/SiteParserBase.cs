@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -99,12 +100,15 @@ namespace ABCat.Shared.Plugins.Sites
                             records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsKeys).ToList();
                         }
 
-                        var savePerCount = pageSource == PageSources.CacheOnly ? 1000 : 5;
+                        var sw = new Stopwatch();
+                        sw.Start();
 
                         var normalizerPlugin =
                             Context.I.ComponentFactory.GetCreators<INormalizationLogicPlugin>()
                                 .First()
                                 .GetInstance<INormalizationLogicPlugin>();
+
+                        var waitingForSave = new List<IAudioBook>();
 
                         for (var z = 0; z < records.Count; z++)
                         {
@@ -115,15 +119,7 @@ namespace ABCat.Shared.Plugins.Sites
                                 DownloadRecord(dbContainer, record, pageSource, smallProgressCallback,
                                     cancellationToken);
                                 record.LastUpdate = DateTime.Now;
-
-                                //var are = new AutoResetEvent(false);
-
-                                //BeginDownloadRecordSourcePageAsync(record, (s, exception) =>
-                                //{
-                                //    are.Set();
-                                //}, cancellationToken);
-
-                                //are.WaitOne();
+                                waitingForSave.Add(record);
 
                                 if (record.Created == default(DateTime))
                                 {
@@ -131,13 +127,13 @@ namespace ABCat.Shared.Plugins.Sites
                                 }
 
                                 if (cancellationToken.IsCancellationRequested) break;
-                                if (z > 0 && z % savePerCount == 0 || z == records.Count - 1)
+                                if (sw.Elapsed > TimeSpan.FromSeconds(30) || z == records.Count - 1)
                                 {
-                                    var waitForResolve = records.Skip(z - savePerCount).Take(savePerCount).ToArray();
-                                    normalizerPlugin.Normalize(waitForResolve, dbContainer);
+                                    sw.Restart();
+                                    normalizerPlugin.Normalize(waitingForSave, dbContainer);
 
                                     if (cancellationToken.IsCancellationRequested) break;
-                                    dbContainer.AudioBookSet.AddChangedRecords(waitForResolve);
+                                    dbContainer.AudioBookSet.AddChangedRecords(waitingForSave.ToArray());
                                     dbContainer.SaveChanges();
                                     if (cancellationToken.IsCancellationRequested) break;
                                 }
@@ -172,7 +168,7 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 try
                 {
-                    completedCallback(GetRecordSourcePageString(audioBook, PageSources.CacheOnly, cancellationToken), null);
+                    completedCallback(GetRecordSourcePageString(audioBook, PageSources.CacheOrWeb, cancellationToken), null);
                 }
                 catch (Exception ex)
                 {
@@ -221,20 +217,20 @@ namespace ABCat.Shared.Plugins.Sites
                 script.ParentNode.RemoveChild(script);
             }
 
-            foreach (var link in document.GetNodes("link", "rel", str => true).ToArray())
-            {
-                link.ParentNode.RemoveChild(link);
-            }
+            //foreach (var link in document.GetNodes("link", "rel", str => true).ToArray())
+            //{
+            //    link.ParentNode.RemoveChild(link);
+            //}
 
-            foreach (var link in document.GetNodes("img", "src", str => true).ToArray())
-            {
-                link.ParentNode.RemoveChild(link);
-            }
+            //foreach (var link in document.GetNodes("img", "src", str => true).ToArray())
+            //{
+            //    link.ParentNode.RemoveChild(link);
+            //}
 
-            foreach (var link in document.GetNodes("style", "src", str => true).ToArray())
-            {
-                link.ParentNode.RemoveChild(link);
-            }
+            //foreach (var link in document.GetNodes("style", "src", str => true).ToArray())
+            //{
+            //    link.ParentNode.RemoveChild(link);
+            //}
         }
 
         protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource,

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 using ABCat.Shared;
+using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using JetBrains.Annotations;

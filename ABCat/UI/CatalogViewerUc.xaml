@@ -144,7 +144,12 @@
                                                     Template="{StaticResource MenuItemTemplate}" />
                                                 <MenuItem
                                                     Command="{Binding ShowCachedInBrowserCommand}"
-                                                    Header="Показать страницу"
+                                                    Header="Открыть сохранённую страницу"
+                                                    Icon="{StaticResource DocumentFromCacheIcon}"
+                                                    Template="{StaticResource MenuItemTemplate}" />
+                                                <MenuItem
+                                                    Command="{Binding OpenOriginalUrlCommand}"
+                                                    Header="Открыть страницу на сайте"
                                                     Icon="{StaticResource DocumentFromCacheIcon}"
                                                     Template="{StaticResource MenuItemTemplate}" />
                                                 <MenuItem
