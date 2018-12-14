@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
+using System.Windows.Input;
 using ABCat.Shared.Plugins.DataSets;
-using JetBrains.Annotations;
+using ABCat.Shared.ViewModels;
 
 namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 {
-    public sealed class NormalizationViewerViewModel : INotifyPropertyChanged
+    public sealed class NormalizationViewerViewModel : ViewModelBase
     {
         private readonly ObservableCollection<ReplacementTreeNode> _replacementTreeSource =
             new ObservableCollection<ReplacementTreeNode>();
@@ -24,18 +22,6 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
         public NormalizationViewerViewModel()
         {
             BeginUpdateReplacementTreeSourceAsync();
-            RemoveItemCommand = new DelegateCommand(parameter =>
-            {
-                var node = (ReplacementTreeNode) parameter;
-
-                using (var dbContainer = Context.I.CreateDbContainer(true))
-                {
-                    dbContainer.ReplacementStringSet.Delete(node.RecordPropertyName, node.ReplaceValue,
-                        node.PossibleValue);
-                }
-
-                BeginUpdateReplacementTreeSourceAsync();
-            }, parameter => true);
         }
 
         public bool IsEmpty
@@ -62,9 +48,18 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public IEnumerable<ReplacementTreeNode> ReplacementTreeSource => _replacementTreeSource;
 
-        public DelegateCommand RemoveItemCommand { get; }
+        public ICommand RemoveItemCommand => CommandFactory.Get(parameter =>
+        {
+            var node = (ReplacementTreeNode) parameter;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+            using (var dbContainer = Context.I.CreateDbContainer(true))
+            {
+                dbContainer.ReplacementStringSet.Delete(node.RecordPropertyName, node.ReplaceValue,
+                    node.PossibleValue);
+            }
+
+            BeginUpdateReplacementTreeSourceAsync();
+        }, parameter => true);
 
         public void BeginUpdateReplacementTreeSourceAsync()
         {
@@ -112,8 +107,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
                         foreach (var recordPropertyGroup in cache)
                         {
-                            var groupNode = new ReplacementTreeNode(false);
-                            groupNode.CanRemove = false;
+                            var groupNode = new ReplacementTreeNode(false) {CanRemove = false};
                             var property =
                                 typeof(IAudioBook).GetProperties()
                                     .FirstOrDefault(item => item.Name.ToLower() == recordPropertyGroup.Key);
@@ -172,12 +166,6 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
                     IsOnUpdate = false;
                 }
             });
-        }
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

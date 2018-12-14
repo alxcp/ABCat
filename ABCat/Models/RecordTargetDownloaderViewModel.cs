@@ -26,13 +26,12 @@ namespace ABCat.UI.WPF.Models
             _recordTargetDownloaderPlugin = recordTargetDownloaderPlugin;
             _getSelectedRecordsFunc = getSelectedRecordsFunc;
             _recordDownloadedCallback = recordDownloadedCallback;
-            DownloadRecordTargetCommand = new DelegateCommand(OnDownloadRecordTarget,
-                obj => CancellationTokenSource == null);
         }
 
-        [UsedImplicitly] public DelegateCommand DownloadRecordTargetCommand { get; }
+        [UsedImplicitly] public ICommand DownloadRecordTargetCommand => CommandFactory.Get(OnDownloadRecordTarget,
+            () => CancellationTokenSource == null);
 
-        public void OnDownloadRecordTarget(object parameter)
+        public void OnDownloadRecordTarget()
         {
             CancellationTokenSource = new CancellationTokenSource();
             var targetRecords = new HashSet<string>(_getSelectedRecordsFunc().Select(item => item.Key));

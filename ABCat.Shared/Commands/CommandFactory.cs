@@ -11,8 +11,10 @@ namespace ABCat.Shared.Commands
     {
         private readonly Dictionary<string, ICommand> _commands = new Dictionary<string, ICommand>();
 
-        public ICommand Get([NotNull] Action action, [NotNull] string commandName)
+        public ICommand Get([NotNull] Action action, [CallerMemberName] string commandName = null)
         {
+            commandName.AgainstNullOrEmpty();
+
             if (_commands.TryGetValue(commandName, out var result))
             {
                 return result;
@@ -25,6 +27,8 @@ namespace ABCat.Shared.Commands
 
         public ICommand Get([NotNull] Action action, [NotNull] Func<bool> canExecute, [CallerMemberName] string commandName = null)
         {
+            commandName.AgainstNullOrEmpty();
+
             if (_commands.TryGetValue(commandName, out var result))
             {
                 return result;
@@ -35,8 +39,21 @@ namespace ABCat.Shared.Commands
             return result;
         }
 
-        public ICommand Get<T>([NotNull] Action<T> action, [NotNull] string commandName)
+        public ICommand Get([NotNull] Action<object> action, [CallerMemberName] string commandName = null)
         {
+            return Get<object>(action, commandName);
+        }
+
+        public ICommand Get([NotNull] Action<object> action, [NotNull] Func<object, bool> canExecute, [CallerMemberName] string commandName = null)
+        {
+            return Get<object>(action, canExecute, commandName);
+        }
+
+
+        public ICommand Get<T>([NotNull] Action<T> action, [CallerMemberName] string commandName = null)
+        {
+            commandName.AgainstNullOrEmpty();
+
             if (_commands.TryGetValue(commandName, out var result))
             {
                 return result;
@@ -47,9 +64,10 @@ namespace ABCat.Shared.Commands
             return result;
         }
 
-        public ICommand Get<T>([NotNull] Action<T> action, [NotNull] Func<T, bool> canExecute,
-            [NotNull] string commandName)
+        public ICommand Get<T>([NotNull] Action<T> action, [NotNull] Func<T, bool> canExecute, [CallerMemberName] string commandName = null)
         {
+            commandName.AgainstNullOrEmpty();
+
             if (_commands.TryGetValue(commandName, out var result))
             {
                 return result;

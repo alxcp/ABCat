@@ -128,8 +128,7 @@ namespace Component.Infrastructure
             var cannotSave = new List<Saveable>();
             while (ChangedItems.Count > 0)
             {
-                Saveable saveable;
-                if (ChangedItems.TryDequeue(out saveable))
+                if (ChangedItems.TryDequeue(out var saveable))
                 {
                     if (saveable.CanSave) items.Add(saveable);
                     else cannotSave.Add(saveable);

@@ -1,10 +1,11 @@
 ﻿using System.Threading;
 using System.Windows.Input;
+using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public abstract class AsyncOperationViewModelBase
+    public abstract class AsyncOperationViewModelBase : ViewModelBase
     {
         protected CancellationTokenSource CancellationTokenSource;
 
@@ -20,7 +21,7 @@ namespace ABCat.UI.WPF.Models
         public void CancelAsyncOperation()
         {
             var cts = CancellationTokenSource;
-            if (cts != null) cts.Cancel();
+            cts?.Cancel();
         }
 
         protected void OnAsynOperationCompleted()
@@ -29,6 +30,7 @@ namespace ABCat.UI.WPF.Models
             ReportProgressSmall(-1, 0, null);
             ReportProgressTotal(-1, 0, null);
             CommandManager.InvalidateRequerySuggested();
+            CommandFactory.UpdateAll();
         }
 
         protected void ReportProgressSmall(int current, int total, string message)

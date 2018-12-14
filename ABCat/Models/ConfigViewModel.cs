@@ -4,45 +4,42 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
+using ABCat.Shared.ViewModels;
 using ABCat.UI.WPF.UI;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class ConfigViewModel : INotifyPropertyChanged
+    public sealed class ConfigViewModel : ViewModelBase
     {
         private Config _currentConfig;
         private Config _selectedItem;
 
         public ConfigViewModel()
         {
-            SaveCommand = new DelegateCommand(obj =>
-            {
-                foreach (var pluginConfig in Configs)
-                {
-                    pluginConfig.Check(true);
-                    pluginConfig.Save();
-                }
-
-                var targetWindow = TargetWindow;
-                targetWindow?.Close();
-            }, obj => Configs.Any(item => item.IsChanged));
-
             var mainConfig = Config.Load<MainConfig>();
             mainConfig.Check(false);
+            mainConfig.PropertyChanged += Config_PropertyChanged;
             Configs.Add(mainConfig);
 
             foreach (var configCreatorAttribute in Context.I.ComponentFactory.GetConfigAttributes())
             {
                 var config = Config.Load(configCreatorAttribute);
+                config.PropertyChanged += Config_PropertyChanged;
                 config.Check(false);
                 Configs.Add(config);
             }
 
             SelectedItem = mainConfig;
+        }
+
+        private void Config_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            CommandFactory.UpdateAll();
         }
 
         public ObservableCollection<Config> Configs { get; } = new ObservableCollection<Config>();
@@ -58,7 +55,17 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public DelegateCommand SaveCommand { get; }
+        public ICommand SaveCommand => CommandFactory.Get(() =>
+        {
+            foreach (var pluginConfig in Configs)
+            {
+                pluginConfig.Check(true);
+                pluginConfig.Save();
+            }
+
+            var targetWindow = TargetWindow;
+            targetWindow?.Close();
+        }, () => Configs.Any(item => item.IsChanged));
 
         public Config SelectedItem
         {
@@ -73,27 +80,13 @@ namespace ABCat.UI.WPF.Models
 
         public Window TargetWindow { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public event EventHandler Saved;
-
         public static void ShowConfigWindow(Config targetConfigs)
         {
             var configWindow = new ConfigEditorWindow();
             var cvm = new ConfigViewModel();
             configWindow.DataContext = cvm;
             cvm.TargetWindow = configWindow;
-            cvm.Saved += CvmSaved;
             configWindow.ShowDialog();
-        }
-
-        private static void CvmSaved(object sender, EventArgs e)
-        {
-        }
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

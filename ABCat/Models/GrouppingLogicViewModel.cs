@@ -5,11 +5,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class GrouppingLogicViewModel : INotifyPropertyChanged
+    public sealed class GrouppingLogicViewModel : ViewModelBase
     {
         private readonly Action<Group> _selectedGroupChanged;
 
@@ -85,8 +86,6 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public void Refresh()
         {
             BeginGenerateGroupsAsync(SelectedGrouppingLogicPlugin);
@@ -119,12 +118,6 @@ namespace ABCat.UI.WPF.Models
             {
                 IsOnUpdate = false;
             }
-        }
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

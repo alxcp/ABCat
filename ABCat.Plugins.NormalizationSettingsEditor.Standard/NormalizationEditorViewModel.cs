@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
-using JetBrains.Annotations;
+using ABCat.Shared.ViewModels;
 
 namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 {
-    public sealed class NormalizationEditorViewModel : INotifyPropertyChanged
+    public sealed class NormalizationEditorViewModel : ViewModelBase
     {
         // ReSharper disable once InconsistentNaming
         private static readonly IEnumerable<PropertyForSelect> _availableProperties = new[]
@@ -34,28 +30,21 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public NormalizationEditorViewModel()
         {
-            SaveCommand = new DelegateCommand(Save, IsCanSave);
-            CancelCommand = new DelegateCommand(parameters =>
-            {
-                ValuesForReplace.Clear();
-                ReplacementValue = null;
-                IsOnEditMode = false;
-                OnPropertyChanged(nameof(IsOnEditMode));
-            }, parameters => true);
-
-            CurrentAsReplacementValueCommand =
-                new DelegateCommand(parameters => { ReplacementValue = CurrentPossibleValue; },
-                    parameters => CurrentPossibleValue != null);
-
-            RemoveItemCommand = new DelegateCommand(parameter => ValuesForReplace.Remove(parameter.ToString()),
-                parameter => true);
         }
 
         public IEnumerable<PropertyForSelect> AvailableProperties => _availableProperties;
 
-        public ICommand CancelCommand { get; }
+        public ICommand CancelCommand => CommandFactory.Get(() =>
+        {
+            ValuesForReplace.Clear();
+            ReplacementValue = null;
+            IsOnEditMode = false;
+            OnPropertyChanged(nameof(IsOnEditMode));
+        }, () => true);
 
-        public ICommand CurrentAsReplacementValueCommand { get; }
+        public ICommand CurrentAsReplacementValueCommand => CommandFactory.Get(
+            () => { ReplacementValue = CurrentPossibleValue; },
+            () => CurrentPossibleValue != null);
 
         public string CurrentPossibleValue
         {
@@ -93,7 +82,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
         }
 
-        public DelegateCommand RemoveItemCommand { get; }
+        public ICommand RemoveItemCommand => CommandFactory.Get(
+            parameter => ValuesForReplace.Remove(parameter.ToString()),
+            parameter => true);
 
         public string ReplacementValue
         {
@@ -107,7 +98,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
         }
 
-        public DelegateCommand SaveCommand { get; }
+        public ICommand SaveCommand => CommandFactory.Get(Save, IsCanSave);
 
         public PropertyForSelect SelectedProperty
         {
@@ -135,22 +126,14 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public ObservableCollection<string> ValuesForReplace { get; } = new ObservableCollection<string>();
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private bool IsCanSave(object arg)
+        private bool IsCanSave()
         {
             return !string.IsNullOrEmpty(ReplacementValue) &&
                    ValuesForReplace.Any(
                        item => string.Compare(item, ReplacementValue, StringComparison.OrdinalIgnoreCase) != 0);
         }
 
-        private void Save(object obj)
+        private void Save()
         {
             using (var dbContainer = Context.I.CreateDbContainer(true))
             {
