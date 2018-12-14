@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.UI;
@@ -57,8 +58,8 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
                 OnPropertyChanged();
                 if (value)
                 {
-                    NormalizationViewerViewModel.BeginUpdateReplacementTreeSourceAsync();
-                    EditorVisible = false;
+                    NormalizationViewerViewModel.UpdateReplacementTreeSource().ContinueWith(task =>
+                        EditorVisible = false);
                 }
             }
         }
@@ -99,9 +100,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
         }
 
-        public void BeginRefreshDataAsync()
+        public async Task RefreshData()
         {
-            NormalizationViewerViewModel.BeginUpdateReplacementTreeSourceAsync();
+            await NormalizationViewerViewModel.UpdateReplacementTreeSource();
         }
 
         public bool CheckForConfig(bool correct, out Config incorrectConfig)

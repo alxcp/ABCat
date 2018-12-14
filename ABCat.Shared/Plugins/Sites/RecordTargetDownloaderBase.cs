@@ -13,35 +13,26 @@ namespace ABCat.Shared.Plugins.Sites
     {
         public Config Config { get; set; }
 
-        public void BeginDownloadRecordTargetAsync(HashSet<string> recordsIds,
+        public async Task DownloadRecordTarget(HashSet<string> recordsIds,
             Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
-            Action<Exception> completedCallback, CancellationToken cancellationToken)
+            CancellationToken cancellationToken)
         {
-            Task.Factory.StartNew(() =>
+            await Task.Factory.StartNew(() =>
             {
-                try
+                var z = 0;
+                using (var dbContainer = Context.I.CreateDbContainer(true))
                 {
-                    var z = 0;
-                    using (var dbContainer = Context.I.CreateDbContainer(true))
+                    var records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsIds).ToArray();
+
+                    foreach (var record in records)
                     {
-                        var records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsIds).ToArray();
-
-                        foreach (var record in records)
-                        {
-                            totalProgressCallback(z, records.Count(), "{0} из {1}".F(z, records.Count()));
-                            DownloadRecordTarget(null, record, dbContainer, smallProgressCallback,
-                                cancellationToken);
-                            if (cancellationToken.IsCancellationRequested) break;
-                            dbContainer.SaveChanges();
-                            z++;
-                        }
+                        totalProgressCallback(z, records.Count(), "{0} из {1}".F(z, records.Count()));
+                        DownloadRecordTarget(null, record, dbContainer, smallProgressCallback,
+                            cancellationToken);
+                        if (cancellationToken.IsCancellationRequested) break;
+                        dbContainer.SaveChanges();
+                        z++;
                     }
-
-                    completedCallback(null);
-                }
-                catch (Exception ex)
-                {
-                    completedCallback(ex);
                 }
             }, cancellationToken);
         }

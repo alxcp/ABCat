@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
@@ -25,74 +26,65 @@ namespace ABCat.UI.WPF.Models
         }
 
         public ICommand DownloadRecordGroupsCommand =>
-            CommandFactory.Get(OnDownloadRecordGroups, () => CancellationTokenSource == null);
+            CommandFactory.Get(async ()=> await OnDownloadRecordGroups(), () => CancellationTokenSource == null);
 
         public ICommand DownloadRecordsCommand =>
-            CommandFactory.Get(OnDownloadRecords, () => CancellationTokenSource == null);
+            CommandFactory.Get(async ()=> await OnDownloadRecords(), () => CancellationTokenSource == null);
 
-        public ICommand ReparseCommand => CommandFactory.Get(Reparse, ()=> CancellationTokenSource == null);
+        public ICommand ReparseCommand => CommandFactory.Get(async ()=> await Reparse(), ()=> CancellationTokenSource == null);
 
         public ISiteParserPlugin SiteParserPlugin { get; set; }
 
-        private void Reparse()
+        private async Task Reparse()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
             var keys = _getSelectedItems().Select(item => item.Key).Distinct().ToHashSet();
 
-            SiteParserPlugin.BeginDownloadRecordsAsync(
+            await SiteParserPlugin.DownloadRecords(
                 keys,
                 PageSources.CacheOrWeb,
                 ReportProgressSmall,
                 ReportProgressTotal,
-                DownloadRecordsAsyncCompleted,
                 CancellationTokenSource.Token);
-        }
 
-        public void OnDownloadRecordGroups()
-        {
-            CancellationTokenSource = new CancellationTokenSource();
-
-            SiteParserPlugin.BeginDownloadRecordGroupsAsync(null,
-                ReportProgressSmall,
-                ReportProgressTotal,
-                DownloadRecordGroupsAsyncCompleted,
-                CancellationTokenSource.Token);
-        }
-
-        public void OnDownloadRecords()
-        {
-            CancellationTokenSource = new CancellationTokenSource();
-
-            SiteParserPlugin.BeginDownloadRecordsAsync(null,
-                PageSources.WebOnly,
-                ReportProgressSmall,
-                ReportProgressTotal,
-                DownloadRecordsAsyncCompleted,
-                CancellationTokenSource.Token);
-        }
-
-        private void DownloadRecordGroupsAsyncCompleted(Exception obj)
-        {
             Executor.OnUiThread(() =>
             {
-                if (obj == null)
-                {
-                    OnAsynOperationCompleted();
-                    _owner.RefreshRecordsListData();
-                }
+                OnAsynOperationCompleted();
+                _owner.RefreshRecordsListData();
             });
         }
 
-        private void DownloadRecordsAsyncCompleted(Exception obj)
+        public async Task OnDownloadRecordGroups()
         {
+            CancellationTokenSource = new CancellationTokenSource();
+
+            await SiteParserPlugin.DownloadRecordGroups(null,
+                ReportProgressSmall,
+                ReportProgressTotal,
+                CancellationTokenSource.Token);
+
             Executor.OnUiThread(() =>
             {
-                if (obj == null)
-                {
-                    OnAsynOperationCompleted();
-                    _owner.RefreshRecordsListData();
-                }
+                OnAsynOperationCompleted();
+                _owner.RefreshRecordsListData();
+            });
+        }
+
+        public async Task OnDownloadRecords()
+        {
+            CancellationTokenSource = new CancellationTokenSource();
+
+            await SiteParserPlugin.DownloadRecords(null,
+                PageSources.WebOnly,
+                ReportProgressSmall,
+                ReportProgressTotal,
+                CancellationTokenSource.Token);
+
+            Executor.OnUiThread(() =>
+            {
+                OnAsynOperationCompleted();
+                _owner.RefreshRecordsListData();
             });
         }
     }

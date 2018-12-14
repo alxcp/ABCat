@@ -14,7 +14,6 @@ namespace ABCat.Shared.Plugins.DataSets
 
         IEnumerable<IAudioBook> GetRecordsUpdatedBefore(DateTime lastUpdate);
 
-        //HashSet<string> GetAllAuthors();
         void Import(string dbFilePath);
         void SaveAudioBooks();
     }

@@ -119,7 +119,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
         }
 
         protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource,
-            Action<int, int, string> progressCallback, CancellationToken cancellationToken)
+            ProgressCallback progressCallback, CancellationToken cancellationToken)
         {
             string pageHtml = null;
 
@@ -162,7 +162,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
         }
 
         protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup,
-            Action<int, int, string> progressCallback, CancellationToken cancellationToken)
+            ProgressCallback progressCallback, CancellationToken cancellationToken)
         {
             dbContainer.SaveChanges();
 

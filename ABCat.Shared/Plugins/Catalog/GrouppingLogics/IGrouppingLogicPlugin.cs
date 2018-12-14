@@ -24,7 +24,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         ///     Начать асинхронную генерацию дерева групп
         /// </summary>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        Task<Group> BeginGenerateGroupsAsync(CancellationToken cancellationToken);
+        Task<Group> GenerateGroups(CancellationToken cancellationToken);
 
         /// <summary>
         ///     Начать асинхронное получение записей, включенных в группу
@@ -32,7 +32,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         /// <param name="dbContainer">Контейнер БД</param>
         /// <param name="group">Группа записей</param>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        Task<IEnumerable<IAudioBook>> BeginGetRecordsAsync(IDbContainer dbContainer, Group group,
+        Task<IEnumerable<IAudioBook>> GetRecords(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken);
     }
 }

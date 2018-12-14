@@ -48,7 +48,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         ///     Начать асинхронную генерацию дерева групп
         /// </summary>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        public async Task<Group> BeginGenerateGroupsAsync(CancellationToken cancellationToken)
+        public async Task<Group> GenerateGroups(CancellationToken cancellationToken)
         {
             IsOnUpdate = true;
             return await Task.Factory.StartNew(
@@ -72,7 +72,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         /// <param name="dbContainer">Контейнер БД</param>
         /// <param name="group">Группа записей</param>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        public async Task<IEnumerable<IAudioBook>> BeginGetRecordsAsync(
+        public async Task<IEnumerable<IAudioBook>> GetRecords(
             IDbContainer dbContainer,
             Group group,
             CancellationToken cancellationToken)

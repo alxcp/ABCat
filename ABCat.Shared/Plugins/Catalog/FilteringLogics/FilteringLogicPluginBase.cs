@@ -109,20 +109,15 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
                 }, cancellationToken);
         }
 
-        public virtual void BeginUpdateCacheAsync(UpdateTypes updateType, Action<Exception> completedCallback)
+        public virtual async Task UpdateCache(UpdateTypes updateType)
         {
-            Task.Factory.StartNew(
+            await Task.Factory.StartNew(
                 () =>
                 {
                     try
                     {
                         IsOnUpdate = true;
                         UpdateCacheInternal(updateType);
-                        completedCallback(null);
-                    }
-                    catch (Exception ex)
-                    {
-                        completedCallback(ex);
                     }
                     finally
                     {

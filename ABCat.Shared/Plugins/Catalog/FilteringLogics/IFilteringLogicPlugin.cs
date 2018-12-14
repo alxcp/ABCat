@@ -44,7 +44,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
         /// <summary>
         ///     Обновить кеш значений фильтра
         /// </summary>
-        void BeginUpdateCacheAsync(UpdateTypes updateType, Action<Exception> completedCallback);
+        Task UpdateCache(UpdateTypes updateType);
 
         /// <summary>
         ///     Выяснить подходит ли запись под условия фильтрации

@@ -8,6 +8,33 @@ using SQLite.Net.Platform.Win32;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
+    //public delegate void ExecuteWithLock(Action action);
+
+    //public abstract class DBSetBase : SQLiteConnection
+    //{
+    //    private static volatile bool _isTablesCreated;
+    //    private readonly ExecuteWithLock _executeWithLock;
+
+    //    protected DBSetBase(string path, ExecuteWithLock executeWithLock, bool vacuum) : base(new SQLitePlatformWin32(), path)
+    //    {
+    //        _executeWithLock = executeWithLock;
+    //        if (!_isTablesCreated)
+    //        {
+    //            lock (_lockContext)
+    //            {
+    //                if (!_isTablesCreated)
+    //                {
+    //                    CreateTable<AudioBook>();
+    //                    CreateTable<AudioBookGroup>();
+    //                    _isTablesCreated = true;
+
+    //                    if (vacuum) Execute("VACUUM");
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
+
     public class AudioBookSet : SQLiteConnection, IAudioBookSet, IAudioBookGroupSet
     {
         private static volatile bool _isTablesCreated;
@@ -100,8 +127,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                 while (_addedAudioBookGroups.Any())
                 {
-                    AudioBookGroup group;
-                    if (_addedAudioBookGroups.TryDequeue(out group))
+                    if (_addedAudioBookGroups.TryDequeue(out var @group))
                     {
                         bookGroups4Add.Add(group);
                     }
@@ -111,8 +137,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                 while (_changedAudioBookGroups.Any())
                 {
-                    AudioBookGroup group;
-                    if (_changedAudioBookGroups.TryDequeue(out group))
+                    if (_changedAudioBookGroups.TryDequeue(out var @group))
                     {
                         bookGroups4Replace.Add(group);
                     }
@@ -202,8 +227,7 @@ WHERE GroupKey = ?;", linkedObjectString);
 
                 while (_addedAudioBooks.Count > 0)
                 {
-                    AudioBook book;
-                    if (_addedAudioBooks.TryDequeue(out book))
+                    if (_addedAudioBooks.TryDequeue(out var book))
                     {
                         books4Add.Add(book);
                     }
@@ -213,8 +237,7 @@ WHERE GroupKey = ?;", linkedObjectString);
 
                 while (_changedAudioBooks.Count > 0)
                 {
-                    AudioBook book;
-                    if (_changedAudioBooks.TryDequeue(out book))
+                    if (_changedAudioBooks.TryDequeue(out var book))
                     {
                         books4Replace.Add(book);
                     }
