@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
+using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
@@ -12,7 +13,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
     /// <summary>
     ///     Группа записей каталога
     /// </summary>
-    public class Group : INotifyPropertyChanged
+    public class Group : ViewModelBase
     {
         public readonly HashSet<string> LinkedRecords = new HashSet<string>();
 
@@ -84,8 +85,6 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         /// </summary>
         public Group Parent { get; set; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         /// <summary>
         ///     Начать асинхронное получение записей
         /// </summary>
@@ -95,12 +94,6 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
             CancellationToken cancellationToken)
         {
             return await OwnerLogic.BeginGetRecordsAsync(dbContainer, this, cancellationToken);
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

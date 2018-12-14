@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.DataSets;
@@ -21,25 +22,19 @@ namespace ABCat.UI.WPF.Models
             _owner = owner;
             _getSelectedItems = getSelectedItems;
             SiteParserPlugin = siteParserPlugin;
-            ReparseCommand = new DelegateCommand(Reparse, IsCanReparse);
-            DownloadRecordsCommand = new DelegateCommand(OnDownloadRecords, CanDownloadRecords);
-            DownloadRecordGroupsCommand = new DelegateCommand(OnDownloadRecordGroups, CanDownloadRecordGroups);
         }
 
-        public DelegateCommand DownloadRecordGroupsCommand { get; }
+        public ICommand DownloadRecordGroupsCommand =>
+            CommandFactory.Get(OnDownloadRecordGroups, () => CancellationTokenSource == null);
 
-        public DelegateCommand DownloadRecordsCommand { get; }
+        public ICommand DownloadRecordsCommand =>
+            CommandFactory.Get(OnDownloadRecords, () => CancellationTokenSource == null);
 
-        public DelegateCommand ReparseCommand { get; }
+        public ICommand ReparseCommand => CommandFactory.Get(Reparse, ()=> CancellationTokenSource == null);
 
         public ISiteParserPlugin SiteParserPlugin { get; set; }
 
-        private bool IsCanReparse(object arg)
-        {
-            return CancellationTokenSource == null;
-        }
-
-        private void Reparse(object obj)
+        private void Reparse()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
@@ -52,25 +47,9 @@ namespace ABCat.UI.WPF.Models
                 ReportProgressTotal,
                 DownloadRecordsAsyncCompleted,
                 CancellationTokenSource.Token);
-
-            //foreach (var record in _getSelectedItems())
-            //{
-            //    SiteParserPlugin.BeginDownloadRecordSourcePageAsync(record, (s, ex) => { },
-            //        CancellationTokenSource.Token);
-            //}
         }
 
-        public bool CanDownloadRecordGroups(object parameter)
-        {
-            return CancellationTokenSource == null;
-        }
-
-        public bool CanDownloadRecords(object parameter)
-        {
-            return CancellationTokenSource == null;
-        }
-
-        public void OnDownloadRecordGroups(object parameter)
+        public void OnDownloadRecordGroups()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
@@ -81,7 +60,7 @@ namespace ABCat.UI.WPF.Models
                 CancellationTokenSource.Token);
         }
 
-        public void OnDownloadRecords(object parameter)
+        public void OnDownloadRecords()
         {
             CancellationTokenSource = new CancellationTokenSource();
 

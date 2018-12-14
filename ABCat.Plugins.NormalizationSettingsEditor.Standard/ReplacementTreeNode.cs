@@ -1,52 +1,17 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
-using JetBrains.Annotations;
+using ABCat.Shared.ViewModels;
 
 namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 {
-    public class ReplacementTreeNode : INotifyPropertyChanged
+    public class ReplacementTreeNode : ViewModelBase
     {
-        private readonly DelegateCommand _hideCommand;
-        private readonly DelegateCommand _unHideCommand;
-
         private bool _isHidden;
 
         public ReplacementTreeNode(bool canHide)
         {
             CanHide = canHide;
-            _hideCommand = new DelegateCommand(parameter =>
-            {
-                using (var dbContainer = Context.I.CreateDbContainer(true))
-                {
-                    var newHiddenValue = dbContainer.HiddenValueSet.CreateHiddenValue();
-                    newHiddenValue.WholeWord = true;
-                    newHiddenValue.IgnoreCase = true;
-                    newHiddenValue.PropertyName = RecordPropertyName;
-                    newHiddenValue.Value = ReplaceValue;
-                    dbContainer.HiddenValueSet.AddHiddenValue(newHiddenValue);
-                }
-
-                IsHidden = true;
-                Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                    .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
-            }, parameter => !IsHidden);
-
-            _unHideCommand = new DelegateCommand(parameter =>
-            {
-                using (var dbContainer = Context.I.CreateDbContainer(true))
-                {
-                    dbContainer.HiddenValueSet.Delete(RecordPropertyName, Value);
-                }
-
-                IsHidden = false;
-                Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                    .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
-            }, parameter => IsHidden);
         }
 
         public bool CanHide { get; }
@@ -54,7 +19,22 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public ObservableCollection<ReplacementTreeNode> Children { get; set; }
 
-        public ICommand HideCommand => _hideCommand;
+        public ICommand HideCommand => CommandFactory.Get(() =>
+        {
+            using (var dbContainer = Context.I.CreateDbContainer(true))
+            {
+                var newHiddenValue = dbContainer.HiddenValueSet.CreateHiddenValue();
+                newHiddenValue.WholeWord = true;
+                newHiddenValue.IgnoreCase = true;
+                newHiddenValue.PropertyName = RecordPropertyName;
+                newHiddenValue.Value = ReplaceValue;
+                dbContainer.HiddenValueSet.AddHiddenValue(newHiddenValue);
+            }
+
+            IsHidden = true;
+            Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
+        }, () => !IsHidden);
 
         public bool IsHidden
         {
@@ -71,21 +51,23 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
         public string RecordPropertyName { get; set; }
         public string ReplaceValue { get; set; }
 
-        public ICommand UnHideCommand => _unHideCommand;
+        public ICommand UnHideCommand => CommandFactory.Get(() =>
+        {
+            using (var dbContainer = Context.I.CreateDbContainer(true))
+            {
+                dbContainer.HiddenValueSet.Delete(RecordPropertyName, Value);
+            }
+
+            IsHidden = false;
+            Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
+        }, () => IsHidden);
 
         public string Value { get; set; }
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public override string ToString()
         {
             return Value;
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.UI
 {
-    public class ShowProgressViewModel : INotifyPropertyChanged
+    public class ShowProgressViewModel : ViewModelBase
     {
         private string _title;
 
@@ -17,14 +18,6 @@ namespace ABCat.Shared.Plugins.UI
                 _title = value;
                 OnPropertyChanged();
             }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

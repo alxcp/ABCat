@@ -2,12 +2,14 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
+using ABCat.Shared.ViewModels;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class StatusBarStateViewModel : INotifyPropertyChanged
+    public sealed class StatusBarStateViewModel : ViewModelBase
     {
         private string _message;
         private int _progressBarSmallMaximum;
@@ -19,25 +21,24 @@ namespace ABCat.UI.WPF.Models
         private int _progressBarTotalMinimum;
         private int _progressBarTotalValue = -1;
 
-        public StatusBarStateViewModel(Func<object, bool> isCanCancelAsyncOperation,
-            Action<object> cancelAsyncOperation)
+        public StatusBarStateViewModel(Func<bool> isCanCancelAsyncOperation,
+            Action cancelAsyncOperation)
         {
             IsCanCancelAsyncOperation = isCanCancelAsyncOperation;
             CancelAsyncOperation = cancelAsyncOperation;
-            CancelAsyncOperationCommand = new DelegateCommand(CancelAsyncOperation,
-                obj => IsCanCancelAsyncOperation(obj));
         }
 
-        public Action<object> CancelAsyncOperation { get; set; }
+        public Action CancelAsyncOperation { get; set; }
 
-        public DelegateCommand CancelAsyncOperationCommand { get; }
+        public ICommand CancelAsyncOperationCommand => CommandFactory.Get(CancelAsyncOperation,
+            () => IsCanCancelAsyncOperation());
 
         public Visibility CancelAsyncOperationCommandVisibibility =>
             _progressBarSmallValue >= 0 || _progressBarTotalValue >= 0
                 ? Visibility.Visible
                 : Visibility.Collapsed;
 
-        public Func<object, bool> IsCanCancelAsyncOperation { get; set; }
+        public Func<bool> IsCanCancelAsyncOperation { get; set; }
 
         public string Mesage
         {
@@ -147,12 +148,5 @@ namespace ABCat.UI.WPF.Models
 
         public Visibility ProgressBarTotalVisibility =>
             ProgressBarTotalValue >= 0 ? Visibility.Visible : Visibility.Collapsed;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }

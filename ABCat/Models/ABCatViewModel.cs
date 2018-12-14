@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,7 +39,7 @@ namespace ABCat.UI.WPF.Models
             RecordsListUc.Data = new List<IAudioBook>();
             StatusBarStateModel = new StatusBarStateViewModel(IsCanCancelAsyncOperation, CancelAsyncOperation);
             SiteParserModel = new SiteParserViewModel(this,
-                Context.I.ComponentFactory.CreateActual<ISiteParserPlugin>(), () => { return SelectedItems; });
+                Context.I.ComponentFactory.CreateActual<ISiteParserPlugin>(), () => SelectedItems);
             RecordTargetDownloaderModel = new RecordTargetDownloaderViewModel(StatusBarStateModel,
                 Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems,
                 () => Filter.BeginUpdateCacheAsync(UpdateTypes.Loaded, ex =>
@@ -61,8 +60,7 @@ namespace ABCat.UI.WPF.Models
                         try
                         {
                             var dbContainer = Context.I.CreateDbContainer(false);
-                            if (_getRecordsCancellationTokenSource != null)
-                                _getRecordsCancellationTokenSource.Cancel();
+                            _getRecordsCancellationTokenSource?.Cancel();
                             _getRecordsCancellationTokenSource = new CancellationTokenSource();
                             var records = await GetCurrentRecordsAsync(dbContainer, group, Filter,
                                 _getRecordsCancellationTokenSource.Token);
@@ -74,13 +72,6 @@ namespace ABCat.UI.WPF.Models
                         }
                     });
 
-            HideSelectedRecordsCommand = new DelegateCommand(HideSelectedRecordsCommandExecute,
-                HideSelectedRecordsCommandCanExecute);
-            RefreshCommand = new DelegateCommand(parameter => RefreshRecordsListData());
-            SetReplacementCommand = new DelegateCommand(SetReplacement, IsCanSetReplacement);
-            ShowCachedInBrowserCommand = new DelegateCommand(ShowCachedInBrowserCommandExecute,
-                ShowCachedInBrowserCommandCanExecute);
-            ConfigCommand = new DelegateCommand(parameter => ConfigViewModel.ShowConfigWindow(null));
         }
 
         public ICommand OpenOriginalUrlCommand =>
@@ -109,7 +100,7 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public DelegateCommand ConfigCommand { get; }
+        public ICommand ConfigCommand => CommandFactory.Get(()=> ConfigViewModel.ShowConfigWindow(null));
 
         public IFilteringLogicPlugin Filter
         {
@@ -133,7 +124,9 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        [UsedImplicitly] public DelegateCommand HideSelectedRecordsCommand { get; }
+        [UsedImplicitly]
+        public ICommand HideSelectedRecordsCommand =>
+            CommandFactory.Get(HideSelectedRecordsCommandExecute, HideSelectedRecordsCommandCanExecute);
 
 
         public NormalizationSettingsEditorViewModel NormalizationSettingsEditorModel { get; }
@@ -148,19 +141,22 @@ namespace ABCat.UI.WPF.Models
                 _recordsListUc = value;
                 if (_recordsListUc != null) _recordsListUc.ItemDoubleClick += RecordsListUcItemDoubleClick;
                 OnPropertyChanged();
-                OnPropertyChanged("SelectedItems");
+                OnPropertyChanged(nameof(SelectedItems));
             }
         }
 
         public RecordTargetDownloaderViewModel RecordTargetDownloaderModel { get; }
 
-        [UsedImplicitly] public DelegateCommand RefreshCommand { get; }
+        [UsedImplicitly] public ICommand RefreshCommand => CommandFactory.Get(RefreshRecordsListData);
 
         public IEnumerable<IAudioBook> SelectedItems => RecordsListUc.SelectedItems;
 
-        [UsedImplicitly] public DelegateCommand SetReplacementCommand { get; }
+        [UsedImplicitly]
+        public ICommand SetReplacementCommand => CommandFactory.Get(SetReplacement, IsCanSetReplacement);
 
-        [UsedImplicitly] public DelegateCommand ShowCachedInBrowserCommand { get; }
+        [UsedImplicitly]
+        public ICommand ShowCachedInBrowserCommand =>
+            CommandFactory.Get(ShowCachedInBrowserCommandExecute, ShowCachedInBrowserCommandCanExecute);
 
         public SiteParserViewModel SiteParserModel { get; }
         public StatusBarStateViewModel StatusBarStateModel { get; }
@@ -175,21 +171,19 @@ namespace ABCat.UI.WPF.Models
             NormalizationSettingsEditorModel?.Dispose();
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public void BrowserWindowPluginWindowPluginClosed(object sender, EventArgs e)
         {
             _browserWindowPlugin.Dispose();
             _browserWindowPlugin = null;
         }
 
-        public void CancelAsyncOperation(object parameter)
+        public void CancelAsyncOperation()
         {
             RecordTargetDownloaderModel.CancelAsyncOperation();
             SiteParserModel.CancelAsyncOperation();
         }
 
-        public bool IsCanCancelAsyncOperation(object parameter)
+        public bool IsCanCancelAsyncOperation()
         {
             return true;
         }
@@ -331,15 +325,9 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        private bool IsCanSetReplacement(object arg)
+        private bool IsCanSetReplacement()
         {
             return SelectedItems.AnySafe();
-        }
-
-        [NotifyPropertyChangedInvocator]
-        private void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void SetCurrentRecords(IDbContainer dbContainer, IEnumerable<IAudioBook> records,
@@ -351,7 +339,7 @@ namespace ABCat.UI.WPF.Models
                 {
                     records = records.ToArray();
                     _recordsListUc.Data = records;
-                    if (_dbContainer4Ui != null) _dbContainer4Ui.Dispose();
+                    _dbContainer4Ui?.Dispose();
                     _dbContainer4Ui = dbContainer;
                 }
                 else
@@ -361,19 +349,19 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        private void SetReplacement(object obj)
+        private void SetReplacement()
         {
             NormalizationSettingsEditorModel.NormalizationSettingsEditorPlugin.TargetRecordsForEdit =
                 SelectedItems.ToArray();
             NormalizationSettingsEditorModel.IsActive = true;
         }
 
-        private bool ShowCachedInBrowserCommandCanExecute(object parameter)
+        private bool ShowCachedInBrowserCommandCanExecute()
         {
             return SelectedItems.AnySafe();
         }
 
-        private void ShowCachedInBrowserCommandExecute(object parameter)
+        private void ShowCachedInBrowserCommandExecute()
         {
             var first = SelectedItems.FirstOrDefault();
             if (first != null)
