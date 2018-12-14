@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
 using ABCat.Shared.Plugins.DataProviders;
@@ -42,15 +41,11 @@ namespace ABCat.UI.WPF.Models
                 Context.I.ComponentFactory.CreateActual<ISiteParserPlugin>(), () => SelectedItems);
             RecordTargetDownloaderModel = new RecordTargetDownloaderViewModel(StatusBarStateModel,
                 Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems,
-                () => Filter.BeginUpdateCacheAsync(UpdateTypes.Loaded, ex =>
-                {
-                    if (ex != null) throw ex;
-                }));
+                async () => await Filter.UpdateCache(UpdateTypes.Loaded));
             Filter =
                 Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>();
             Filter.PropertyChanged += FilterPropertyChanged;
-            Filter.BeginUpdateCacheAsync(UpdateTypes.Hidden | UpdateTypes.Loaded | UpdateTypes.Values,
-                ex => { });
+            Filter.UpdateCache(UpdateTypes.Hidden | UpdateTypes.Loaded | UpdateTypes.Values);
             NormalizationSettingsEditorModel = new NormalizationSettingsEditorViewModel();
             GrouppingLogicModel =
                 new GrouppingLogicViewModel(
@@ -62,7 +57,7 @@ namespace ABCat.UI.WPF.Models
                             var dbContainer = Context.I.CreateDbContainer(false);
                             _getRecordsCancellationTokenSource?.Cancel();
                             _getRecordsCancellationTokenSource = new CancellationTokenSource();
-                            var records = await GetCurrentRecordsAsync(dbContainer, group, Filter,
+                            var records = await GetCurrentRecords(dbContainer, group, Filter,
                                 _getRecordsCancellationTokenSource.Token);
                             SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
                             OnPropertyChanged();
@@ -126,8 +121,7 @@ namespace ABCat.UI.WPF.Models
 
         [UsedImplicitly]
         public ICommand HideSelectedRecordsCommand =>
-            CommandFactory.Get(HideSelectedRecordsCommandExecute, HideSelectedRecordsCommandCanExecute);
-
+            CommandFactory.Get(async ()=> await HideSelectedRecordsCommandExecute(), HideSelectedRecordsCommandCanExecute);
 
         public NormalizationSettingsEditorViewModel NormalizationSettingsEditorModel { get; }
 
@@ -156,7 +150,7 @@ namespace ABCat.UI.WPF.Models
 
         [UsedImplicitly]
         public ICommand ShowCachedInBrowserCommand =>
-            CommandFactory.Get(ShowCachedInBrowserCommandExecute, ShowCachedInBrowserCommandCanExecute);
+            CommandFactory.Get(async ()=> await ShowCachedInBrowserCommandExecute(), ShowCachedInBrowserCommandCanExecute);
 
         public SiteParserViewModel SiteParserModel { get; }
         public StatusBarStateViewModel StatusBarStateModel { get; }
@@ -193,7 +187,7 @@ namespace ABCat.UI.WPF.Models
             try
             {
                 var dbContainer = Context.I.CreateDbContainer(false);
-                var records = await GetCurrentRecordsAsync(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
+                var records = await GetCurrentRecords(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
                     _getRecordsCancellationTokenSource.Token);
                 SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
             }
@@ -202,20 +196,21 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public void ShowInBrowser([NotNull] IAudioBook record)
+        public async Task ShowInBrowser([NotNull] IAudioBook record)
         {
-            SiteParserModel.SiteParserPlugin.BeginDownloadRecordSourcePageAsync(record, (pageHtml, ex) =>
+            var pageHtml =
+                await SiteParserModel.SiteParserPlugin.DownloadRecordSourcePage(record,
+                    CancellationToken.None);
+
+            Application.Current.Dispatcher.CheckAccess(() =>
             {
-                Application.Current.Dispatcher.CheckAccess(() =>
+                ShowInDefaultWebBrowser(pageHtml);
+                using (var dbContainer = Context.I.CreateDbContainer(true))
                 {
-                    ShowInDefaultWebBrowser(pageHtml);
-                    using (var dbContainer = Context.I.CreateDbContainer(true))
-                    {
-                        record.OpenCounter++;
-                        dbContainer.AudioBookSet.AddChangedRecords(record);
-                    }
-                });
-            }, CancellationToken.None);
+                    record.OpenCounter++;
+                    dbContainer.AudioBookSet.AddChangedRecords(record);
+                }
+            });
         }
 
         private void ShowInDefaultWebBrowser(string pageHtml)
@@ -231,7 +226,7 @@ namespace ABCat.UI.WPF.Models
             Process.Start(_previousFileName);
         }
 
-        private static async Task<IEnumerable<IAudioBook>> GetCurrentRecordsAsync(
+        private static async Task<IEnumerable<IAudioBook>> GetCurrentRecords(
             IDbContainer dbContainer,
             Group currentGroup,
             IFilteringLogicPlugin filteringLogicPlugin,
@@ -241,7 +236,7 @@ namespace ABCat.UI.WPF.Models
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grouppedRecords = await currentGroup.BeginGetRecordsAsync(dbContainer, cancellationToken);
+            var grouppedRecords = await currentGroup.GetRecords(dbContainer, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -266,7 +261,7 @@ namespace ABCat.UI.WPF.Models
                 var dbContainer = Context.I.CreateDbContainer(false);
                 var records =
                     await
-                        GetCurrentRecordsAsync(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
+                        GetCurrentRecords(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
                             _getRecordsCancellationTokenSource.Token);
                 _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
@@ -281,7 +276,7 @@ namespace ABCat.UI.WPF.Models
             return SelectedItems.AnySafe();
         }
 
-        private void HideSelectedRecordsCommandExecute()
+        private async Task HideSelectedRecordsCommandExecute()
         {
             var selected = SelectedItems.ToDictionary(item => item.GroupKey + "\\" + item.Key, item => item);
 
@@ -302,9 +297,6 @@ namespace ABCat.UI.WPF.Models
                     }
                 }
 
-                //existedHidden.AddRange(dbContainer.HiddenRecordSet.GetHiddenRecords(group.Key, new HashSet<string>(group.Select(item => item.Key))));
-                //var existedHidden = dbContainer.HiddenRecordSet.GetHiddenRecords(item => selected.Keys.Contains(item.RecordGroupKey + "\\" + item.RecordKey)).ToDictionary(item => item.RecordGroupKey + "\\" + item.RecordKey, item => item);
-
                 var hiddenRecords = new List<IHiddenRecord>();
 
                 foreach (var selectedItem in selected)
@@ -321,7 +313,7 @@ namespace ABCat.UI.WPF.Models
                 dbContainer.HiddenRecordSet.AddHiddenRecord(hiddenRecords.ToArray());
 
                 dbContainer.SaveChanges();
-                Filter.BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
+                await Filter.UpdateCache(UpdateTypes.Hidden);
             }
         }
 
@@ -361,18 +353,21 @@ namespace ABCat.UI.WPF.Models
             return SelectedItems.AnySafe();
         }
 
-        private void ShowCachedInBrowserCommandExecute()
+        private async Task ShowCachedInBrowserCommandExecute()
         {
             var first = SelectedItems.FirstOrDefault();
             if (first != null)
             {
-                ShowInBrowser(first);
+                await ShowInBrowser(first);
             }
         }
 
         private void RecordsListUcItemDoubleClick(object sender, ItemDoubleClickRowEventArgs e)
         {
-            if (e.Target != null) ShowInBrowser(e.Target);
+            if (e.Target != null)
+            {
+                ShowInBrowser(e.Target).ContinueWith(task => { });
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public ObservableCollection<ReplacementTreeNode> Children { get; set; }
 
-        public ICommand HideCommand => CommandFactory.Get(() =>
+        public ICommand HideCommand => CommandFactory.Get(async () =>
         {
             using (var dbContainer = Context.I.CreateDbContainer(true))
             {
@@ -32,8 +32,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
 
             IsHidden = true;
-            Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
+            await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>().UpdateCache(UpdateTypes.Hidden);
         }, () => !IsHidden);
 
         public bool IsHidden
@@ -51,7 +50,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
         public string RecordPropertyName { get; set; }
         public string ReplaceValue { get; set; }
 
-        public ICommand UnHideCommand => CommandFactory.Get(() =>
+        public ICommand UnHideCommand => CommandFactory.Get(async () =>
         {
             using (var dbContainer = Context.I.CreateDbContainer(true))
             {
@@ -59,8 +58,8 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
 
             IsHidden = false;
-            Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                .BeginUpdateCacheAsync(UpdateTypes.Hidden, ex => { });
+            await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                .UpdateCache(UpdateTypes.Hidden);
         }, () => IsHidden);
 
         public string Value { get; set; }

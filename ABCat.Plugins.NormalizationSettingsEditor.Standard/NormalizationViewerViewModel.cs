@@ -21,7 +21,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public NormalizationViewerViewModel()
         {
-            BeginUpdateReplacementTreeSourceAsync();
+            UpdateReplacementTreeSource().ContinueWith(task => { });
         }
 
         public bool IsEmpty
@@ -48,7 +48,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public IEnumerable<ReplacementTreeNode> ReplacementTreeSource => _replacementTreeSource;
 
-        public ICommand RemoveItemCommand => CommandFactory.Get(parameter =>
+        public ICommand RemoveItemCommand => CommandFactory.Get(async parameter =>
         {
             var node = (ReplacementTreeNode) parameter;
 
@@ -58,12 +58,12 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
                     node.PossibleValue);
             }
 
-            BeginUpdateReplacementTreeSourceAsync();
+            await UpdateReplacementTreeSource();
         }, parameter => true);
 
-        public void BeginUpdateReplacementTreeSourceAsync()
+        public async Task UpdateReplacementTreeSource()
         {
-            BeginBuildReplacementTreeAsync(SetSource);
+            SetSource(await BuildReplacementTree());
         }
 
         private void SetSource(IEnumerable<ReplacementTreeNode> nodes)
@@ -88,13 +88,14 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             }
         }
 
-        private void BeginBuildReplacementTreeAsync(Action<IEnumerable<ReplacementTreeNode>> completedCallback)
+        private async Task<IReadOnlyCollection<ReplacementTreeNode>> BuildReplacementTree()
         {
-            Task.Factory.StartNew(() =>
+            return await Task.Factory.StartNew(() =>
             {
+                IsOnUpdate = true;
+
                 try
                 {
-                    IsOnUpdate = true;
                     using (var dbContainer = Context.I.CreateDbContainer(false))
                     {
                         var hiddenRecords = dbContainer.HiddenValueSet.GetHiddenValuesAll().ToArray();
@@ -148,17 +149,20 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
                                 foreach (var possibleValue in setValueGroup)
                                 {
-                                    var itemNode = new ReplacementTreeNode(false) {Value = possibleValue};
-                                    itemNode.RecordPropertyName = recordPropertyGroup.Key;
-                                    itemNode.ReplaceValue = setValueGroup.Key;
-                                    itemNode.PossibleValue = possibleValue;
-                                    itemNode.CanRemove = true;
+                                    var itemNode = new ReplacementTreeNode(false)
+                                    {
+                                        Value = possibleValue,
+                                        RecordPropertyName = recordPropertyGroup.Key,
+                                        ReplaceValue = setValueGroup.Key,
+                                        PossibleValue = possibleValue,
+                                        CanRemove = true
+                                    };
                                     setNode.Children.Add(itemNode);
                                 }
                             }
                         }
 
-                        completedCallback(result);
+                        return result;
                     }
                 }
                 finally

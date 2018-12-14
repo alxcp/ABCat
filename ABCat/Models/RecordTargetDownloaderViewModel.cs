@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
@@ -28,30 +29,24 @@ namespace ABCat.UI.WPF.Models
             _recordDownloadedCallback = recordDownloadedCallback;
         }
 
-        [UsedImplicitly] public ICommand DownloadRecordTargetCommand => CommandFactory.Get(OnDownloadRecordTarget,
+        [UsedImplicitly] public ICommand DownloadRecordTargetCommand => CommandFactory.Get(async ()=> await OnDownloadRecordTarget(),
             () => CancellationTokenSource == null);
 
-        public void OnDownloadRecordTarget()
+        public async Task OnDownloadRecordTarget()
         {
             CancellationTokenSource = new CancellationTokenSource();
             var targetRecords = new HashSet<string>(_getSelectedRecordsFunc().Select(item => item.Key));
 
-            _recordTargetDownloaderPlugin.BeginDownloadRecordTargetAsync(targetRecords,
+            await _recordTargetDownloaderPlugin.DownloadRecordTarget(targetRecords,
                 ReportProgressSmall,
                 ReportProgressTotal,
-                DownloadRecordTargetAsyncCompleted,
                 CancellationTokenSource.Token);
-        }
 
-        private void DownloadRecordTargetAsyncCompleted(Exception ex)
-        {
             Executor.OnUiThread(() =>
             {
                 OnAsynOperationCompleted();
                 CommandManager.InvalidateRequerySuggested();
-
-                if (ex == null) _recordDownloadedCallback();
-                else throw ex;
+                _recordDownloadedCallback();
             });
         }
     }

@@ -82,19 +82,19 @@ namespace ABCat.UI.WPF.Models
                 if (Equals(value, _selectedGrouppingLogicPlugin)) return;
                 _selectedGrouppingLogicPlugin = value;
                 OnPropertyChanged();
-                BeginGenerateGroupsAsync(value);
+                GenerateGroups(value);
             }
         }
 
         public void Refresh()
         {
-            BeginGenerateGroupsAsync(SelectedGrouppingLogicPlugin);
+            GenerateGroups(SelectedGrouppingLogicPlugin);
         }
 
-        private async void BeginGenerateGroupsAsync([NotNull] IGrouppingLogicPlugin grouppingLogic)
+        private async void GenerateGroups([NotNull] IGrouppingLogicPlugin grouppingLogic)
         {
             var cancellationTokenSource = _cancellationTokenSource;
-            if (cancellationTokenSource != null) cancellationTokenSource.Cancel();
+            cancellationTokenSource?.Cancel();
             cancellationTokenSource = new CancellationTokenSource();
             _cancellationTokenSource = cancellationTokenSource;
 
@@ -102,7 +102,7 @@ namespace ABCat.UI.WPF.Models
             {
                 IsOnUpdate = true;
 
-                var group = await grouppingLogic.BeginGenerateGroupsAsync(cancellationTokenSource.Token);
+                var group = await grouppingLogic.GenerateGroups(cancellationTokenSource.Token);
 
                 Root = new[] {group};
 

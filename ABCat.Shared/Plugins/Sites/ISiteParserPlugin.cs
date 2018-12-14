@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 
 namespace ABCat.Shared.Plugins.Sites
 {
+    public delegate void ProgressCallback(int current, int total, string message);
+
     public interface ISiteParserPlugin : IExtComponent
     {
         /// <summary>
@@ -14,17 +17,13 @@ namespace ABCat.Shared.Plugins.Sites
         /// <param name="recordGroupsIds"></param>
         /// <param name="smallProgressCallback"></param>
         /// <param name="totalProgressCallback"></param>
-        /// <param name="completedCallback"></param>
         /// <param name="cancellationToken"></param>
-        void BeginDownloadRecordGroupsAsync(HashSet<string> recordGroupsIds,
-            Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
-            Action<Exception> completedCallback, CancellationToken cancellationToken);
+        Task DownloadRecordGroups(HashSet<string> recordGroupsIds,
+            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
 
-        void BeginDownloadRecordsAsync(HashSet<string> recordsIds, PageSources pageSource,
-            Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
-            Action<Exception> completedCallback, CancellationToken cancellationToken);
+        Task DownloadRecords(HashSet<string> recordsIds, PageSources pageSource,
+            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
 
-        void BeginDownloadRecordSourcePageAsync(IAudioBook record, Action<string, Exception> completedCallback,
-            CancellationToken cancellationToken);
+        Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
     }
 }

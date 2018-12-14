@@ -90,10 +90,10 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         /// </summary>
         /// <param name="dbContainer">Контейнер БД</param>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        public async Task<IEnumerable<IAudioBook>> BeginGetRecordsAsync(IDbContainer dbContainer,
+        public async Task<IEnumerable<IAudioBook>> GetRecords(IDbContainer dbContainer,
             CancellationToken cancellationToken)
         {
-            return await OwnerLogic.BeginGetRecordsAsync(dbContainer, this, cancellationToken);
+            return await OwnerLogic.GetRecords(dbContainer, this, cancellationToken);
         }
     }
 }

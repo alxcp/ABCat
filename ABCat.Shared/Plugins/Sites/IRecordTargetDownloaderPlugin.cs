@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Component.Infrastructure;
 
 namespace ABCat.Shared.Plugins.Sites
@@ -16,10 +17,8 @@ namespace ABCat.Shared.Plugins.Sites
         /// <param name="records">Список ID загружаемых записей</param>
         /// <param name="smallProgressCallback">Метод сообщения о прогрессе выполнения загрузки одной записи</param>
         /// <param name="totalProgressCallback">Метод сообщения о прогрессе общего выполнения операции</param>
-        /// <param name="completedCallback">Метод завершения операции</param>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        void BeginDownloadRecordTargetAsync(HashSet<string> records, Action<int, int, string> smallProgressCallback,
-            Action<int, int, string> totalProgressCallback, Action<Exception> completedCallback,
-            CancellationToken cancellationToken);
+        Task DownloadRecordTarget(HashSet<string> records, Action<int, int, string> smallProgressCallback,
+            Action<int, int, string> totalProgressCallback, CancellationToken cancellationToken);
     }
 }

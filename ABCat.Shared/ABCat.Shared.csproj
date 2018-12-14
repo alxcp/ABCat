@@ -116,6 +116,7 @@
     <Compile Include="Plugins\Downloaders\ITorrentFileDownloaderPlugin.cs" />
     <Compile Include="Plugins\Sites\IRecordTargetDownloaderPlugin.cs" />
     <Compile Include="Plugins\Sites\ISiteParserPlugin.cs" />
+    <Compile Include="Plugins\Sites\PageSources.cs" />
     <Compile Include="Plugins\Sites\RecordTargetDownloaderBase.cs" />
     <Compile Include="Plugins\Sites\SiteParserBase.cs" />
     <Compile Include="Plugins\UI\IBrowserWindowPlugin.cs" />
