@@ -3,39 +3,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using ABCat.Shared.Plugins.DataSets;
-using SQLite.Net;
-using SQLite.Net.Platform.Win32;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
-    //public delegate void ExecuteWithLock(Action action);
-
-    //public abstract class DBSetBase : SQLiteConnection
-    //{
-    //    private static volatile bool _isTablesCreated;
-    //    private readonly ExecuteWithLock _executeWithLock;
-
-    //    protected DBSetBase(string path, ExecuteWithLock executeWithLock, bool vacuum) : base(new SQLitePlatformWin32(), path)
-    //    {
-    //        _executeWithLock = executeWithLock;
-    //        if (!_isTablesCreated)
-    //        {
-    //            lock (_lockContext)
-    //            {
-    //                if (!_isTablesCreated)
-    //                {
-    //                    CreateTable<AudioBook>();
-    //                    CreateTable<AudioBookGroup>();
-    //                    _isTablesCreated = true;
-
-    //                    if (vacuum) Execute("VACUUM");
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
-    public class AudioBookSet : SQLiteConnection, IAudioBookSet, IAudioBookGroupSet
+    public class AudioBookSet : DBSetBase, IAudioBookSet, IAudioBookGroupSet
     {
         private static volatile bool _isTablesCreated;
 
@@ -47,15 +18,12 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         private readonly ConcurrentQueue<AudioBook> _changedAudioBooks = new ConcurrentQueue<AudioBook>();
 
-        private readonly object _lockContext;
-
-        public AudioBookSet(string path, object lockContext, bool vacuum)
-            : base(new SQLitePlatformWin32(), path)
+        public AudioBookSet(string path, ExecuteWithLock executeWithLockDelegate, bool vacuum)
+            : base(path, executeWithLockDelegate, vacuum)
         {
-            _lockContext = lockContext;
             if (!_isTablesCreated)
             {
-                lock (_lockContext)
+                ExecuteWithLock(() =>
                 {
                     if (!_isTablesCreated)
                     {
@@ -65,7 +33,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                         if (vacuum) Execute("VACUUM");
                     }
-                }
+                });
             }
         }
 
@@ -89,39 +57,36 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public IAudioBookGroup GetRecordGroupByKey(string key)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<AudioBookGroup>().FirstOrDefault(group => group.Key == key);
-            }
+            });
         }
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsAll()
         {
-            lock (_lockContext)
-            {
-                return Table<AudioBookGroup>();
-            }
+            return ExecuteWithLock(Table<AudioBookGroup>);
         }
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsByIds(HashSet<int> groupIds)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<AudioBookGroup>().Where(group => groupIds.Contains(group.Id));
-            }
+            });
         }
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsUpdatedBefore(DateTime lastUpdate)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<AudioBookGroup>().Where(group => group.LastUpdate <= lastUpdate);
-            }
+            });
         }
 
         public void SaveAudioBookGroups()
         {
-            lock (_lockContext)
+            ExecuteWithLock(() =>
             {
                 var bookGroups4Add = new List<AudioBookGroup>();
 
@@ -154,7 +119,7 @@ WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => item.Key
 
                     InsertAll(bookGroups4Add.Union(bookGroups4Replace));
                 });
-            }
+            });
         }
 
         public void AddChangedRecords(params IAudioBook[] audioBooks)
@@ -177,25 +142,19 @@ WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => item.Key
 
         public IEnumerable<IAudioBook> GetRecordsAll()
         {
-            lock (_lockContext)
-            {
-                return Table<AudioBook>();
-            }
+            return ExecuteWithLock<IEnumerable<IAudioBook>>(Table<AudioBook>);
         }
 
         public IEnumerable<IAudioBook> GetRecordsByGroup(string linkedObjectString)
         {
-            lock (_lockContext)
-            {
-                return Query<AudioBook>(@"
+            return ExecuteWithLock(() => Query<AudioBook>(@"
 SELECT * FROM AudioBook
-WHERE GroupKey = ?;", linkedObjectString);
-            }
+WHERE GroupKey = ?;", linkedObjectString));
         }
 
         public IEnumerable<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 var result = new List<IAudioBook>();
                 var count = 0;
@@ -208,20 +167,20 @@ WHERE GroupKey = ?;", linkedObjectString);
                 }
 
                 return result;
-            }
+            });
         }
 
         public IEnumerable<IAudioBook> GetRecordsUpdatedBefore(DateTime lastUpdate)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<AudioBook>().ToArray().Where(audioBook => audioBook.LastUpdate <= lastUpdate);
-            }
+            });
         }
 
         public void SaveAudioBooks()
         {
-            lock (_lockContext)
+            ExecuteWithLock(() =>
             {
                 var books4Add = new List<AudioBook>();
 
@@ -254,12 +213,12 @@ WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => item.Key))));
 
                     InsertAll(books4Add.Union(books4Replace));
                 });
-            }
+            });
         }
 
         public void Import(string dbFilePath)
         {
-            using (var audioBookSet = new AudioBookSet(dbFilePath, _lockContext, true))
+            using (var audioBookSet = new AudioBookSet(dbFilePath, ExecuteWithLockDelegate, true))
             {
                 var groups = audioBookSet.GetRecordGroupsAll();
                 var records = audioBookSet.GetRecordsAll();
@@ -284,13 +243,10 @@ WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => item.Key))));
 
         public IAudioBook GetRecordByKey(string key)
         {
-            lock (_lockContext)
-            {
-                return FindWithQuery<AudioBook>(@"
+            return ExecuteWithLock(() => FindWithQuery<AudioBook>(@"
 SELECT * FROM AudioBook
 WHERE Key = ?
-LIMIT 1;", key);
-            }
+LIMIT 1;", key));
         }
     }
 }

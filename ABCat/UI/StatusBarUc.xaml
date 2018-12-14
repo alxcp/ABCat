@@ -59,5 +59,8 @@
                 Visibility="{Binding ProgressBarSmallVisibility}"
                 Value="{Binding ProgressBarSmallValue}" />
         </StackPanel>
+        <StackPanel Visibility="{Binding IsOnDbOperation, Converter={StaticResource Bool2VisibilityConverter}}">
+            <TextBlock>DB OPERATION</TextBlock>
+        </StackPanel>
     </StackPanel>
 </UserControl>

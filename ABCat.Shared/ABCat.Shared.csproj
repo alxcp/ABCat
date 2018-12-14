@@ -85,6 +85,7 @@
     <Compile Include="LoggerFactoryBase.cs" />
     <Compile Include="LoginInfo.cs" />
     <Compile Include="MainConfig.cs" />
+    <Compile Include="Messages\DBOperationMessage.cs" />
     <Compile Include="ModernWindowBehavior.cs" />
     <Compile Include="ObjectPool.cs" />
     <Compile Include="ObjectPoolItem.cs" />
@@ -158,6 +159,7 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
