@@ -1,40 +1,34 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using ABCat.Shared.Plugins.DataSets;
-using SQLite.Net;
-using SQLite.Net.Platform.Win32;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
-    public class BinaryDataSet : SQLiteConnection, IBinaryDataSet
+    public class BinaryDataSet : DBSetBase, IBinaryDataSet
     {
         private readonly ConcurrentQueue<BinaryData> _addedBinaryData = new ConcurrentQueue<BinaryData>();
         private readonly ConcurrentQueue<BinaryData> _changedBinaryData = new ConcurrentQueue<BinaryData>();
-        private readonly object _lockContext;
 
         private volatile bool _isTablesCreated;
         private readonly Timer _saveTimer;
         private readonly TimeSpan _savePeriod = TimeSpan.FromSeconds(30);
 
-        public BinaryDataSet(string databasePath, object lockContext)
-            : base(new SQLitePlatformWin32(), databasePath)
+        public BinaryDataSet(string databasePath, ExecuteWithLock executeWithLockDelegate)
+            : base(databasePath, executeWithLockDelegate, false)
         {
-            _lockContext = lockContext;
-
             if (!_isTablesCreated)
             {
-                lock (_lockContext)
+                ExecuteWithLock(() =>
                 {
                     if (!_isTablesCreated)
                     {
                         CreateTable<BinaryData>();
                         _isTablesCreated = true;
                     }
-                }
+                });
             }
 
             _saveTimer = new Timer(SaveBinaryDataByTimer, null, _savePeriod, _savePeriod);
@@ -55,13 +49,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public IBinaryData GetByKey(string key)
         {
-            lock (_lockContext)
-            {
-                return FindWithQuery<BinaryData>(@"
+            return ExecuteWithLock(() => FindWithQuery<BinaryData>(@"
 SELECT * FROM BinaryData
 WHERE Key = ?
-LIMIT 1;", key);
-            }
+LIMIT 1;", key));
         }
 
         private void SaveBinaryDataByTimer(object o = null)
@@ -72,7 +63,7 @@ LIMIT 1;", key);
 
         public void SaveBinaryData()
         {
-            lock (_lockContext)
+            ExecuteWithLock(() =>
             {
                 var data4Add = new List<BinaryData>();
 
@@ -105,14 +96,14 @@ WHERE Key IN({0})".F(string.Join(",", data4Replace.Select(item => "'{0}'".F(item
 
                     InsertAll(data4Add.Union(data4Replace));
                 });
-            }
+            });
         }
 
         public void Import(string dbFilePath)
         {
             var existed = GetKeysAll();
 
-            using (var binaryDataSet = new BinaryDataSet(dbFilePath, _lockContext))
+            using (var binaryDataSet = new BinaryDataSet(dbFilePath, ExecuteWithLockDelegate))
             {
                 var importKeys = binaryDataSet.GetKeysAll();
 
@@ -139,19 +130,19 @@ WHERE Key IN({0})".F(string.Join(",", data4Replace.Select(item => "'{0}'".F(item
 
         public IEnumerable<IBinaryData> GetByKeys(HashSet<string> keys)
         {
-            lock (_lockContext)
-            {
-                return Table<BinaryData>().Where(row => keys.Contains(row.Key));
-            }
+            return ExecuteWithLock(() => { return Table<BinaryData>().Where(row => keys.Contains(row.Key)); });
         }
 
         public HashSet<string> GetKeysAll()
         {
-            return
-                new HashSet<string>(
-                    Query(Table<BinaryData>().Table, "SELECT Key FROM BinaryData")
-                        .Cast<BinaryData>()
-                        .Select(item => item.Key));
+            return ExecuteWithLock(() =>
+            {
+                return
+                    new HashSet<string>(
+                        Query(Table<BinaryData>().Table, "SELECT Key FROM BinaryData")
+                            .Cast<BinaryData>()
+                            .Select(item => item.Key));
+            });
         }
     }
 }

@@ -20,18 +20,20 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public AudioBooksDbContainerSqLite()
         {
+            ExecuteWithLock executeWithLockDelegate = AudioBooksDbContainerSQLiteConfig.ExecuteWithLockDelegate;
+
             _audioBooks = new Lazy<AudioBookSet>(() =>
             {
                 var needVacuum = _config.LastAudioBooksVacuum.AddDays(3) < DateTime.Now;
-                var result = new AudioBookSet(_config.AudioBooksFilePath, AudioBooksDbContainerSQLiteConfig.LockContext,
+                var result = new AudioBookSet(_config.AudioBooksFilePath, executeWithLockDelegate,
                     needVacuum);
                 if (needVacuum)
                 {
-                    lock (AudioBooksDbContainerSQLiteConfig.LockContext)
+                    executeWithLockDelegate(() =>
                     {
                         _config.LastAudioBooksVacuum = DateTime.Now;
                         _config.Save();
-                    }
+                    });
                 }
 
                 return result;
@@ -40,14 +42,14 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 new Lazy<ReplacementStringSet>(
                     () =>
                         new ReplacementStringSet(_config.ProcessingSettingsFilePath,
-                            AudioBooksDbContainerSQLiteConfig.LockContext), true);
+                            executeWithLockDelegate), true);
             _userDataSet =
                 new Lazy<UserDataSet>(
-                    () => new UserDataSet(_config.UserDataFilePath, AudioBooksDbContainerSQLiteConfig.LockContext),
+                    () => new UserDataSet(_config.UserDataFilePath, executeWithLockDelegate),
                     true);
             _binaryDataSet =
                 new Lazy<BinaryDataSet>(
-                    () => new BinaryDataSet(_config.BinaryDataFilePath, AudioBooksDbContainerSQLiteConfig.LockContext),
+                    () => new BinaryDataSet(_config.BinaryDataFilePath, executeWithLockDelegate),
                     true);
         }
 

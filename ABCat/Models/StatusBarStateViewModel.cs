@@ -5,11 +5,13 @@ using System.Windows;
 using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
+using ABCat.Shared.Messages;
 using ABCat.Shared.ViewModels;
+using Caliburn.Micro;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class StatusBarStateViewModel : ViewModelBase
+    public sealed class StatusBarStateViewModel : ViewModelBase, IHandle<DBOperationMessage>
     {
         private string _message;
         private int _progressBarSmallMaximum;
@@ -20,12 +22,14 @@ namespace ABCat.UI.WPF.Models
         private string _progressBarTotalMessage;
         private int _progressBarTotalMinimum;
         private int _progressBarTotalValue = -1;
+        private bool _isOnDbOperation;
 
         public StatusBarStateViewModel(Func<bool> isCanCancelAsyncOperation,
             Action cancelAsyncOperation)
         {
             IsCanCancelAsyncOperation = isCanCancelAsyncOperation;
             CancelAsyncOperation = cancelAsyncOperation;
+            Context.I.EventAggregator.Subscribe(this);
         }
 
         public Action CancelAsyncOperation { get; set; }
@@ -148,5 +152,24 @@ namespace ABCat.UI.WPF.Models
 
         public Visibility ProgressBarTotalVisibility =>
             ProgressBarTotalValue >= 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        public bool IsOnDbOperation
+        {
+            get => _isOnDbOperation;
+            private set
+            {
+                if (value == _isOnDbOperation) return;
+                _isOnDbOperation = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public void Handle(DBOperationMessage message)
+        {
+            Application.Current.MainWindow.Dispatcher.Invoke(() =>
+            {
+                IsOnDbOperation = message.OperationState == DBOperationMessage.OperationStates.Started;
+            });
+        }
     }
 }

@@ -8,35 +8,29 @@ using SQLite.Net.Platform.Win32;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
-    public class ReplacementStringSet : SQLiteConnection, IReplacementStringSet
+    public class ReplacementStringSet : DBSetBase, IReplacementStringSet
     {
-        private readonly object _lockContext;
-
         private volatile bool _isTablesCreated;
 
-        public ReplacementStringSet(string databasePath, object lockContext)
-            : base(new SQLitePlatformWin32(), databasePath)
+        public ReplacementStringSet(string databasePath, ExecuteWithLock executeWithLockDelegate)
+            : base(databasePath, executeWithLockDelegate, false)
         {
-            _lockContext = lockContext;
             if (!_isTablesCreated)
             {
-                lock (_lockContext)
+                ExecuteWithLock(() =>
                 {
                     if (!_isTablesCreated)
                     {
                         CreateTable<ReplacementString>();
                         _isTablesCreated = true;
                     }
-                }
+                });
             }
         }
 
         public void AddReplacementString(params IReplacementString[] replacementString)
         {
-            lock (_lockContext)
-            {
-                InsertAll(replacementString);
-            }
+            ExecuteWithLock(() => { InsertAll(replacementString); });
         }
 
         public IReplacementString CreateReplacementString()
@@ -50,7 +44,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 throw new ArgumentNullException(nameof(recordPropertyName));
             if (Extensions.IsNullOrEmpty(replaceValue)) throw new ArgumentNullException(nameof(replaceValue));
 
-            lock (_lockContext)
+            ExecuteWithLock(() =>
             {
                 RunInTransaction(() =>
                 {
@@ -81,31 +75,28 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                         Delete(replacementString);
                     }
                 });
-            }
+            });
         }
 
         public IEnumerable<IReplacementString> GetReplacementStringsAll()
         {
-            lock (_lockContext)
-            {
-                return Table<ReplacementString>();
-            }
+            return ExecuteWithLock(Table<ReplacementString>);
         }
 
         public IEnumerable<IReplacementString> GetReplacementStringsBy(string propertyName)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<ReplacementString>().Where(item => item.RecordPropertyName == propertyName);
-            }
+            });
         }
 
         public IEnumerable<IReplacementString> Where(Func<IReplacementString, bool> predicate)
         {
-            lock (_lockContext)
+            return ExecuteWithLock(() =>
             {
                 return Table<ReplacementString>().Where(replacementString => predicate(replacementString));
-            }
+            });
         }
     }
 }

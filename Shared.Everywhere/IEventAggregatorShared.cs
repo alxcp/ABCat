@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Threading;
 
 // ReSharper disable once CheckNamespace
 public interface IEventAggregatorShared
@@ -31,4 +32,8 @@ public interface IEventAggregatorShared
     /// <param name="message">The message instance.</param>
     /// <param name="marshal">Allows the publisher to provide a custom thread marshaller for the message publication.</param>
     void Publish(object message, Action<Action> marshal);
+
+    void PublishOnUIThread(object message);
+
+    Dispatcher Dispatcher { get; set; }
 }

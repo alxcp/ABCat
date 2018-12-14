@@ -3,16 +3,29 @@ using System.ComponentModel;
 using System.IO;
 using ABCat.Core.Editors;
 using ABCat.Shared;
+using ABCat.Shared.Messages;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
+    public delegate void ExecuteWithLock(Action action);
+
     [UsedImplicitly]
     [DisplayName("База данных аудиокниг")]
     public sealed class AudioBooksDbContainerSQLiteConfig : Config
     {
-        public static readonly object LockContext = new object();
+        private static readonly object ExecuteWithLockObj = new object();
+
+        public static void ExecuteWithLockDelegate(Action action)
+        {
+            lock (ExecuteWithLockObj)
+            {
+                Context.I.EventAggregator.PublishOnUIThread(new DBOperationMessage(DBOperationMessage.OperationStates.Started));
+                action();
+                Context.I.EventAggregator.PublishOnUIThread(new DBOperationMessage(DBOperationMessage.OperationStates.Finished));
+            }
+        }
 
         private string _databaseFolder;
 
@@ -55,7 +68,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         {
             var result = true;
 
-            lock (LockContext)
+            ExecuteWithLockDelegate(() =>
             {
                 if (Extensions.IsNullOrEmpty(DatabaseFolder))
                 {
@@ -83,7 +96,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                             BinaryDataFilePath);
                     }
                 }
-            }
+            });
 
             return result;
         }
