@@ -50,6 +50,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
             attachComment?.ParentNode.RemoveChild(attachComment);
             var boldTCenter = document.GetNodesByClass("div", "bold tCenter mrg_8").FirstOrDefault();
             boldTCenter?.ParentNode.RemoveChild(boldTCenter);
+            var charSet = document.DocumentNode.GetNodes("meta", "charset", "Windows-1251").FirstOrDefault();
+            charSet?.SetAttributeValue("charset", "utf-8");
 
             var nodeNames = new[] {"td", "p", "tbody", "div"};
 
