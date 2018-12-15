@@ -9,8 +9,13 @@
     d:DataContext="{d:DesignInstance models:StatusBarStateViewModel}"
     Background="{StaticResource WindowBackgroundColorBrush}"
     mc:Ignorable="d">
-    <StackPanel Orientation="Horizontal">
-        <Button
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Column="0" Orientation="Horizontal">
+            <Button
             MinWidth="24"
             MinHeight="24"
             MaxHeight="24"
@@ -21,8 +26,8 @@
             Command="{Binding CancelAsyncOperationCommand}"
             Content="{StaticResource CancelAsyncOperationIcon}"
             Visibility="{Binding CancelAsyncOperationCommandVisibibility}" />
-        <StackPanel Orientation="Horizontal">
-            <TextBlock
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
                 MinWidth="100"
                 MaxWidth="350"
                 Margin="4"
@@ -31,7 +36,7 @@
                 Text="{Binding ProgressBarTotalMessage}"
                 TextTrimming="CharacterEllipsis"
                 Visibility="{Binding ProgressBarTotalVisibility}" />
-            <ProgressBar
+                <ProgressBar
                 Width="100"
                 Margin="4"
                 Foreground="White"
@@ -39,9 +44,9 @@
                 Minimum="{Binding ProgressBarTotalMinimum}"
                 Visibility="{Binding ProgressBarTotalVisibility}"
                 Value="{Binding ProgressBarTotalValue}" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <TextBlock
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
                 MinWidth="100"
                 MaxWidth="350"
                 Margin="4"
@@ -50,7 +55,7 @@
                 Text="{Binding ProgressBarSmallMessage}"
                 TextTrimming="CharacterEllipsis"
                 Visibility="{Binding ProgressBarSmallVisibility}" />
-            <ProgressBar
+                <ProgressBar
                 Width="100"
                 Margin="4"
                 Foreground="White"
@@ -58,9 +63,11 @@
                 Minimum="{Binding ProgressBarSmallMinimum}"
                 Visibility="{Binding ProgressBarSmallVisibility}"
                 Value="{Binding ProgressBarSmallValue}" />
+            </StackPanel>
         </StackPanel>
-        <StackPanel Visibility="{Binding IsOnDbOperation, Converter={StaticResource Bool2VisibilityConverter}}">
-            <TextBlock>DB OPERATION</TextBlock>
-        </StackPanel>
-    </StackPanel>
+        <Grid Grid.Column="1" Width="20" VerticalAlignment="Center" Margin="4">
+            <ContentPresenter Content="{StaticResource DataBaseIcon}" Opacity="0.1"/>
+            <ContentPresenter Content="{StaticResource DataBaseIcon}" Visibility="{Binding IsOnDbOperation, Converter={StaticResource Bool2VisibilityConverter}}"/>
+        </Grid>
+    </Grid>
 </UserControl>

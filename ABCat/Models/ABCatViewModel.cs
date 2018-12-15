@@ -219,8 +219,6 @@ namespace ABCat.UI.WPF.Models
                 File.Delete(_previousFileName);
             _previousFileName = null;
 
-            pageHtml = "<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"></head>" +
-                       pageHtml;
             _previousFileName = Path.GetTempFileName() + ".html";
             File.WriteAllText(_previousFileName, pageHtml);
             Process.Start(_previousFileName);
