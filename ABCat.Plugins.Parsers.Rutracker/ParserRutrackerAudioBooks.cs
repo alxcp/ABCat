@@ -210,18 +210,24 @@ namespace ABCat.Plugins.Parsers.Rutracker
             audioBookGroup.LastUpdate = DateTime.Now;
         }
 
-        protected override void ParseRecord(IDbContainer dbContainer, IAudioBook record, string postBodyHtml)
+        protected override void ParseRecord(IDbContainer dbContainer, IAudioBook record, string postHtml)
         {
             record.ClearMetaInfo();
 
-            var elementsByRows = ParsePostBodyElementsByRows(postBodyHtml);
+            var document = new HtmlDocument();
+            document.LoadHtml(postHtml);
+            var topicMain = document.GetElementbyId("topic_main");
+            var postBody = topicMain?.ChildNodes.FirstOrDefault(item => item.Name == "tbody");
 
-            foreach (var element in elementsByRows)
+            if (postBody != null)
             {
-                FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
-            }
+                var elementsByRows = ParsePostBodyElementsByRows(postBody.InnerHtml);
 
-            //record.LastUpdate = DateTime.Now;
+                foreach (var element in elementsByRows)
+                {
+                    FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
+                }
+            }
         }
 
         private static int GetRecordGroupPageCount(HtmlDocument document)
@@ -367,6 +373,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         CleanupRecordValue(value, false, 200)
                             .ChangeCase(Extensions.CaseTypes.AfterSplitter, false, true);
                     break;
+                case "битрейт":
                 case "битрейт аудио":
                     record.Bitrate = CleanupRecordValue(value, false, 100)
                         .ChangeCase(Extensions.CaseTypes.FirstWord, true, true);
@@ -501,9 +508,9 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var result = new Dictionary<string, string>();
 
             var rows = postBodyHtml
-                .Replace("</span>", "")
-                .Replace("<span>", "")
-                .Split(new[] {"<br>", "post-hr"}, StringSplitOptions.RemoveEmptyEntries);
+                //.Replace("</span>", "")
+                //.Replace("<span>", "")
+                .Split(new[] {"<br>", "<hr class=\"post-hr\">" }, StringSplitOptions.RemoveEmptyEntries);
 
             foreach (var row in rows)
             {
