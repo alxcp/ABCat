@@ -12,7 +12,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         private string _lastParsedLenght;
         private TimeSpan _parsedLenght;
 
-        [Column("Author")] public string Author { get; set; }
+        //[Column("Author")] public string Author { get; set; }
 
         [Ignore] public string AuthorNameForParse { get; set; }
 

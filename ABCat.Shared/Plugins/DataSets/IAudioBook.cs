@@ -5,7 +5,7 @@ namespace ABCat.Shared.Plugins.DataSets
 {
     public interface IAudioBook : IRecord
     {
-        [DisplayName("Автор")] string Author { get; set; }
+        //[DisplayName("Автор")] string Author { get; set; }
 
         [Browsable(false)] string AuthorNameForParse { get; set; }
 
