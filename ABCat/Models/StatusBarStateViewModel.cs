@@ -166,10 +166,11 @@ namespace ABCat.UI.WPF.Models
 
         public void Handle(DBOperationMessage message)
         {
-            Application.Current.MainWindow.Dispatcher.Invoke(() =>
-            {
-                IsOnDbOperation = message.OperationState == DBOperationMessage.OperationStates.Started;
-            });
+            if (message.OperationState == DBOperationMessage.OperationStates.Started &&
+                message.Elapsed.TotalMilliseconds > 1000)
+                return;
+
+            IsOnDbOperation = message.OperationState == DBOperationMessage.OperationStates.Started;
         }
     }
 }
