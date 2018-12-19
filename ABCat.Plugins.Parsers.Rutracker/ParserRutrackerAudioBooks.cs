@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -223,11 +224,51 @@ namespace ABCat.Plugins.Parsers.Rutracker
             {
                 var elementsByRows = ParsePostBodyElementsByRows(postBody.InnerHtml);
 
+                var sizeElement = document.DocumentNode.Descendants()
+                    .FirstOrDefault(item => item.HasClass("attach_link") && item.HasClass("guest"));
+
+                if (sizeElement != null && sizeElement.ChildNodes.Count == 3)
+                {
+                    var sizeNode = sizeElement.LastChild;
+                    var size = GetSizeInBytes(sizeNode.InnerText.Replace("&middot;", "").Replace("&nbsp;", " ").Trim(' ', '\t'));
+                    record.Size = size;
+                }
+
                 foreach (var element in elementsByRows)
                 {
                     FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
                 }
             }
+        }
+
+        private static long GetSizeInBytes(string sizeString)
+        {
+            long result = 0;
+            var subSize = sizeString.Split(' ');
+            if (subSize.Length == 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
+            {
+                int multiplier = 0;
+
+                switch (subSize[1])
+                {
+                    case "GB":
+                        multiplier = 1024 * 1024 * 1024;
+                        break;
+                    case "MB":
+                        multiplier = 1024 * 1024;
+                        break;
+                    case "KB":
+                        multiplier = 1024;
+                        break;
+                    default:
+                        var t = 0;
+                        break;
+                }
+
+                result = (long) size * multiplier;
+            }
+
+            return result;
         }
 
         private static int GetRecordGroupPageCount(HtmlDocument document)
