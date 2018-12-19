@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
@@ -36,8 +35,7 @@ namespace ABCat.Plugins.GrouppingLogics.Standard
                     if (cancellationToken.IsCancellationRequested) return null;
                     var authorName = record.Key ?? " ";
 
-                    Group alphabetGroup;
-                    if (!alphabetGroups.TryGetValue(authorName[0], out alphabetGroup))
+                    if (!alphabetGroups.TryGetValue(authorName[0], out var alphabetGroup))
                     {
                         alphabetGroup = new Group(this);
                         alphabetGroup.Caption = authorName[0].ToString();

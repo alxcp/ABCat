@@ -35,7 +35,6 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             get
             {
                 var fields = FilterFields;
-
                 return fields == null || fields.IsEmpty;
             }
         }
@@ -104,7 +103,11 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             get => FilterFields.GetValue("IsHidden") == "1";
             set
             {
-                FilterFields.SetValue("IsHidden", value ? "1" : "0");
+                if (value)
+                    FilterFields.SetValue("IsHidden", "1");
+                else
+                    FilterFields.ClearValue("IsHidden");
+
                 OnPropertyChanged();
             }
         }
@@ -117,7 +120,11 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             get => FilterFields.GetValue("IsLoaded") == "1";
             set
             {
-                FilterFields.SetValue("IsLoaded", value ? "1" : "0");
+                if (value)
+                    FilterFields.SetValue("IsLoaded", "1");
+                else
+                    FilterFields.ClearValue("IsLoaded");
+
                 OnPropertyChanged();
             }
         }
@@ -126,12 +133,12 @@ namespace ABCat.Plugins.FilteringLogics.Standard
         [DisplayName("Длительность")]
         [Description("Длительность воспроизведения")]
         [Editor(typeof(FilteredComboBoxEditor), typeof(FilteredComboBoxEditor))]
-        public string ParsedLenght
+        public string ParsedLength
         {
-            get => FilterFields.GetValue("ParsedLenght");
+            get => FilterFields.GetValue("ParsedLength");
             set
             {
-                FilterFields.SetValue("ParsedLenght", value);
+                FilterFields.SetValue("ParsedLength", value);
                 OnPropertyChanged();
             }
         }
@@ -197,7 +204,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                          && (string.IsNullOrEmpty(Genre) || Filter(Genre, audioBook.Genre))
                          && (string.IsNullOrEmpty(Bitrate) || Filter(Bitrate, audioBook.Bitrate))
                          && (string.IsNullOrEmpty(Description) || Filter(Description, audioBook.Description))
-                         && (string.IsNullOrEmpty(ParsedLenght) || FilterTimeSpan(ParsedLenght, audioBook.ParsedLenght))
+                         && (string.IsNullOrEmpty(ParsedLength) || FilterTimeSpan(ParsedLength, audioBook.ParsedLength))
                          && (string.IsNullOrEmpty(Publisher) || Filter(Publisher, audioBook.Publisher))
                          && (string.IsNullOrEmpty(Reader) || Filter(Reader, audioBook.Reader))
                          && (string.IsNullOrEmpty(Title) || Filter(Title, audioBook.Title));
@@ -369,9 +376,8 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
                         foreach (var loadedRecord in dbContainer.UserDataSet.GetUserDataAll())
                         {
-                            string recordKey;
                             var key = loadedRecord.RecordGroupKey + "\\" + loadedRecord.RecordKey;
-                            if (keys.TryGetValue(key, out recordKey))
+                            if (keys.TryGetValue(key, out var recordKey))
                             {
                                 _loadedCache[recordKey] = true;
                             }
@@ -386,17 +392,14 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             var filterCollection = GetFilterValuesFromCache(collectionName);
             filterValues = filterValues.ToArray();
             var application = Application.Current;
-            if (application != null)
+            application?.Dispatcher.BeginInvoke((Action) (() =>
             {
-                application.Dispatcher.BeginInvoke((Action) (() =>
+                filterCollection.Clear();
+                foreach (var filterValue in filterValues)
                 {
-                    filterCollection.Clear();
-                    foreach (var filterValue in filterValues)
-                    {
-                        filterCollection.Add(filterValue);
-                    }
-                }));
-            }
+                    filterCollection.Add(filterValue);
+                }
+            }));
         }
 
         private bool Filter(string filterString, object value)

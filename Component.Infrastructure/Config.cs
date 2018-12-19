@@ -11,7 +11,7 @@ namespace Component.Infrastructure
     {
         protected static readonly string LayoutFolderPath;
 
-        private static readonly string ConfigFolderPath;
+        public static readonly string ConfigFolderPath;
 
         static Config()
         {

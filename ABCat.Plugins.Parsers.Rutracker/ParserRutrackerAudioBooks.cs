@@ -217,7 +217,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var document = new HtmlDocument();
             document.LoadHtml(postHtml);
             var topicMain = document.GetElementbyId("topic_main");
-            var postBody = topicMain?.ChildNodes.FirstOrDefault(item => item.Name == "tbody");
+            var postBody = topicMain?.Descendants().FirstOrDefault(item => item.HasClass("post_body"));
 
             if (postBody != null)
             {
@@ -338,8 +338,47 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return postBody;
         }
 
+        private static class KeysCollection
+        {
+            private static Stopwatch _sw = new Stopwatch();
+            private static readonly Dictionary<string, HashSet<string>> _values = new Dictionary<string, HashSet<string>>(StringComparer.InvariantCultureIgnoreCase);
+
+            public static void Add(string key, string value)
+            {
+                if (!_values.TryGetValue(key, out var values))
+                {
+                    values = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+                    _values.Add(key, values);
+                }
+
+                values.Add(value);
+
+                if (!_sw.IsRunning)
+                    _sw.Start();
+
+                if (_sw.Elapsed.TotalSeconds > 15)
+                {
+                    Debug.WriteLine("===============================");
+                    var top50 = _values.Where(item => item.Value.Count > 10);
+                    foreach (var keyValuePair in top50.OrderByDescending(item=>item.Value.Count))
+                    {
+                        Debug.WriteLine($"{keyValuePair.Key}\t{keyValuePair.Value.Count}");
+                    }
+
+                    Debug.WriteLine("===============================");
+                    _sw.Restart();
+                }
+            }
+        }
+
         private void FillRecordElement(IAudioBook record, string key, string value)
         {
+            key = key.Trim(' ', '[', ']', '<', '>', ';', '\n', '\t', '.', ',', '"', '(');
+
+#if DEBUG
+            KeysCollection.Add(key, value);
+#endif
+
             switch (key.ToLower())
             {
                 case "автор":
@@ -381,15 +420,20 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 case "длительность":
                 case "прдолжительность":
                 case "продолжительность":
+                case "продолжительность звучания":
+                case "продолжительность книги":
                 case "общее время звучания":
+                case "общее время воспроизведения":
                 case "bремя звучания":
                 case "время звучания":
                 case "время воспроизведения":
+                case "время чтения":
+                case "общая продолжительность":
                 case "продолжительность аудиокниги":
                 case "продолжительность (время звучания)":
                 case "время":
-                    record.Lenght = CleanupRecordValue(value, false, 500)
-                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                case "длина записи":
+                    record.Length = CleanupRecordValue(value, false, 500);
                     break;
                 case "описание":
                 case "аннотация":
@@ -426,7 +470,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             key = null;
             value = null;
 
-            if (!Extensions.IsNullOrEmpty(keyValue))
+            if (!keyValue.IsNullOrEmpty())
             {
                 var iofColon = keyValue.IndexOf(':');
                 if (iofColon > 0 && iofColon < keyValue.Length - 1)
@@ -508,19 +552,26 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var result = new Dictionary<string, string>();
 
             var rows = postBodyHtml
-                //.Replace("</span>", "")
-                //.Replace("<span>", "")
-                .Split(new[] {"<br>", "<hr class=\"post-hr\">" }, StringSplitOptions.RemoveEmptyEntries);
+                .Split(new[] {"<br>", "<hr class=\"post-hr\">", "<span class=\"post-b\">"},
+                    StringSplitOptions.RemoveEmptyEntries).Select(item => item.TrimStart('\n', '"'))
+                .Where(item => !item.IsNullOrEmpty() && item != "</span>").ToArray();
 
-            foreach (var row in rows)
+
+            if (rows.Length > 1)
             {
-                var doc = new HtmlDocument();
-                doc.LoadHtml(row);
-                var str = doc.DocumentNode.InnerText;
+                rows[1] = string.Join("", rows[1].Split("</var>").Skip(1));
 
-                if (ParseKeyValue(str, out var key, out var value))
+                // Skip(1) - skip post title
+                foreach (var row in rows.Skip(1))
                 {
-                    result[key] = value;
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(row);
+                    var str = doc.DocumentNode.InnerText.TrimStart('\n', '"');
+
+                    if (!str.IsNullOrEmpty() && ParseKeyValue(str, out var key, out var value))
+                    {
+                        result[key] = value;
+                    }
                 }
             }
 

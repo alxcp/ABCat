@@ -158,7 +158,7 @@ namespace ABCat.Shared.Plugins.Sites
 
         public abstract IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer container);
 
-        protected virtual string CleanupRecordValue(string value, bool allowMultiLine, int maxLenght)
+        protected virtual string CleanupRecordValue(string value, bool allowMultiLine, int maxLength)
         {
             var result = allowMultiLine ? value : value.Split(new[] {"\r\n"}, StringSplitOptions.RemoveEmptyEntries)[0];
 
@@ -168,9 +168,9 @@ namespace ABCat.Shared.Plugins.Sites
                 result = value.Trim().Trim('\r', '\n', ':', '-', '=');
             } while (result != value);
 
-            if (maxLenght > 0 && result.Length > maxLenght)
+            if (maxLength > 0 && result.Length > maxLength)
             {
-                result = result.Substring(0, maxLenght - 1) + "…";
+                result = result.Substring(0, maxLength - 1) + "…";
             }
 
             return result;
