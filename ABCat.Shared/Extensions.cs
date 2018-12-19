@@ -372,7 +372,7 @@ namespace ABCat.Shared
                 List<string> lengths;
                 lengthString = ReplaceExtraWords(lengthString);
 
-                if (TimeSpan.TryParse(lengthString, out result))
+                if (lengthString.Length >= 7 && TimeSpan.TryParse(lengthString, out result))
                 {
                     lengths = new List<string>(lengthString.Split(":"));
                 }
@@ -503,7 +503,10 @@ namespace ABCat.Shared
             }
             else
             {
-                lengths = new List<string>(length4Parse.Split(":"));
+                if (length.Length <= 2)
+                    lengths = new List<string> {"00", "00", length};
+                else
+                    lengths = new List<string>(length4Parse.Split(":"));
             }
 
             return lengths;

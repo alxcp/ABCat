@@ -75,9 +75,7 @@ namespace ABCat.Shared.Commands
         /// </summary>
         protected virtual void OnIsActiveChanged()
         {
-            EventHandler isActiveChangedHandler = IsActiveChanged;
-            if (isActiveChangedHandler != null)
-                isActiveChangedHandler(this, EventArgs.Empty);
+            IsActiveChanged?.Invoke(this, EventArgs.Empty);
         }
 
         void ICommand.Execute(object parameter)

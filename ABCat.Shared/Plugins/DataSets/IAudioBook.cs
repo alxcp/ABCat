@@ -19,6 +19,12 @@ namespace ABCat.Shared.Plugins.DataSets
 
         [DisplayName("Длина (Парсинг)")] TimeSpan ParsedLength { get; }
 
+        [DisplayName("Битрейт (Парсинг)")] int ParsedBitrate { get; }
+
+        [DisplayName("Размер, Байт")] long Size { get; set; }
+
+        [DisplayName("Длина (По битрейту)")] TimeSpan ParsedLengthByBitrate { get; }
+
         [DisplayName("Издатель")] string Publisher { get; set; }
 
         [DisplayName("Читает")] string Reader { get; set; }
