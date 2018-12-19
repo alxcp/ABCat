@@ -16,25 +16,13 @@
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="9" />
         </Grid.RowDefinitions>
-        <Grid MinHeight="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <ComboBox
-                Grid.Column="0"
-                IsEditable="True"
-                ItemsSource="{Binding FiltersList}"
-                SelectedItem="{Binding FilterFields, Mode=TwoWay}" />
-            <Button Grid.Column="1" MinWidth="20">+</Button>
-        </Grid>
         <xctk:PropertyGrid
             x:Name="PropertyGrid"
-            Grid.Row="1"
+            Grid.Row="0"
             Margin="2"
             NameColumnWidth="110"
             SelectedObject="{Binding .}"
@@ -42,6 +30,7 @@
             ShowSortOptions="False"
             ShowSummary="False"
             ShowTitle="False" />
+        <Button Grid.Row="1" Command="{Binding ClearFilterCommand}">Очистить</Button>
         <primitives3:MetroProgressStripe
             Grid.Row="2"
             Margin="2,0"

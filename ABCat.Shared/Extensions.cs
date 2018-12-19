@@ -28,7 +28,6 @@ namespace ABCat.Shared
         private const string Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 
         private static readonly Random Rnd = new Random();
-        private static readonly Dictionary<string, TimeSpan> TimeSpanParseCache = new Dictionary<string, TimeSpan>();
 
         public static bool AnySafe<T>(this IEnumerable<T> value, Func<T, bool> predicate = null)
         {
@@ -344,22 +343,42 @@ namespace ABCat.Shared
             return value == null ? string.Empty : value.ToString();
         }
 
-        public static TimeSpan ToTimeSpan(this string length)
+        public static TimeSpan ToTimeSpan(this string lengthString)
+        {
+            TimeSpan result = TimeSpan.Zero;
+
+            var parts = lengthString.Split("+", " и ");
+            if (parts.Length > 1)
+            {
+                foreach (var part in parts)
+                {
+                    result += SingleValueToTimeSpan(part);
+                }
+            }
+            else
+            {
+                result = SingleValueToTimeSpan(lengthString);
+            }
+
+            return result;
+        }
+
+        private static TimeSpan SingleValueToTimeSpan(string lengthString)
         {
             var result = TimeSpan.Zero;
 
-            if (!IsNullOrEmpty(length) && !TimeSpanParseCache.TryGetValue(length, out result))
+            if (!IsNullOrEmpty(lengthString))
             {
                 List<string> lengths;
-                length = ReplaceExtraWords(length);
+                lengthString = ReplaceExtraWords(lengthString);
 
-                if (TimeSpan.TryParse(length, out result))
+                if (TimeSpan.TryParse(lengthString, out result))
                 {
-                    lengths = new List<string>(length.Split(":"));
+                    lengths = new List<string>(lengthString.Split(":"));
                 }
-                else if (!TryToParseDotSpaceFormat(length, out lengths))
+                else if (!TryToParseDotSpaceFormat(lengthString, out lengths))
                 {
-                    lengths = TryToResolveByKeywords(length);
+                    lengths = TryToResolveByKeywords(lengthString);
                 }
 
                 if (lengths.Count == 2) lengths.Insert(0, "00");
@@ -383,8 +402,6 @@ namespace ABCat.Shared
 
                     result = new TimeSpan(hour, minute, second);
                 }
-
-                TimeSpanParseCache[length] = result;
             }
 
             return result;
@@ -432,20 +449,20 @@ namespace ABCat.Shared
 
             foreach (var hour in hours)
             {
-                var lenght1 = length4Parse.Replace(hour, "*-*");
-                length4Parse = lenght1;
+                var length1 = length4Parse.Replace(hour, "*-*");
+                length4Parse = length1;
             }
 
             foreach (var minute in minutes)
             {
-                var lenght1 = length4Parse.Replace(minute, "*--*");
-                length4Parse = lenght1;
+                var length1 = length4Parse.Replace(minute, "*--*");
+                length4Parse = length1;
             }
 
             foreach (var second in seconds)
             {
-                var lenght1 = length4Parse.Replace(second, "*---*");
-                length4Parse = lenght1;
+                var length1 = length4Parse.Replace(second, "*---*");
+                length4Parse = length1;
             }
 
             var containsHours = length4Parse.Contains("*-*");
@@ -511,10 +528,10 @@ namespace ABCat.Shared
                             {
                                 var filePathName = Path.Combine(targetPath, br.ReadString());
 
-                                var lenght = br.ReadInt32();
+                                var length = br.ReadInt32();
                                 try
                                 {
-                                    File.WriteAllBytes(filePathName, br.ReadBytes(lenght));
+                                    File.WriteAllBytes(filePathName, br.ReadBytes(length));
                                     reportProgressCallBack((int) (fs.Position / (double) fs.Length) * 100);
                                 }
                                 catch (Exception ex)

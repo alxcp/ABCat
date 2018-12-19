@@ -9,8 +9,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     [Table("AudioBook")]
     public class AudioBook : IAudioBook
     {
-        private string _lastParsedLenght;
-        private TimeSpan _parsedLenght;
+        private string _lastParsedLength;
+        private TimeSpan _parsedLength;
 
         [Column("Author")] public string Author { get; set; }
 
@@ -32,21 +32,21 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         [Column("LastUpdate")] public DateTime LastUpdate { get; set; }
 
-        [Column("Lenght")] public string Lenght { get; set; }
+        [Column("Length")] public string Length { get; set; }
 
         [Ignore]
         [DisplayName("Длительность (парсинг)")]
-        public TimeSpan ParsedLenght
+        public TimeSpan ParsedLength
         {
             get
             {
-                if (_parsedLenght == TimeSpan.MinValue || !Equals(Lenght, _lastParsedLenght))
+                if (_parsedLength == TimeSpan.MinValue || !Equals(Length, _lastParsedLength))
                 {
-                    _parsedLenght = Lenght.ToTimeSpan();
-                    _lastParsedLenght = Lenght;
+                    _parsedLength = Length.ToTimeSpan();
+                    _lastParsedLength = Length;
                 }
 
-                return _parsedLenght;
+                return _parsedLength;
             }
         }
 
@@ -67,7 +67,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             Publisher = null;
             Reader = null;
             Description = null;
-            Lenght = null;
+            Length = null;
             Genre = null;
         }
 

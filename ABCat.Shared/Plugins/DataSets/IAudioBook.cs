@@ -15,9 +15,9 @@ namespace ABCat.Shared.Plugins.DataSets
 
         [DisplayName("Жанр")] string Genre { get; set; }
 
-        [DisplayName("Длина")] string Lenght { get; set; }
+        [DisplayName("Длина")] string Length { get; set; }
 
-        [DisplayName("Длина (Парсинг)")] TimeSpan ParsedLenght { get; }
+        [DisplayName("Длина (Парсинг)")] TimeSpan ParsedLength { get; }
 
         [DisplayName("Издатель")] string Publisher { get; set; }
 

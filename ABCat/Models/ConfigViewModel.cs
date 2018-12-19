@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.ViewModels;
 using ABCat.UI.WPF.UI;
 using Component.Infrastructure;
-using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {

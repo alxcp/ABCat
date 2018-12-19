@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using static System.String;
 
 // ReSharper disable once CheckNamespace
 public static class ToolsExt
@@ -182,7 +183,7 @@ public static class ToolsExt
     /// </returns>
     public static string F(this string format, params object[] args)
     {
-        return string.IsNullOrEmpty(format) ? format : string.Format(format, args);
+        return String.IsNullOrEmpty(format) ? format : Format(format, args);
     }
 
     public static void Fire(this EventHandler eventHandler, object sender, EventArgs e)
@@ -285,7 +286,7 @@ public static class ToolsExt
 
     public static bool IsNullOrEmpty(this string value)
     {
-        return string.IsNullOrEmpty(value);
+        return String.IsNullOrEmpty(value);
     }
 
     public static bool IsTrue(this bool? value)
@@ -403,6 +404,11 @@ public static class ToolsExt
 
     public static string ToStringOrEmpty(this object obj)
     {
-        return obj == null ? string.Empty : obj.ToString();
+        return obj == null ? Empty : obj.ToString();
+    }
+
+    public static bool Compare(this string value1, string value2, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    {
+        return String.Compare(value1, value2, comparison) == 0;
     }
 }
