@@ -7,8 +7,8 @@
     <ProjectGuid>{03AAEF9A-02EC-4563-B469-60F38EB2C859}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ABCat.Plugins.GrouppingLogics.Standard</RootNamespace>
-    <AssemblyName>ABCat.Plugins.GrouppingLogics.Standard</AssemblyName>
+    <RootNamespace>ABCat.Plugins.GroupingLogics.Standard</RootNamespace>
+    <AssemblyName>ABCat.Plugins.GroupingLogics.Standard</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -55,11 +55,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GrouppingLogicForumAuthor.cs" />
-    <Compile Include="GrouppingLogicForumGenre.cs" />
-    <Compile Include="GrouppingLogicAuthorAlphabet.cs" />
-    <Compile Include="GrouppingLogicForumAuthorByCount.cs" />
-    <Compile Include="GrouppingLogicForumGenreByCount.cs" />
+    <Compile Include="GroupingLogicForumAuthor.cs" />
+    <Compile Include="GroupingLogicForumGenre.cs" />
+    <Compile Include="GroupingLogicAuthorAlphabet.cs" />
+    <Compile Include="GroupingLogicForumAuthorByCount.cs" />
+    <Compile Include="GroupingLogicForumGenreByCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

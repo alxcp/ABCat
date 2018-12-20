@@ -1,5 +1,5 @@
 ﻿using System;
-using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 
 namespace ABCat.UI.WPF.UI
 {

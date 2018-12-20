@@ -6,9 +6,9 @@ using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 
-namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
+namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
 {
-    public interface IGrouppingLogicPlugin : IExtComponent, INotifyPropertyChanged
+    public interface IGroupingLogicPlugin : IExtComponent, INotifyPropertyChanged
     {
         /// <summary>
         ///     В данный момент выполняется асинхронная операция

@@ -4,10 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviours="clr-namespace:ABCat.UI.WPF.UI.Behaviors"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:grouppingLogics1="clr-namespace:ABCat.Shared.Plugins.Catalog.GrouppingLogics;assembly=ABCat.Shared"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:primitives="clr-namespace:ABCat.UI.WPF.UI.Primitives"
+    xmlns:groupingLogics1="clr-namespace:ABCat.Shared.Plugins.Catalog.GroupingLogics;assembly=ABCat.Shared"
     d:DesignHeight="300"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -21,10 +21,10 @@
             <RowDefinition Height="9" />
         </Grid.RowDefinitions>
         <ComboBox
-            x:Name="GrouppingLogicCmb"
+            x:Name="GroupingLogicCmb"
             Margin="2"
-            ItemsSource="{Binding GrouppingPlugins}"
-            SelectedItem="{Binding SelectedGrouppingLogicPlugin, Mode=TwoWay}" />
+            ItemsSource="{Binding GroupingPlugins}"
+            SelectedItem="{Binding SelectedGroupingLogicPlugin, Mode=TwoWay}" />
         <TreeView
             x:Name="GroupsTree"
             Grid.Row="1"
@@ -40,7 +40,7 @@
                 </Style>
             </TreeView.ItemContainerStyle>
             <TreeView.Resources>
-                <HierarchicalDataTemplate DataType="{x:Type grouppingLogics1:Group}" ItemsSource="{Binding Children}">
+                <HierarchicalDataTemplate DataType="{x:Type groupingLogics1:Group}" ItemsSource="{Binding Children}">
                     <TextBlock Text="{Binding Path=Caption}" />
                 </HierarchicalDataTemplate>
             </TreeView.Resources>

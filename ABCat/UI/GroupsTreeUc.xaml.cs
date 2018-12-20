@@ -10,9 +10,9 @@ namespace ABCat.UI.WPF.UI
             InitializeComponent();
         }
 
-        public GrouppingLogicViewModel ViewModel
+        public GroupingLogicViewModel ViewModel
         {
-            get => (GrouppingLogicViewModel) DataContext;
+            get => (GroupingLogicViewModel) DataContext;
             set => DataContext = value;
         }
 

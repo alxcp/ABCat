@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
-using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
@@ -22,11 +22,10 @@ namespace ABCat.UI.WPF.Models
 {
     public sealed class AbCatViewModel : ViewModelBase, IDisposable
     {
-        private IBrowserWindowPlugin _browserWindowPlugin;
         private IDbContainer _dbContainer4Ui;
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;
-        private GrouppingLogicViewModel _grouppingLogicModel;
+        private GroupingLogicViewModel _groupingLogicModel;
 
         private string _previousFileName;
         private IRecordsListPlugin _recordsListUc;
@@ -47,10 +46,10 @@ namespace ABCat.UI.WPF.Models
             Filter.PropertyChanged += FilterPropertyChanged;
             Filter.UpdateCache(UpdateTypes.Hidden | UpdateTypes.Loaded | UpdateTypes.Values);
             NormalizationSettingsEditorModel = new NormalizationSettingsEditorViewModel();
-            GrouppingLogicModel =
-                new GrouppingLogicViewModel(
-                    Context.I.ComponentFactory.GetCreators<IGrouppingLogicPlugin>()
-                        .Select(item => item.GetInstance<IGrouppingLogicPlugin>()), async group =>
+            GroupingLogicModel =
+                new GroupingLogicViewModel(
+                    Context.I.ComponentFactory.GetCreators<IGroupingLogicPlugin>()
+                        .Select(item => item.GetInstance<IGroupingLogicPlugin>()), async group =>
                     {
                         try
                         {
@@ -80,21 +79,6 @@ namespace ABCat.UI.WPF.Models
                 }
             }, () => SelectedItems.AnySafe());
 
-        public IBrowserWindowPlugin BrowserWindowPlugin
-        {
-            get
-            {
-                if (_browserWindowPlugin == null)
-                {
-                    _browserWindowPlugin =
-                        Context.I.ComponentFactory.CreateActual<IBrowserWindowPlugin>();
-                    _browserWindowPlugin.WindowClosed += BrowserWindowPluginWindowPluginClosed;
-                }
-
-                return _browserWindowPlugin;
-            }
-        }
-
         public ICommand ConfigCommand => CommandFactory.Get(()=> ConfigViewModel.ShowConfigWindow(null));
 
         public IFilteringLogicPlugin Filter
@@ -108,13 +92,13 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public GrouppingLogicViewModel GrouppingLogicModel
+        public GroupingLogicViewModel GroupingLogicModel
         {
-            get => _grouppingLogicModel;
+            get => _groupingLogicModel;
             set
             {
-                if (Equals(value, _grouppingLogicModel)) return;
-                _grouppingLogicModel = value;
+                if (Equals(value, _groupingLogicModel)) return;
+                _groupingLogicModel = value;
                 OnPropertyChanged();
             }
         }
@@ -157,18 +141,11 @@ namespace ABCat.UI.WPF.Models
 
         public void Dispose()
         {
-            _browserWindowPlugin?.Dispose();
             _dbContainer4Ui?.Dispose();
             _filter?.Dispose();
             _getRecordsCancellationTokenSource?.Dispose();
             _recordsListUc?.Dispose();
             NormalizationSettingsEditorModel?.Dispose();
-        }
-
-        public void BrowserWindowPluginWindowPluginClosed(object sender, EventArgs e)
-        {
-            _browserWindowPlugin.Dispose();
-            _browserWindowPlugin = null;
         }
 
         public void CancelAsyncOperation()
@@ -187,7 +164,7 @@ namespace ABCat.UI.WPF.Models
             try
             {
                 var dbContainer = Context.I.CreateDbContainer(false);
-                var records = await GetCurrentRecords(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
+                var records = await GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
                     _getRecordsCancellationTokenSource.Token);
                 SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
             }
@@ -234,18 +211,18 @@ namespace ABCat.UI.WPF.Models
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var grouppedRecords = await currentGroup.GetRecords(dbContainer, cancellationToken);
+            var groupedRecords = await currentGroup.GetRecords(dbContainer, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (filteringLogicPlugin.IsEnabled)
             {
-                var result = await filteringLogicPlugin.Filter(grouppedRecords, cancellationToken);
+                var result = await filteringLogicPlugin.Filter(groupedRecords, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 return result;
             }
 
-            return grouppedRecords;
+            return groupedRecords;
         }
 
         private async void FilterPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -259,7 +236,7 @@ namespace ABCat.UI.WPF.Models
                 var dbContainer = Context.I.CreateDbContainer(false);
                 var records =
                     await
-                        GetCurrentRecords(dbContainer, GrouppingLogicModel.SelectedGroup, Filter,
+                        GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
                             _getRecordsCancellationTokenSource.Token);
                 _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);

@@ -35,9 +35,12 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
             get => (IEnumerable<IAudioBook>) Grid.ItemsSource;
             set
             {
+                var currentRecords = this.SelectedItems.Select(item => item.Key).ToHashSet();
                 if (Grid.ItemsSource != null) StoreLayout();
                 Grid.ItemsSource = value;
                 RestoreLayout();
+                if (currentRecords.Any())
+                    Grid.SelectedItem = value.FirstOrDefault(item => item.Key == currentRecords.First());
             }
         }
 

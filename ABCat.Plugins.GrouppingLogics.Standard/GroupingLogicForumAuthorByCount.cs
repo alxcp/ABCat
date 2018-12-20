@@ -1,19 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ABCat.Shared;
-using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
 
-namespace ABCat.Plugins.GrouppingLogics.Standard
+namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("1.0")]
-    public class GrouppingLogicForumAuthor : GrouppingLogicPluginBase
+    public class GroupingLogicForumAuthorByCount : GroupingLogicPluginBase
     {
-        public override string Name => "Форум → Автор";
+        public override string Name => "Форум → Автор (↓Кол-во)";
 
         public override bool CheckForConfig(bool correct, out Config incorrectConfig)
         {
@@ -33,8 +32,7 @@ namespace ABCat.Plugins.GrouppingLogics.Standard
                 var records =
                     dbContainer.AudioBookSet.GetRecordsAll().ToArray().GroupBy(record => record.GroupKey).ToArray();
 
-                foreach (var grouping in records.Where(item => item.Key != null)
-                    .OrderBy(item => recordGroups[item.Key].Title))
+                foreach (var grouping in records.OrderBy(item => recordGroups[item.Key].Title))
                 {
                     if (cancellationToken.IsCancellationRequested) return null;
                     var recordGroupGroup = new Group(this)
@@ -48,7 +46,9 @@ namespace ABCat.Plugins.GrouppingLogics.Standard
 
                     var authorRecords = grouping.GroupBy(record => record.Author).ToArray();
 
-                    foreach (var authorRecord in authorRecords.OrderBy(item => item.Key))
+                    foreach (
+                        var authorRecord in
+                        authorRecords.OrderByDescending(item => item.Count()).ThenBy(item => item.Key))
                     {
                         if (cancellationToken.IsCancellationRequested) return null;
 
@@ -58,10 +58,13 @@ namespace ABCat.Plugins.GrouppingLogics.Standard
                         {
                             Parent = recordGroupGroup,
                             Caption = groupCaption,
-                            Level = 2
+                            Level = 2,
+                            LinkedObjectString = authorRecord.Key
                         };
+
                         foreach (var audioBookKey in authorRecord.Select(item => item.Key))
                             recordAuthorGroup.LinkedRecords.Add(audioBookKey);
+
                         recordGroupGroup.Children.Add(recordAuthorGroup);
                     }
                 }
@@ -89,6 +92,11 @@ namespace ABCat.Plugins.GrouppingLogics.Standard
             }
 
             return result;
+        }
+
+        public override string ToString()
+        {
+            return "Grouping logic by Forum\\Author (↓Count)";
         }
     }
 }

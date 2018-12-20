@@ -21,8 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog", "Catalog", "{AEB3
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.GrouppingLogics.Standard", "ABCat.Plugins.GrouppingLogics.Standard\ABCat.Plugins.GrouppingLogics.Standard.csproj", "{03AAEF9A-02EC-4563-B469-60F38EB2C859}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.BrowserWindow.WPFWebBrowser", "ABCat.Plugins.BrowserWindow.WPFWebBrowser\ABCat.Plugins.BrowserWindow.WPFWebBrowser.csproj", "{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.RecordsList.WpfToolKit", "ABCat.Plugins.RecordsList.WpfToolKit\ABCat.Plugins.RecordsList.WpfToolKit.csproj", "{799DBDC4-E061-439A-BA27-6D88E61B3F1B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.NormalizationLogic.Standard", "ABCat.Plugins.NormalizationLogic.Standard\ABCat.Plugins.NormalizationLogic.Standard.csproj", "{8B48A3AA-B949-4010-B498-0C827C47CF4C}"
@@ -48,9 +46,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.TorrentFileDownloaders", "ABCat.Plugins.TorrentFileDownloaders\ABCat.Plugins.TorrentFileDownloaders.csproj", "{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -120,18 +115,6 @@ Global
 		{03AAEF9A-02EC-4563-B469-60F38EB2C859}.x86|Any CPU.Build.0 = x86|Any CPU
 		{03AAEF9A-02EC-4563-B469-60F38EB2C859}.x86|Mixed Platforms.ActiveCfg = x86|Any CPU
 		{03AAEF9A-02EC-4563-B469-60F38EB2C859}.x86|Mixed Platforms.Build.0 = x86|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.x86|Any CPU.ActiveCfg = x86|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.x86|Any CPU.Build.0 = x86|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.x86|Mixed Platforms.ActiveCfg = x86|Any CPU
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC}.x86|Mixed Platforms.Build.0 = x86|Any CPU
 		{799DBDC4-E061-439A-BA27-6D88E61B3F1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{799DBDC4-E061-439A-BA27-6D88E61B3F1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{799DBDC4-E061-439A-BA27-6D88E61B3F1B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -250,7 +233,6 @@ Global
 		{E5253681-841C-485A-B055-2AB500221F20} = {9961D052-EF38-4043-9A5C-F84B5483DF96}
 		{AEB3B95E-D4CE-47FE-BE65-DC472A45E80F} = {9961D052-EF38-4043-9A5C-F84B5483DF96}
 		{03AAEF9A-02EC-4563-B469-60F38EB2C859} = {AEB3B95E-D4CE-47FE-BE65-DC472A45E80F}
-		{F170DDA4-FFCC-4DB6-A6C1-CA964277C0BC} = {E5253681-841C-485A-B055-2AB500221F20}
 		{799DBDC4-E061-439A-BA27-6D88E61B3F1B} = {E5253681-841C-485A-B055-2AB500221F20}
 		{8B48A3AA-B949-4010-B498-0C827C47CF4C} = {AEB3B95E-D4CE-47FE-BE65-DC472A45E80F}
 		{B7CCEE62-26A2-4095-982F-13E187D82C60} = {AEB3B95E-D4CE-47FE-BE65-DC472A45E80F}
@@ -264,6 +246,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8444EB21-2B3F-4370-AC5A-51442C05D6B0}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

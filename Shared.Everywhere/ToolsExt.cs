@@ -289,6 +289,21 @@ public static class ToolsExt
         return String.IsNullOrEmpty(value);
     }
 
+    public static string ReplaceAll(this string value, IReadOnlyCollection<string> oldStrings, string newString)
+    {
+        foreach (var oldString in oldStrings)
+        {
+            value = value.Replace(oldString, newString);
+        }
+
+        return value;
+    }
+
+    public static bool ContainsAny(this string value, IReadOnlyCollection<string> valuesForSearch, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    {
+        return valuesForSearch.Any(v => value.IndexOf(v, comparison) >= 0);
+    }
+
     public static bool IsTrue(this bool? value)
     {
         return value.HasValue && value.Value;
