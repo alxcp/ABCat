@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Windows;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.DataProviders;
 using Component.Infrastructure.Factory;
@@ -21,7 +22,17 @@ namespace ABCat.Core
             Context.I = this;
             ComponentFactory =
                 new AbCatComponentFactory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plug-ins"));
-            ComponentFactory.Init();
+            try
+            {
+                ComponentFactory.Init();
+            }
+            catch (Exception e)
+            {
+                var ex = new Exception("An error occurred on initializing ComponentFactory.", e);
+                MessageBox.Show(ex.CollectExceptionDetails());
+                throw ex;
+            }
+
             _dbPluginCreatorAttribute = ComponentFactory.GetCreators<IDbContainer>().First();
             Logger = ComponentFactory.CreateActual<ILoggerFactory>().GetLogger("MainLog");
         }

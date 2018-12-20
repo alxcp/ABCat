@@ -105,19 +105,26 @@ namespace Component.Infrastructure
 
             foreach (var dll in assemblies.Where(AssemblyNameFilter))
             {
-                var assembly = Assembly.LoadFile(dll);
-
-                foreach (var type in assembly.GetTypes())
+                try
                 {
-                    foreach (var infoAttribute in GetComponentInfoAttributes(type))
-                    {
-                        Register(type, infoAttribute);
-                    }
+                    var assembly = Assembly.LoadFile(dll);
 
-                    if (type.InheritsFrom(typeof(Config)))
+                    foreach (var type in assembly.GetTypes())
                     {
-                        _pluginConfigTypes.Add(type);
+                        foreach (var infoAttribute in GetComponentInfoAttributes(type))
+                        {
+                            Register(type, infoAttribute);
+                        }
+
+                        if (type.InheritsFrom(typeof(Config)))
+                        {
+                            _pluginConfigTypes.Add(type);
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"An error ocurred on trying to load plugins from '{dll}'.", ex);
                 }
             }
         }
