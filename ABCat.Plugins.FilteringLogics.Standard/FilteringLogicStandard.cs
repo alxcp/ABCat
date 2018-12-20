@@ -7,6 +7,7 @@ using System.Linq;
 using System.Windows;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
+using ABCat.Shared.Plugins.Catalog.ParsingLogics;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
@@ -17,6 +18,13 @@ namespace ABCat.Plugins.FilteringLogics.Standard
     [SingletoneComponentInfo("1.0")]
     public class FilteringLogicStandard : FilteringLogicPluginBase
     {
+        private static readonly INaturalTimeSpanParserPlugin TimeSpanParser;
+
+        static FilteringLogicStandard()
+        {
+            TimeSpanParser = Context.I.ComponentFactory.CreateActual<INaturalTimeSpanParserPlugin>();
+        }
+
         private readonly ConcurrentDictionary<string, ObservableCollection<string>> _filterValuesCache =
             new ConcurrentDictionary<string, ObservableCollection<string>>();
 
@@ -417,22 +425,22 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             {
                 if (filter.StartsWith(">"))
                 {
-                    var filterValue = filter.Substring(1, filter.Length - 1).ToTimeSpan();
+                    var filterValue = TimeSpanParser.Parse(filter.Substring(1, filter.Length - 1));
                     result = value > filterValue;
                 }
                 else if (filter.StartsWith("<"))
                 {
-                    var filterValue = filter.Substring(1, filter.Length - 1).ToTimeSpan();
+                    var filterValue = TimeSpanParser.Parse(filter.Substring(1, filter.Length - 1));
                     result = value < filterValue;
                 }
                 else if (filter.StartsWith("="))
                 {
-                    var filterValue = filter.Substring(1, filter.Length - 1).ToTimeSpan();
+                    var filterValue = TimeSpanParser.Parse(filter.Substring(1, filter.Length - 1));
                     result = value == filterValue;
                 }
                 else
                 {
-                    var filterValue = filter.ToTimeSpan();
+                    var filterValue = TimeSpanParser.Parse(filter);
                     result = value == filterValue;
                 }
             }

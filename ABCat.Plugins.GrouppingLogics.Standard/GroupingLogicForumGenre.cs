@@ -1,17 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using ABCat.Shared;
-using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
 
-namespace ABCat.Plugins.GrouppingLogics.Standard
+namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("1.0")]
-    public class GrouppingLogicForumGenre : GrouppingLogicPluginBase
+    public class GroupingLogicForumGenre : GroupingLogicPluginBase
     {
         public override string Name => "Форум → Жанр";
 

@@ -137,7 +137,7 @@
     <Compile Include="Models\ABCatViewModel.cs" />
     <Compile Include="Models\AsyncOperationViewModelBase.cs" />
     <Compile Include="Models\ConfigViewModel.cs" />
-    <Compile Include="Models\GrouppingLogicViewModel.cs" />
+    <Compile Include="Models\GroupingLogicViewModel.cs" />
     <Compile Include="Models\NormalizationSettingsEditorViewModel.cs" />
     <Compile Include="Models\RecordTargetDownloaderViewModel.cs" />
     <Compile Include="Models\SiteParserViewModel.cs" />

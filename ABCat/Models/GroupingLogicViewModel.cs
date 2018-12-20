@@ -4,38 +4,38 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using ABCat.Shared.Plugins.Catalog.GrouppingLogics;
+using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class GrouppingLogicViewModel : ViewModelBase
+    public sealed class GroupingLogicViewModel : ViewModelBase
     {
         private readonly Action<Group> _selectedGroupChanged;
 
         private CancellationTokenSource _cancellationTokenSource;
-        private IEnumerable<IGrouppingLogicPlugin> _grouppingPlugins;
+        private IEnumerable<IGroupingLogicPlugin> _groupingPlugins;
         private bool _isOnUpdate;
         private IEnumerable<Group> _root;
         private Group _selectedGroup;
-        private IGrouppingLogicPlugin _selectedGrouppingLogicPlugin;
+        private IGroupingLogicPlugin _selectedGroupingLogicPlugin;
 
-        public GrouppingLogicViewModel(IEnumerable<IGrouppingLogicPlugin> grouppingPlugins,
+        public GroupingLogicViewModel(IEnumerable<IGroupingLogicPlugin> groupingPlugins,
             Action<Group> selectedGroupChanged)
         {
             _selectedGroupChanged = selectedGroupChanged;
-            GrouppingPlugins = grouppingPlugins;
-            SelectedGrouppingLogicPlugin = GrouppingPlugins.FirstOrDefault();
+            GroupingPlugins = groupingPlugins;
+            SelectedGroupingLogicPlugin = GroupingPlugins.FirstOrDefault();
         }
 
-        public IEnumerable<IGrouppingLogicPlugin> GrouppingPlugins
+        public IEnumerable<IGroupingLogicPlugin> GroupingPlugins
         {
-            get => _grouppingPlugins;
+            get => _groupingPlugins;
             set
             {
-                if (Equals(value, _grouppingPlugins)) return;
-                _grouppingPlugins = value;
+                if (Equals(value, _groupingPlugins)) return;
+                _groupingPlugins = value;
                 OnPropertyChanged();
             }
         }
@@ -74,13 +74,13 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public IGrouppingLogicPlugin SelectedGrouppingLogicPlugin
+        public IGroupingLogicPlugin SelectedGroupingLogicPlugin
         {
-            get => _selectedGrouppingLogicPlugin;
+            get => _selectedGroupingLogicPlugin;
             set
             {
-                if (Equals(value, _selectedGrouppingLogicPlugin)) return;
-                _selectedGrouppingLogicPlugin = value;
+                if (Equals(value, _selectedGroupingLogicPlugin)) return;
+                _selectedGroupingLogicPlugin = value;
                 OnPropertyChanged();
                 GenerateGroups(value);
             }
@@ -88,10 +88,10 @@ namespace ABCat.UI.WPF.Models
 
         public void Refresh()
         {
-            GenerateGroups(SelectedGrouppingLogicPlugin);
+            GenerateGroups(SelectedGroupingLogicPlugin);
         }
 
-        private async void GenerateGroups([NotNull] IGrouppingLogicPlugin grouppingLogic)
+        private async void GenerateGroups([NotNull] IGroupingLogicPlugin groupingLogic)
         {
             var cancellationTokenSource = _cancellationTokenSource;
             cancellationTokenSource?.Cancel();
@@ -102,7 +102,7 @@ namespace ABCat.UI.WPF.Models
             {
                 IsOnUpdate = true;
 
-                var group = await grouppingLogic.GenerateGroups(cancellationTokenSource.Token);
+                var group = await groupingLogic.GenerateGroups(cancellationTokenSource.Token);
 
                 Root = new[] {group};
 

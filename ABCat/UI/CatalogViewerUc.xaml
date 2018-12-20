@@ -101,7 +101,7 @@
                                 CanClose="False"
                                 CanHide="False"
                                 ContentId="6">
-                                <ui2:GroupsTreeUc DataContext="{Binding GrouppingLogicModel}" />
+                                <ui2:GroupsTreeUc DataContext="{Binding GroupingLogicModel}" />
 
                             </xcad:LayoutAnchorable>
                         </xcad:LayoutAnchorablePane>

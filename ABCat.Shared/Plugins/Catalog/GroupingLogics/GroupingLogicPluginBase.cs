@@ -9,12 +9,12 @@ using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using JetBrains.Annotations;
 
-namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
+namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
 {
     /// <summary>
     ///     Базовый класс логики группировки записей
     /// </summary>
-    public abstract class GrouppingLogicPluginBase : IGrouppingLogicPlugin
+    public abstract class GroupingLogicPluginBase : IGroupingLogicPlugin
     {
         private bool _isOnUpdate;
 

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ABCat.Shared;
+using ABCat.Shared.Plugins.Catalog.ParsingLogics;
 using ABCat.Shared.Plugins.DataSets;
 using SQLite.Net.Attributes;
 
@@ -10,9 +12,17 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     [Table("AudioBook")]
     public class AudioBook : IAudioBook
     {
+        private static readonly INaturalTimeSpanParserPlugin TimeSpanParser;
+        private static readonly INaturalBitrateParserPlugin BitrateParser;
         private string _lastParsedLength;
         private TimeSpan _parsedLength;
         private int _parsedBitrate;
+
+        static AudioBook()
+        {
+            TimeSpanParser = Context.I.ComponentFactory.CreateActual<INaturalTimeSpanParserPlugin>();
+            BitrateParser = Context.I.ComponentFactory.CreateActual<INaturalBitrateParserPlugin>();
+        }
 
         [Column("Author")] public string Author { get; set; }
 
@@ -44,7 +54,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             {
                 if (_parsedLength == TimeSpan.MinValue || !Equals(Length, _lastParsedLength))
                 {
-                    _parsedLength = Length.ToTimeSpan();
+                    _parsedLength = TimeSpanParser.Parse(Length);
                     _lastParsedLength = Length;
                 }
 
@@ -58,49 +68,37 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             {
                 if (_parsedBitrate == 0)
                 {
-                    TryParseBitrate(Bitrate, out _parsedBitrate);
+                    BitrateParser.TryParseBitrate(Bitrate, out _parsedBitrate);
                 }
 
                 return _parsedBitrate;
             }
         }
 
-        private readonly static string[] _bitrateJunkStart = {"~", "vbr", "cbr"};
-
-        private static readonly string[] _bitrateKbps =
-            {"kbps", "kbit / sec", "kbit / s", "kb / s", "kbit", "кбит / сек", "кб / с", "к / с"};
-
-        private bool TryParseBitrate(string bitrateString, out int bitrate)
-        {
-            bitrateString = bitrateString.ToLower();
-            bitrate = 0;
-            if (!bitrateString.IsNullOrEmpty())
-            {
-                string mainPart;
-                var parts = bitrateString.Split(',', 'и');
-                if (parts.Length > 1)
-                    mainPart = parts
-                        .FirstOrDefault(item => _bitrateKbps.Any(bs => item.IndexOf(bs, StringComparison.InvariantCultureIgnoreCase) >= 0));
-                else
-                    mainPart = bitrateString;
-
-                if (!mainPart.IsNullOrEmpty())
-                {
-                    foreach (var s in _bitrateJunkStart)
-                    {
-                        mainPart = mainPart.Replace(s, "");
-                    }
-
-                    mainPart = mainPart.Trim();
-                }
-            }
-
-            return false;
-        }
-
         [Column("Size")] public long Size { get; set; }
 
-        public TimeSpan ParsedLengthByBitrate { get; }
+        private TimeSpan _parsedLengthByBitrate;
+
+        public TimeSpan ParsedLengthByBitrate
+        {
+            get
+            {
+                if (_parsedLengthByBitrate == default(TimeSpan))
+                {
+                    if (Size > 0)
+                    {
+                        var pBitrate = ParsedBitrate;
+                        if (pBitrate > 0)
+                        {
+                            var seconds = Size / (pBitrate * 1024 / 8);
+                            _parsedLengthByBitrate = TimeSpan.FromSeconds(seconds);
+                        }
+                    }
+                }
+
+                return _parsedLengthByBitrate;
+            }
+        }
 
         [Column("Publisher")] public string Publisher { get; set; }
 

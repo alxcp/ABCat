@@ -98,10 +98,12 @@
     <Compile Include="Plugins\Catalog\FilteringLogics\FilteringLogicPluginBase.cs" />
     <Compile Include="Plugins\Catalog\FilteringLogics\IFilteringLogicPlugin.cs" />
     <Compile Include="Plugins\Catalog\FilteringLogics\UpdateTypes.cs" />
-    <Compile Include="Plugins\Catalog\GrouppingLogics\Group.cs" />
-    <Compile Include="Plugins\Catalog\GrouppingLogics\GrouppingLogicBase.cs" />
-    <Compile Include="Plugins\Catalog\GrouppingLogics\IGrouppingLogicPlugin.cs" />
+    <Compile Include="Plugins\Catalog\GroupingLogics\Group.cs" />
+    <Compile Include="Plugins\Catalog\GroupingLogics\GroupingLogicPluginBase.cs" />
+    <Compile Include="Plugins\Catalog\GroupingLogics\IGrouppingLogicPlugin.cs" />
     <Compile Include="Plugins\Catalog\INormalizationLogicPlugin.cs" />
+    <Compile Include="Plugins\Catalog\ParsingLogics\INaturalBitrateParserPlugin.cs" />
+    <Compile Include="Plugins\Catalog\ParsingLogics\INaturalTimeSpanParserPlugin.cs" />
     <Compile Include="Plugins\DataProviders\IDbContainer.cs" />
     <Compile Include="Plugins\DataSets\IAudioBook.cs" />
     <Compile Include="Plugins\DataSets\IAudioBookGroup.cs" />
@@ -125,7 +127,6 @@
     <Compile Include="Plugins\Sites\PageSources.cs" />
     <Compile Include="Plugins\Sites\RecordTargetDownloaderBase.cs" />
     <Compile Include="Plugins\Sites\SiteParserBase.cs" />
-    <Compile Include="Plugins\UI\IBrowserWindowPlugin.cs" />
     <Compile Include="Plugins\UI\INormalizationSettingsEditorPlugin.cs" />
     <Compile Include="Plugins\UI\IRecordsListPlugin.cs" />
     <Compile Include="Plugins\UI\ISupportLayoutPlugin.cs" />

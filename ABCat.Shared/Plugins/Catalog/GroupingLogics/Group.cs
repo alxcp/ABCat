@@ -1,14 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.ViewModels;
-using JetBrains.Annotations;
 
-namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
+namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
 {
     /// <summary>
     ///     Группа записей каталога
@@ -18,7 +15,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         public readonly HashSet<string> LinkedRecords = new HashSet<string>();
 
         /// <summary>Логика группировки, создавшая группу</summary>
-        public readonly GrouppingLogicPluginBase OwnerLogic;
+        public readonly GroupingLogicPluginBase OwnerLogic;
 
         private bool _isExpanded;
         private bool _isSelected;
@@ -27,7 +24,7 @@ namespace ABCat.Shared.Plugins.Catalog.GrouppingLogics
         ///     Группа записей каталога
         /// </summary>
         /// <param name="ownerLogic">Логика группировки, создавшая группу</param>
-        public Group(GrouppingLogicPluginBase ownerLogic)
+        public Group(GroupingLogicPluginBase ownerLogic)
         {
             OwnerLogic = ownerLogic;
             Children = new List<Group>();
