@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.Catalog;
@@ -142,6 +144,74 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
+        public async Task OrganizeKeywords(ProgressCallback totalProgressCallback, CancellationToken cancellationToken)
+        {
+            var mainConfig = Config.Load<MainConfig>();
+
+            await Task.Factory.StartNew(() =>
+            {
+                var recordActualityPeriod = mainConfig.RecordActualityPeriod;
+
+                using (var dbContainer = Context.I.CreateDbContainer(true))
+                {
+                    List<IAudioBook> records = dbContainer.AudioBookSet.GetRecordsAll().ToList();
+
+                    var sw = new Stopwatch();
+                    sw.Start();
+
+                    var symbolicDistancePlugin = Context.I.ComponentFactory.GetActualCreator<ISymbolicDistance>();
+
+                    var allGenres = records.SelectMany(item => item.Genre.Split(',')).Select(item=>item.Trim()).GroupBy(item => item)
+                        .ToDictionary(item => item.Key, item => item.Count());
+
+                    var topMost = allGenres.Where(item => item.Value > 3).OrderByDescending(item => item.Value)
+                        .ToDictionary(item => item.Key, item => item.Value);
+
+                    //var waitingForSave = new List<IAudioBook>();
+
+                    //for (var z = 0; z < records.Count; z++)
+                    //{
+                    //    try
+                    //    {
+                    //        var record = records[z];
+                    //        totalProgressCallback(z, records.Count, "{0} из {1}".F(z, records.Count()));
+                    //        DownloadRecord(dbContainer, record, pageSource, smallProgressCallback,
+                    //            cancellationToken);
+                    //        record.LastUpdate = DateTime.Now;
+                    //        waitingForSave.Add(record);
+
+                    //        if (record.Created == default(DateTime))
+                    //        {
+                    //            record.Created = DateTime.Now;
+                    //        }
+
+                    //        if (cancellationToken.IsCancellationRequested) break;
+                    //        if (sw.Elapsed > TimeSpan.FromSeconds(30) || z == records.Count - 1)
+                    //        {
+                    //            sw.Restart();
+                    //            normalizerPlugin.Normalize(waitingForSave, dbContainer);
+
+                    //            if (cancellationToken.IsCancellationRequested) break;
+                    //            dbContainer.AudioBookSet.AddChangedRecords(waitingForSave.ToArray());
+                    //            dbContainer.SaveChanges();
+                    //            if (cancellationToken.IsCancellationRequested) break;
+                    //        }
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        Context.I.Logger.Error(ex);
+                    //    }
+                    //}
+
+                    //if (!cancellationToken.IsCancellationRequested)
+                    //{
+                    //    dbContainer.SaveChanges();
+                    //}
+                    //else dbContainer.AutoSaveChanges = false;
+                }
+            }, cancellationToken);
+        }
+
         public async Task<string> DownloadRecordSourcePage(IAudioBook audioBook, CancellationToken cancellationToken)
         {
             return await Task.Factory.StartNew(() => GetRecordSourcePageString(audioBook, PageSources.CacheOrWeb, cancellationToken), cancellationToken);
@@ -157,6 +227,7 @@ namespace ABCat.Shared.Plugins.Sites
         public event EventHandler Disposed;
 
         public abstract IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer container);
+        private static readonly Regex HtmlSpecCharRegex = new Regex("&#[0-9]+;");
 
         protected virtual string CleanupRecordValue(string value, bool allowMultiLine, int maxLength)
         {
@@ -173,7 +244,14 @@ namespace ABCat.Shared.Plugins.Sites
                 result = result.Substring(0, maxLength - 1) + "…";
             }
 
+            result = HtmlSpecCharRegex.Replace(result, RegexReadTerm);
+
             return result;
+        }
+
+        static string RegexReadTerm(Match m)
+        {
+            return WebUtility.HtmlDecode(m.Value);
         }
 
         /// <summary>

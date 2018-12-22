@@ -88,10 +88,24 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                     if (Size > 0)
                     {
                         var pBitrate = ParsedBitrate;
+                        var parsedLength = ParsedLength;
+
                         if (pBitrate > 0)
                         {
                             var seconds = Size / (pBitrate * 1024 / 8);
                             _parsedLengthByBitrate = TimeSpan.FromSeconds(seconds);
+                            if (parsedLength != TimeSpan.Zero)
+                            {
+                                var k = parsedLength.TotalMilliseconds / _parsedLengthByBitrate.TotalMilliseconds;
+                                if (k > 0.8 && k < 1.2)
+                                {
+                                    _parsedLengthByBitrate = parsedLength;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            _parsedLengthByBitrate = parsedLength;
                         }
                     }
                 }

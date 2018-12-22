@@ -52,10 +52,6 @@ namespace ABCat.Core
             return result;
         }
 
-        public string AuthorDefaultName => "<Не задано>";
-
-        public string GenreDefaultName => "<Не задано>";
-
         public IEventAggregatorShared EventAggregator { get; } = new EventAggregatorShared();
 
         public Encoding DefaultEncoding { get; } = Encoding.GetEncoding(1251);

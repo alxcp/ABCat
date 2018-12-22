@@ -79,7 +79,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
                 record.Author = authorReplacement != null ? authorReplacement.ReplaceValue : authorName;
 
-                if (record.Author == Context.I.AuthorDefaultName)
+                if (record.Author.IsNullOrEmpty())
                 {
                     if (!record.Title.IsNullOrEmpty())
                     {
@@ -87,14 +87,13 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                         if (parts.Length > 1)
                         {
                             var possibleAuthor = parts[0].Trim().ToLower();
-                            string author = null;
-                            if (_authors.TryGetValue(possibleAuthor, out author)) record.Author = author;
+                            if (_authors.TryGetValue(possibleAuthor, out var author)) record.Author = author;
                         }
                     }
                 }
                 else _authors.TryAdd(authorName, authorName);
 
-                var genreName = record.Genre ?? Context.I.GenreDefaultName;
+                var genreName = record.Genre ?? string.Empty;
                 var genreReplacement =
                     cache.FirstOrDefault(
                         str =>
@@ -121,7 +120,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                 else if (string.IsNullOrEmpty(record.AuthorNameForParse) &&
                          string.IsNullOrEmpty(record.AuthorSurnameForParse))
                 {
-                    result = Context.I.AuthorDefaultName;
+                    result = string.Empty;
                 }
                 else
                 {

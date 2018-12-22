@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using ABCat.Shared;
 using ABCat.Shared.Commands;
+using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 
@@ -41,12 +42,17 @@ namespace ABCat.UI.WPF.Models
 
             var keys = _getSelectedItems().Select(item => item.Key).Distinct().ToHashSet();
 
+            //await SiteParserPlugin.OrganizeKeywords(ReportProgressTotal, CancellationTokenSource.Token);
+
             await SiteParserPlugin.DownloadRecords(
                 keys,
                 PageSources.CacheOrWeb,
                 ReportProgressSmall,
                 ReportProgressTotal,
                 CancellationTokenSource.Token);
+
+            await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                .UpdateCache(UpdateTypes.Values);
 
             Executor.OnUiThread(() =>
             {

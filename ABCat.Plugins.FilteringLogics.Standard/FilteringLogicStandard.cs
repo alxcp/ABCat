@@ -223,7 +223,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                 {
                     if (!_hiddenCache.TryGetValue(audioBook.Key, out var isHidden))
                     {
-                        UpdateCacheInternal(UpdateTypes.Hidden);
+                        UpdateCacheInternal(UpdateTypes.Hidden | UpdateTypes.Values);
                         if (!_hiddenCache.TryGetValue(audioBook.Key, out isHidden)) return false;
                     }
 
@@ -234,7 +234,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                 {
                     if (!_loadedCache.TryGetValue(audioBook.Key, out var isLoaded))
                     {
-                        UpdateCacheInternal(UpdateTypes.Loaded);
+                        UpdateCacheInternal(UpdateTypes.Loaded | UpdateTypes.Values);
                         if (!_loadedCache.TryGetValue(audioBook.Key, out isLoaded)) return false;
                     }
 
@@ -249,7 +249,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
         {
             using (var dbContainer = Context.I.CreateDbContainer(false))
             {
-                if ((updateType & UpdateTypes.Values) == UpdateTypes.Values)
+                if (updateType.HasFlag(UpdateTypes.Values))
                 {
                     _booksCache = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
 
@@ -257,8 +257,9 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                         _booksCache.Select(item => item.Author).Distinct().OrderBy(item => item));
                     FillFilterValueCollection("Bitrate",
                         _booksCache.Select(item => item.Bitrate).Distinct().OrderBy(item => item));
-                    FillFilterValueCollection("Genre",
-                        _booksCache.Select(item => item.Genre).Distinct().OrderBy(item => item));
+
+                    FillFilterValueCollection("Genre", GetGenres(_booksCache));
+
                     FillFilterValueCollection("Publisher",
                         _booksCache.Select(item => item.Publisher).Distinct().OrderBy(item => item));
                     FillFilterValueCollection("Reader",
@@ -393,6 +394,14 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                     }
                 }
             }
+        }
+
+        private IReadOnlyCollection<string> GetGenres(IEnumerable<IAudioBook> records)
+        {
+            var allGenres = records.SelectMany(item => item.Genre.Split(',', '/')).Select(item => item.Trim()).GroupBy(item => item.ToLower())
+                .ToDictionary(item => item.Key, item => item.Count());
+
+            return allGenres.OrderByDescending(item => item.Value).Where(item=>!item.Key.IsNullOrEmpty()).Select(item=>item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false)).ToArray();
         }
 
         private void FillFilterValueCollection(string collectionName, IEnumerable<string> filterValues)
