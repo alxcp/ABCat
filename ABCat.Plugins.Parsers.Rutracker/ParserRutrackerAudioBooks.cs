@@ -143,10 +143,15 @@ namespace ABCat.Plugins.Parsers.Rutracker
                     {
                         var doc = new HtmlDocument();
                         doc.Load(ms);
+                        var savedHtml = doc.DocumentNode.OuterHtml;
                         ClearRecordPage(doc);
-                        page.SetString(doc.DocumentNode.InnerHtml, true);
-                        dbContainer.BinaryDataSet.AddChangedBinaryData(page);
                         pageHtml = doc.DocumentNode.InnerHtml;
+
+                        if (savedHtml != pageHtml)
+                        {
+                            page.SetString(doc.DocumentNode.InnerHtml, true);
+                            dbContainer.BinaryDataSet.AddChangedBinaryData(page);
+                        }
                     }
                 }
             }
@@ -265,7 +270,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         break;
                 }
 
-                result = (long) size * multiplier;
+                result = (long) (size * multiplier);
             }
 
             return result;
@@ -379,46 +384,46 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return postBody;
         }
 
-        private static class KeysCollection
-        {
-            private static Stopwatch _sw = new Stopwatch();
-            private static readonly Dictionary<string, HashSet<string>> _values = new Dictionary<string, HashSet<string>>(StringComparer.InvariantCultureIgnoreCase);
+        //private static class KeysCollection
+        //{
+        //    private static Stopwatch _sw = new Stopwatch();
+        //    private static readonly Dictionary<string, HashSet<string>> _values = new Dictionary<string, HashSet<string>>(StringComparer.InvariantCultureIgnoreCase);
 
-            public static void Add(string key, string value)
-            {
-                if (!_values.TryGetValue(key, out var values))
-                {
-                    values = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-                    _values.Add(key, values);
-                }
+        //    public static void Add(string key, string value)
+        //    {
+        //        if (!_values.TryGetValue(key, out var values))
+        //        {
+        //            values = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        //            _values.Add(key, values);
+        //        }
 
-                values.Add(value);
+        //        values.Add(value);
 
-                if (!_sw.IsRunning)
-                    _sw.Start();
+        //        if (!_sw.IsRunning)
+        //            _sw.Start();
 
-                if (_sw.Elapsed.TotalSeconds > 15)
-                {
-                    Debug.WriteLine("===============================");
-                    var top50 = _values.Where(item => item.Value.Count > 10);
-                    foreach (var keyValuePair in top50.OrderByDescending(item=>item.Value.Count))
-                    {
-                        Debug.WriteLine($"{keyValuePair.Key}\t{keyValuePair.Value.Count}");
-                    }
+        //        if (_sw.Elapsed.TotalSeconds > 15)
+        //        {
+        //            Debug.WriteLine("===============================");
+        //            var top50 = _values.Where(item => item.Value.Count > 10);
+        //            foreach (var keyValuePair in top50.OrderByDescending(item=>item.Value.Count))
+        //            {
+        //                Debug.WriteLine($"{keyValuePair.Key}\t{keyValuePair.Value.Count}");
+        //            }
 
-                    Debug.WriteLine("===============================");
-                    _sw.Restart();
-                }
-            }
-        }
+        //            Debug.WriteLine("===============================");
+        //            _sw.Restart();
+        //        }
+        //    }
+        //}
 
         private void FillRecordElement(IAudioBook record, string key, string value)
         {
             key = key.Trim(' ', '[', ']', '<', '>', ';', '\n', '\t', '.', ',', '"', '(');
 
-#if DEBUG
-            KeysCollection.Add(key, value);
-#endif
+//#if DEBUG
+//            KeysCollection.Add(key, value);
+//#endif
 
             switch (key.ToLower())
             {
@@ -646,8 +651,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         audioBook = dbContainer.AudioBookSet.CreateRecord();
                         audioBook.Created = DateTime.Now;
                         audioBook.Key = topic.Key;
-                        audioBook.Genre = Context.I.GenreDefaultName;
-                        audioBook.Author = Context.I.AuthorDefaultName;
+                        audioBook.Genre = string.Empty;
+                        audioBook.Author = string.Empty;
                         records.Add(topic.Key, audioBook);
                         dbContainer.AudioBookSet.AddRecord(audioBook);
                     }

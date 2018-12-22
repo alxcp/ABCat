@@ -24,6 +24,8 @@ namespace ABCat.Shared.Plugins.Sites
         Task DownloadRecords(HashSet<string> recordsIds, PageSources pageSource,
             ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
 
+        Task OrganizeKeywords(ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
+
         Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
     }
 }

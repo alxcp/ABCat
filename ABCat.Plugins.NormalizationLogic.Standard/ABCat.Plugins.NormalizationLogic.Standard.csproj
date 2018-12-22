@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DistanceAlferovPlugin.cs" />
     <Compile Include="NaturalBitrateParserPluginStandard.cs" />
     <Compile Include="NaturalTimeSpanParserPluginStandard.cs" />
     <Compile Include="NormalizationLogicStandardPlugin.cs" />

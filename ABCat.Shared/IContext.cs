@@ -9,8 +9,6 @@ namespace ABCat.Shared
     {
         ILog Logger { get; }
         IComponentFactory ComponentFactory { get; }
-        string AuthorDefaultName { get; }
-        string GenreDefaultName { get; }
         IEventAggregatorShared EventAggregator { get; }
         Encoding DefaultEncoding { get; }
         IDbContainer CreateDbContainer(bool autoSave);
