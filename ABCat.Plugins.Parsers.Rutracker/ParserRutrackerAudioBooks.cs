@@ -4,10 +4,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Windows.Controls;
 using ABCat.Shared;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
@@ -23,6 +22,11 @@ namespace ABCat.Plugins.Parsers.Rutracker
     {
         private const int RecordsOnPageCount = 50;
 
+        private static readonly string[] GroupKeys = {
+            "2388", "2387", "1036", "399", "400", "402", "490", "499", "574", "403", "716", "2165", "695",
+            "661", "2348", "1279"
+        };
+
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
 
         public override bool CheckForConfig(bool correct, out Config incorrectConfig)
@@ -33,9 +37,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
         public override IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer dbContainer)
         {
-            var groupKeys = new[]
-                {"2389", "2388", "2387", "1036", "399", "400", "402", "490", "499", "574", "403", "716", "2165", "695"};
-            var result = groupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));
+            var result = GroupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));
             dbContainer.SaveChanges();
             return result;
         }
@@ -121,8 +123,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
-        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource,
-            ProgressCallback progressCallback, CancellationToken cancellationToken)
+        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken)
         {
             string pageHtml = null;
 
@@ -169,25 +170,24 @@ namespace ABCat.Plugins.Parsers.Rutracker
             ParseRecord(dbContainer, record, pageHtml);
         }
 
-        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup,
-            ProgressCallback progressCallback, CancellationToken cancellationToken)
+        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup, CancellationToken cancellationToken)
         {
             dbContainer.SaveChanges();
 
-            var url = "http://rutracker.org/forum/viewforum.php?f={0}".F(audioBookGroup.Key);
+            var url = $"http://rutracker.org/forum/viewforum.php?f={audioBookGroup.Key}";
 
             var pageIndex = 0;
             var pageCount = 0;
 
             do
             {
-                progressCallback(pageIndex, pageCount, "Загрузка списка '{0}'".F(audioBookGroup.Title));
+                ProgressMessage.Report(pageIndex, pageCount, audioBookGroup.Title);
 
                 string pageHtml;
 
                 using (var webClient = WebClientPool.GetPoolItem())
                 {
-                    var pageUrl = @"{0}&start={1}".F(url, pageIndex * RecordsOnPageCount);
+                    var pageUrl = $"{url}&start={pageIndex * RecordsOnPageCount}";
                     pageHtml = webClient.Target.DownloadString(pageUrl);
                     dbContainer.WaitForParse.Enqueue(pageHtml);
                     if (cancellationToken.IsCancellationRequested) return;
@@ -202,7 +202,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                     pageCount = audioBookGroup.LastPageCount;
                 }
 
-                if (dbContainer.WaitForParse.Count() == 10 || pageIndex == pageCount - 1)
+                if (dbContainer.WaitForParse.Count == 10 || pageIndex == pageCount - 1)
                 {
                     ParseRecordGroupPages(dbContainer, audioBookGroup, cancellationToken);
                 }
@@ -235,7 +235,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 if (sizeElement != null && sizeElement.ChildNodes.Count == 3)
                 {
                     var sizeNode = sizeElement.LastChild;
-                    var size = GetSizeInBytes(sizeNode.InnerText.Replace("&middot;", "").Replace("&nbsp;", " ").Trim(' ', '\t'));
+                    var size = GetSizeInBytes(sizeNode.InnerText.ReplaceAll(new[] {"&middot;", "&nbsp;"}, " ")
+                        .Trim(' ', '\t'));
                     record.Size = size;
                 }
 
@@ -305,7 +306,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
             if (head == null) throw new Exception("Cannot find element 'head'");
             var title = head.GetNodesByClass("title", null).FirstOrDefault();
             if (title == null) throw new Exception("Cannot find element 'title'");
-            return title.InnerText.Split(new[] {"[стр. 1]"}, StringSplitOptions.RemoveEmptyEntries)[0].Trim();
+            var result = title.InnerText.Split("[стр. 1]").First().Replace("[Аудио]", "").Trim();
+            return result;
         }
 
         private static IEnumerable<HtmlNode> GetTopics(HtmlDocument document)

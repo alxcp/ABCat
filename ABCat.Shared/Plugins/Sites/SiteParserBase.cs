@@ -6,6 +6,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
@@ -18,9 +19,7 @@ namespace ABCat.Shared.Plugins.Sites
     {
         public Config Config { get; set; }
 
-        public async Task DownloadRecordGroups(HashSet<string> recordGroupsKeys,
-            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback,
-            CancellationToken cancellationToken)
+        public async Task DownloadRecordGroups(HashSet<string> recordGroupsKeys, CancellationToken cancellationToken)
         {
             var mainConfig = Config.Load<MainConfig>();
 
@@ -38,14 +37,12 @@ namespace ABCat.Shared.Plugins.Sites
                                 .Where(item => recordGroupsKeys.Contains(item.Key))
                                 .ToArray();
 
-                    foreach (
-                        var group in
-                        groups.Where(item => (DateTime.Now - item.LastUpdate).TotalDays > groupActualityPeriod))
+                    foreach (var group in groups.Where(item => (DateTime.Now - item.LastUpdate).TotalDays > groupActualityPeriod))
                     {
                         try
                         {
-                            totalProgressCallback(z, groups.Count(), "{0} из {1}".F(z, groups.Count()));
-                            DownloadRecordGroup(dbContainer, group, smallProgressCallback, cancellationToken);
+                            ProgressMessage.ReportComplex(z, groups.Length);
+                            DownloadRecordGroup(dbContainer, group, cancellationToken);
                             if (cancellationToken.IsCancellationRequested) break;
                             dbContainer.SaveChanges();
                             z++;
@@ -59,9 +56,7 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
-        public async Task DownloadRecords(HashSet<string> recordsKeys, PageSources pageSource,
-            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback,
-            CancellationToken cancellationToken)
+        public async Task DownloadRecords(HashSet<string> recordsKeys, PageSources pageSource, CancellationToken cancellationToken)
         {
             var mainConfig = Config.Load<MainConfig>();
 
@@ -106,9 +101,8 @@ namespace ABCat.Shared.Plugins.Sites
                         try
                         {
                             var record = records[z];
-                            totalProgressCallback(z, records.Count, "{0} из {1}".F(z, records.Count()));
-                            DownloadRecord(dbContainer, record, pageSource, smallProgressCallback,
-                                cancellationToken);
+                            ProgressMessage.ReportComplex(z, records.Count);
+                            DownloadRecord(dbContainer, record, pageSource, cancellationToken);
                             record.LastUpdate = DateTime.Now;
                             waitingForSave.Add(record);
 
@@ -144,7 +138,7 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
-        public async Task OrganizeKeywords(ProgressCallback totalProgressCallback, CancellationToken cancellationToken)
+        public async Task OrganizeKeywords(CancellationToken cancellationToken)
         {
             var mainConfig = Config.Load<MainConfig>();
 
@@ -266,11 +260,9 @@ namespace ABCat.Shared.Plugins.Sites
             }
         }
 
-        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource,
-            ProgressCallback progressCallback, CancellationToken cancellationToken);
+        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken);
 
-        protected abstract void DownloadRecordGroup(IDbContainer db, IAudioBookGroup recordGroup,
-            ProgressCallback progressCallback, CancellationToken cancellationToken);
+        protected abstract void DownloadRecordGroup(IDbContainer db, IAudioBookGroup recordGroup, CancellationToken cancellationToken);
 
         protected abstract string GetRecordSourcePageString(IAudioBook audioBook, PageSources pageSource,
             CancellationToken cancellationToken);
