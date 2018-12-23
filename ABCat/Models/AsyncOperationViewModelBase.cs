@@ -1,17 +1,20 @@
 ﻿using System.Threading;
 using System.Windows.Input;
+using ABCat.Shared.Messages;
 using ABCat.Shared.ViewModels;
+using Caliburn.Micro;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public abstract class AsyncOperationViewModelBase : ViewModelBase
+    public abstract class AsyncOperationViewModelBase : ViewModelBase, IHandle<ProgressMessage>
     {
         protected CancellationTokenSource CancellationTokenSource;
 
         protected AsyncOperationViewModelBase([NotNull] StatusBarStateViewModel statusBarStateModel)
         {
             StatusBarStateModel = statusBarStateModel;
+            Context.I.EventAggregator.Subscribe(this);
         }
 
         public bool IsAsyncOperationExecuting => CancellationTokenSource != null;
@@ -47,6 +50,18 @@ namespace ABCat.UI.WPF.Models
             StatusBarStateModel.ProgressBarTotalMaximum = total;
             StatusBarStateModel.ProgressBarTotalMessage = message;
             StatusBarStateModel.ProgressBarTotalValue = current;
+        }
+
+        public void Handle(ProgressMessage message)
+        {
+            if (message.IsComplexProgress)
+            {
+                ReportProgressTotal(message.Completed, message.Total, message.Message);
+            }
+            else
+            {
+                ReportProgressSmall(message.Completed, message.Total, message.Message);
+            }
         }
     }
 }

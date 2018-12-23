@@ -7,7 +7,7 @@ using Component.Infrastructure;
 
 namespace ABCat.Shared.Plugins.Sites
 {
-    public delegate void ProgressCallback(int current, int total, string message);
+    //public delegate void ProgressCallback(int current, int total, string message);
 
     public interface ISiteParserPlugin : IExtComponent
     {
@@ -15,16 +15,13 @@ namespace ABCat.Shared.Plugins.Sites
         ///     Начать обновление списка записей
         /// </summary>
         /// <param name="recordGroupsIds"></param>
-        /// <param name="smallProgressCallback"></param>
-        /// <param name="totalProgressCallback"></param>
         /// <param name="cancellationToken"></param>
-        Task DownloadRecordGroups(HashSet<string> recordGroupsIds,
-            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
+        Task DownloadRecordGroups(HashSet<string> recordGroupsIds, CancellationToken cancellationToken);
 
         Task DownloadRecords(HashSet<string> recordsIds, PageSources pageSource,
-            ProgressCallback smallProgressCallback, ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
+            CancellationToken cancellationToken);
 
-        Task OrganizeKeywords(ProgressCallback totalProgressCallback, CancellationToken cancellationToken);
+        Task OrganizeKeywords(CancellationToken cancellationToken);
 
         Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
     }

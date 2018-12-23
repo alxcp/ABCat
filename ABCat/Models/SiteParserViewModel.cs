@@ -47,8 +47,6 @@ namespace ABCat.UI.WPF.Models
             await SiteParserPlugin.DownloadRecords(
                 keys,
                 PageSources.CacheOrWeb,
-                ReportProgressSmall,
-                ReportProgressTotal,
                 CancellationTokenSource.Token);
 
             await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
@@ -65,10 +63,7 @@ namespace ABCat.UI.WPF.Models
         {
             CancellationTokenSource = new CancellationTokenSource();
 
-            await SiteParserPlugin.DownloadRecordGroups(null,
-                ReportProgressSmall,
-                ReportProgressTotal,
-                CancellationTokenSource.Token);
+            await SiteParserPlugin.DownloadRecordGroups(null, CancellationTokenSource.Token);
 
             Executor.OnUiThread(() =>
             {
@@ -83,8 +78,6 @@ namespace ABCat.UI.WPF.Models
 
             await SiteParserPlugin.DownloadRecords(null,
                 PageSources.WebOnly,
-                ReportProgressSmall,
-                ReportProgressTotal,
                 CancellationTokenSource.Token);
 
             Executor.OnUiThread(() =>
