@@ -48,6 +48,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.Parsers.Audioboo", "ABCat.Plugins.Parsers.Audioboo\ABCat.Plugins.Parsers.Audioboo.csproj", "{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}"
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

@@ -48,9 +48,9 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
-        protected override void ClearRecordPage(HtmlDocument document)
+        protected override void CleanupRecordPage(HtmlDocument document)
         {
-            base.ClearRecordPage(document);
+            base.CleanupRecordPage(document);
             var pageHeader = document.GetElementbyId("page_header");
             pageHeader?.ParentNode.RemoveChild(pageHeader);
             var pageFooter = document.GetElementbyId("page_footer");
@@ -93,7 +93,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         document.Load(ms);
                         if (cancellationToken.IsCancellationRequested) return null;
 
-                        ClearRecordPage(document);
+                        CleanupRecordPage(document);
                         result = document.DocumentNode.InnerHtml;
 
                         if (cancellationToken.IsCancellationRequested) return null;
@@ -114,7 +114,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         document.LoadHtml(result);
                         if (cancellationToken.IsCancellationRequested) return null;
 
-                        ClearRecordPage(document);
+                        CleanupRecordPage(document);
                         result = document.DocumentNode.InnerHtml;
 
                         if (cancellationToken.IsCancellationRequested) return null;
@@ -151,7 +151,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                         var doc = new HtmlDocument();
                         doc.Load(ms);
                         var savedHtml = doc.DocumentNode.OuterHtml;
-                        ClearRecordPage(doc);
+                        CleanupRecordPage(doc);
                         pageHtml = doc.DocumentNode.InnerHtml;
 
                         if (savedHtml != pageHtml)
