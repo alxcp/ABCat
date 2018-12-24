@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.DataSets
 {
@@ -19,11 +20,11 @@ namespace ABCat.Shared.Plugins.DataSets
 
         [DisplayName("Длина (Парсинг)")] TimeSpan ParsedLength { get; }
 
-        [DisplayName("Битрейт (Парсинг)")] int ParsedBitrate { get; }
+        [UsedImplicitly] [DisplayName("Битрейт (Парсинг)")] int ParsedBitrate { get; }
 
         [DisplayName("Размер, Байт")] long Size { get; set; }
 
-        [DisplayName("Длина (По битрейту)")] TimeSpan ParsedLengthByBitrate { get; }
+        [UsedImplicitly] [DisplayName("Длина (По битрейту)")] TimeSpan ParsedLengthByBitrate { get; }
 
         [DisplayName("Издатель")] string Publisher { get; set; }
 

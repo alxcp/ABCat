@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
@@ -16,14 +14,15 @@ namespace ABCat.UI.WPF.Models
     {
         private readonly Func<IEnumerable<IAudioBook>> _getSelectedItems;
         private readonly AbCatViewModel _owner;
+        private readonly IReadOnlyCollection<ISiteParserPlugin> _siteParserPlugins;
 
-        public SiteParserViewModel(AbCatViewModel owner, ISiteParserPlugin siteParserPlugin,
-            Func<IEnumerable<IAudioBook>> getSelectedItems)
+        public SiteParserViewModel(AbCatViewModel owner, Func<IEnumerable<IAudioBook>> getSelectedItems)
             : base(owner.StatusBarStateModel)
         {
             _owner = owner;
             _getSelectedItems = getSelectedItems;
-            SiteParserPlugin = siteParserPlugin;
+            _siteParserPlugins = Context.I.ComponentFactory.GetCreators<ISiteParserPlugin>()
+                .Select(item => item.GetInstance<ISiteParserPlugin>()).ToArray();
         }
 
         public ICommand DownloadRecordGroupsCommand =>
@@ -34,36 +33,55 @@ namespace ABCat.UI.WPF.Models
 
         public ICommand ReparseCommand => CommandFactory.Get(async ()=> await Reparse(), ()=> CancellationTokenSource == null);
 
-        public ISiteParserPlugin SiteParserPlugin { get; set; }
-
         private async Task Reparse()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
-            var keys = _getSelectedItems().Select(item => item.Key).Distinct().ToHashSet();
+            Dictionary<string, int> allGroups = new Dictionary<string, int>();
 
-            //await SiteParserPlugin.OrganizeKeywords(ReportProgressTotal, CancellationTokenSource.Token);
-
-            await SiteParserPlugin.DownloadRecords(
-                keys,
-                PageSources.CacheOrWeb,
-                CancellationTokenSource.Token);
-
-            await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                .UpdateCache(UpdateTypes.Values);
-
-            Executor.OnUiThread(() =>
+            foreach (var siteParserPlugin in _siteParserPlugins)
             {
-                OnAsynOperationCompleted();
-                _owner.RefreshRecordsListData();
-            });
+                foreach (var groupKey in siteParserPlugin.GetGroupKeys(false))
+                {
+                    allGroups.Add(groupKey, siteParserPlugin.WebSiteId);
+                }
+            }
+
+            var forReparse = _getSelectedItems().GroupBy(item => allGroups[item.GroupKey])
+                .ToDictionary(item => item.Key, values => values.Select(item => item.Key).ToHashSet());
+
+            foreach (var audioBooks in forReparse)
+            {
+                var plugin = _siteParserPlugins.FirstOrDefault(item=>item.WebSiteId == audioBooks.Key);
+                //await SiteParserPlugin.OrganizeKeywords(ReportProgressTotal, CancellationTokenSource.Token);
+
+                if (plugin != null)
+                {
+                    await plugin.DownloadRecords(
+                        audioBooks.Value,
+                        PageSources.CacheOrWeb,
+                        CancellationTokenSource.Token);
+
+                    await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                        .UpdateCache(UpdateTypes.Values);
+                }
+
+                Executor.OnUiThread(() =>
+                {
+                    OnAsynOperationCompleted();
+                    _owner.RefreshRecordsListData();
+                });
+            }
         }
 
         public async Task OnDownloadRecordGroups()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
-            await SiteParserPlugin.DownloadRecordGroups(null, CancellationTokenSource.Token);
+            foreach (var siteParserPlugin in _siteParserPlugins)
+            {
+                await siteParserPlugin.DownloadRecordGroups(null, CancellationTokenSource.Token);
+            }
 
             Executor.OnUiThread(() =>
             {
@@ -76,15 +94,38 @@ namespace ABCat.UI.WPF.Models
         {
             CancellationTokenSource = new CancellationTokenSource();
 
-            await SiteParserPlugin.DownloadRecords(null,
-                PageSources.WebOnly,
-                CancellationTokenSource.Token);
+            foreach (var siteParserPlugin in _siteParserPlugins)
+            {
+                await siteParserPlugin.DownloadRecords(null,
+                    PageSources.WebOnly,
+                    CancellationTokenSource.Token);
+            }
 
             Executor.OnUiThread(() =>
             {
                 OnAsynOperationCompleted();
                 _owner.RefreshRecordsListData();
             });
+        }
+
+        public async Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken)
+        {
+            var groupKey = record.GroupKey;
+            var plugin = _siteParserPlugins.FirstOrDefault(item=>item.GetGroupKeys(false).Contains(groupKey));
+
+            if (plugin != null)
+            {
+                return await plugin.DownloadRecordSourcePage(record, cancellationToken);
+            }
+
+            return string.Empty;
+        }
+
+        public Uri GetRecordPageUrl(IAudioBook record)
+        {
+            var groupKey = record.GroupKey;
+            var plugin = _siteParserPlugins.FirstOrDefault(item => item.GetGroupKeys(false).Contains(groupKey));
+            return plugin?.GetRecordPageUrl(record);
         }
     }
 }
