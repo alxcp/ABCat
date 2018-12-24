@@ -18,6 +18,52 @@ namespace ABCat.Shared.Plugins.Sites
     public abstract class SiteParserBase : ISiteParserPlugin
     {
         public Config Config { get; set; }
+        private int _webSiteId = -1;
+        private HashSet<string> _groupKeys;
+
+        public int WebSiteId
+        {
+            get
+            {
+                if (_webSiteId == -1)
+                {
+                    using (var dbContainer = Context.I.CreateDbContainer(false))
+                    {
+                        var ws = dbContainer.WebSiteSet.GetWebSitesAll()
+                            .FirstOrDefault(item => item.SiteParserPluginName.Compare(GetType().Name));
+                        if (ws == null)
+                        {
+                            ws = dbContainer.WebSiteSet.CreateWebSite();
+                            ws.SiteParserPluginName = GetType().Name;
+                            dbContainer.WebSiteSet.AddWebSite(ws);
+                            ws = dbContainer.WebSiteSet.GetWebSitesAll()
+                                .First(item => item.SiteParserPluginName.Compare(GetType().Name));
+                        }
+
+                        _webSiteId = ws.Id;
+                    }
+                }
+
+                return _webSiteId;
+            }
+        }
+
+        public HashSet<string> GetGroupKeys(bool forceRefresh)
+        {
+            if (_groupKeys == null || forceRefresh)
+            {
+                var webSiteId = WebSiteId;
+                using (var dbContainer = Context.I.CreateDbContainer(false))
+                {
+                    _groupKeys = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
+                        .Where(item => item.WebSiteId == webSiteId).Select(item => item.Key).ToHashSet();
+                }
+            }
+
+            return _groupKeys;
+        }
+
+        public abstract Uri GetRecordPageUrl(IAudioBook record);
 
         public async Task DownloadRecordGroups(HashSet<string> recordGroupsKeys, CancellationToken cancellationToken)
         {
@@ -47,7 +93,7 @@ namespace ABCat.Shared.Plugins.Sites
                             dbContainer.SaveChanges();
                             z++;
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             // ignored
                         }
@@ -66,24 +112,24 @@ namespace ABCat.Shared.Plugins.Sites
 
                 using (var dbContainer = Context.I.CreateDbContainer(true))
                 {
-                    List<IAudioBook> records;
+                    IAudioBook[] records;
 
                     if (recordsKeys == null)
                     {
                         if (pageSource == PageSources.CacheOnly)
                         {
-                            records = dbContainer.AudioBookSet.GetRecordsAll().ToList();
+                            records = dbContainer.AudioBookSet.GetRecordsByWebSite(WebSiteId).ToArray();
                         }
                         else
                         {
                             records =
-                                dbContainer.AudioBookSet.GetRecordsUpdatedBefore(
-                                    DateTime.Now.Subtract(TimeSpan.FromDays(recordActualityPeriod))).ToList();
+                                dbContainer.AudioBookSet.GetRecordsUpdatedBefore(WebSiteId, 
+                                    DateTime.Now.Subtract(TimeSpan.FromDays(recordActualityPeriod))).ToArray();
                         }
                     }
                     else
                     {
-                        records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsKeys).ToList();
+                        records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsKeys).ToArray();
                     }
 
                     var sw = new Stopwatch();
@@ -96,12 +142,12 @@ namespace ABCat.Shared.Plugins.Sites
 
                     var waitingForSave = new List<IAudioBook>();
 
-                    for (var z = 0; z < records.Count; z++)
+                    for (var z = 0; z < records.Length; z++)
                     {
                         try
                         {
                             var record = records[z];
-                            ProgressMessage.ReportComplex(z, records.Count);
+                            ProgressMessage.ReportComplex(z, records.Length);
                             DownloadRecord(dbContainer, record, pageSource, cancellationToken);
                             record.LastUpdate = DateTime.Now;
                             waitingForSave.Add(record);
@@ -112,7 +158,7 @@ namespace ABCat.Shared.Plugins.Sites
                             }
 
                             if (cancellationToken.IsCancellationRequested) break;
-                            if (sw.Elapsed > TimeSpan.FromSeconds(30) || z == records.Count - 1)
+                            if (sw.Elapsed > TimeSpan.FromSeconds(30) || z == records.Length - 1)
                             {
                                 sw.Restart();
                                 normalizerPlugin.Normalize(waitingForSave, dbContainer);

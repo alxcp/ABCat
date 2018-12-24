@@ -8,5 +8,6 @@ namespace ABCat.Shared.Plugins.DataSets
         int LastPageCount { get; set; }
         DateTime LastUpdate { get; set; }
         string Title { get; set; }
+        int WebSiteId { get; set; }
     }
 }
