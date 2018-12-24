@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
-using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.Sites
 {
@@ -25,10 +24,5 @@ namespace ABCat.Shared.Plugins.Sites
         Task OrganizeKeywords(CancellationToken cancellationToken);
 
         Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
-
-        int WebSiteId { get; }
-
-        HashSet<string> GetGroupKeys(bool forceRefresh);
-        Uri GetRecordPageUrl([NotNull] IAudioBook record);
     }
 }

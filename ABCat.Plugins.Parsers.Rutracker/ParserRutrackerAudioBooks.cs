@@ -17,8 +17,7 @@ using JetBrains.Annotations;
 
 namespace ABCat.Plugins.Parsers.Rutracker
 {
-    [SingletoneComponentInfo("1.0", false)]
-    [UsedImplicitly]
+    [SingletoneComponentInfo("1.0")]
     public class SiteParserRutrackerAudioBooks : SiteParserBase
     {
         private const int RecordsOnPageCount = 50;
@@ -29,11 +28,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
         };
 
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
-
-        public override Uri GetRecordPageUrl(IAudioBook record)
-        {
-            return new Uri($"http://rutracker.org/forum/viewtopic.php?t={record.Key}");
-        }
 
         public override bool CheckForConfig(bool correct, out Config incorrectConfig)
         {
@@ -107,7 +101,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 {
                     using (var webClient = WebClientPool.GetPoolItem())
                     {
-                        var pageUrl = GetRecordPageUrl(audioBook);
+                        var pageUrl = audioBook.GetRecordPageUrl();
                         result = webClient.Target.DownloadString(pageUrl);
 
                         var document = new HtmlDocument();
@@ -176,8 +170,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             ParseRecord(dbContainer, record, pageHtml);
         }
 
-        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup,
-            CancellationToken cancellationToken)
+        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup, CancellationToken cancellationToken)
         {
             dbContainer.SaveChanges();
 
@@ -196,20 +189,23 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 {
                     var pageUrl = $"{url}&start={pageIndex * RecordsOnPageCount}";
                     pageHtml = webClient.Target.DownloadString(pageUrl);
+                    dbContainer.WaitForParse.Enqueue(pageHtml);
                     if (cancellationToken.IsCancellationRequested) return;
                 }
 
-                var document = new HtmlDocument();
-                document.LoadHtml(pageHtml);
-
                 if (pageCount == 0)
                 {
+                    var document = new HtmlDocument();
+                    document.LoadHtml(pageHtml);
                     UpdateRecordGroupInfo(audioBookGroup, document);
                     dbContainer.AudioBookGroupSet.AddChangedRecordGroups(audioBookGroup);
                     pageCount = audioBookGroup.LastPageCount;
                 }
 
-                ParseRecordGroupPage(dbContainer, audioBookGroup, document, cancellationToken);
+                if (dbContainer.WaitForParse.Count == 10 || pageIndex == pageCount - 1)
+                {
+                    ParseRecordGroupPages(dbContainer, audioBookGroup, cancellationToken);
+                }
 
                 Thread.Sleep(200);
 
@@ -339,7 +335,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             string page;
             using (var webClient = WebClientPool.GetPoolItem())
             {
-                var pageUrl = GetRecordPageUrl(record);
+                var pageUrl = record.GetRecordPageUrl();
                 page = webClient.Target.DownloadString(pageUrl);
                 _lastLoadFromInternet.Restart();
                 if (cancellationToken.IsCancellationRequested) return null;
@@ -547,6 +543,58 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
+        //private Dictionary<string, string> ParsePostBodyElements(string postBodyHtml)
+        //{
+        //    var result = new Dictionary<string, string>();
+
+        //    var document = new HtmlDocument();
+        //    document.LoadHtml(postBodyHtml);
+
+        //    var allNodes = document.DocumentNode.EnumerateAllNodes().ToArray();
+
+        //    for (var z = 0; z < allNodes.Length - 1; z++)
+        //    {
+        //        var postNode = allNodes[z];
+
+        //        if (postNode.Name == "span" && postNode.GetAttributeValue("class", "") == "post-b")
+        //        {
+        //            var currentElementName = postNode.InnerText;
+
+        //            string text = null;
+        //            var br = false;
+        //            var breakFound = false;
+
+        //            do
+        //            {
+        //                z++;
+        //                var next = allNodes[z];
+        //                text += next.InnerText;
+        //                if (z == allNodes.Length - 1) br = true;
+        //                else if (next.Name == "br")
+        //                {
+        //                    text += "\r\n";
+        //                    breakFound = true;
+        //                }
+        //                else if (next.Name == "span" && next.GetAttributeValue("class", "") == "post-br")
+        //                {
+        //                    text += "\r\n";
+        //                    breakFound = true;
+        //                }
+        //                else if (z < allNodes.Length - 2 && breakFound && allNodes[z + 1].Name == "span" &&
+        //                         allNodes[z + 1].GetAttributeValue("class", "") == "post-b") br = true;
+        //            } while (!br);
+
+        //            text = CleanupRecordValue(text, true, 0);
+        //            if (!string.IsNullOrEmpty(text))
+        //            {
+        //                result[currentElementName] = text;
+        //            }
+        //        }
+        //    }
+
+        //    return result;
+        //}
+
         private Dictionary<string, string> ParsePostBodyElementsByRows([NotNull] string postBodyHtml)
         {
             var result = new Dictionary<string, string>();
@@ -622,6 +670,20 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 {
                     // ignored
                 }
+            }
+        }
+
+        private void ParseRecordGroupPages(IDbContainer dbContainer, IAudioBookGroup recordGroup,
+            CancellationToken cancellationToken)
+        {
+            while (dbContainer.WaitForParse.Any())
+            {
+                var pageHtml = dbContainer.WaitForParse.Dequeue();
+                if (cancellationToken.IsCancellationRequested) return;
+                var document = new HtmlDocument();
+                document.LoadHtml(pageHtml);
+
+                ParseRecordGroupPage(dbContainer, recordGroup, document, cancellationToken);
             }
         }
 
