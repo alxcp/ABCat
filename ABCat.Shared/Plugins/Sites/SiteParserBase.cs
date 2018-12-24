@@ -298,7 +298,7 @@ namespace ABCat.Shared.Plugins.Sites
         ///     Очистить страницу описания торрента от лишних элементов (заголовок, меню, скрипты и др.)
         /// </summary>
         /// <param name="document">Документ</param>
-        protected virtual void ClearRecordPage(HtmlDocument document)
+        protected virtual void CleanupRecordPage(HtmlDocument document)
         {
             foreach (var script in document.GetNodes("script", "type", str => true).ToArray())
             {

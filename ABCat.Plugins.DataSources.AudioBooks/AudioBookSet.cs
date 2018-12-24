@@ -226,7 +226,7 @@ AND abg.WebSiteId = ?", webSiteId));
                     {
                         Execute(@"
 DELETE FROM AudioBook
-WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => item.Key))));
+WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => $"'{item.Key}'"))));
                     }
 
                     InsertAll(books4Add.Union(books4Replace));

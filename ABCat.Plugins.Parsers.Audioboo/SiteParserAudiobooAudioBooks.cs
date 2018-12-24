@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -53,29 +54,60 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return result;
         }
 
-        protected override void ClearRecordPage(HtmlDocument document)
+        protected override void CleanupRecordPage(HtmlDocument document)
         {
-            base.ClearRecordPage(document);
-            var pageHeader = document.GetElementbyId("page_header");
+            base.CleanupRecordPage(document);
+            var pageHeader = document.DocumentNode.Descendants("div").FirstOrDefault(item=>item.HasClass("header"));
             pageHeader?.ParentNode.RemoveChild(pageHeader);
-            var pageFooter = document.GetElementbyId("page_footer");
-            pageFooter?.ParentNode.RemoveChild(pageFooter);
-            var attachComment = document.GetNodesByClass("div", "attach_comment med").FirstOrDefault();
-            attachComment?.ParentNode.RemoveChild(attachComment);
-            var boldTCenter = document.GetNodesByClass("div", "bold tCenter mrg_8").FirstOrDefault();
-            boldTCenter?.ParentNode.RemoveChild(boldTCenter);
-            var charSet = document.DocumentNode.GetNodes("meta", "charset", "Windows-1251").FirstOrDefault();
-            charSet?.SetAttributeValue("charset", "utf-8");
+            var loadingLayer = document.GetElementbyId("loading-layer");
+            loadingLayer?.ParentNode.RemoveChild(loadingLayer);
+            var noIndex = document.DocumentNode.Descendants("noindex").FirstOrDefault();
+            noIndex?.ParentNode.RemoveChild(noIndex);
 
-            var nodeNames = new[] {"td", "p", "tbody", "div"};
+            var main = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("main"));
+            var mainElements = main?.ChildNodes.ToArray();
 
-            foreach (var nodeName in nodeNames)
+            if (mainElements != null)
             {
-                foreach (var hideForPrintNode in document.GetNodes(nodeName, "class", cls=>!cls.IsNullOrEmpty() && cls.Contains("hide-for-print")).ToList())
+                for (var z = 0; z < mainElements.Length - 1; z++)
                 {
-                    hideForPrintNode.ParentNode.RemoveChild(hideForPrintNode);
+                    mainElements[z].ParentNode.RemoveChild(mainElements[z]);
                 }
             }
+
+            var fullNewsContentNode = document.DocumentNode.Descendants("div")
+                .FirstOrDefault(item => item.HasClass("full-news-content"));
+
+            var fullNewsContentElements = fullNewsContentNode?.ChildNodes.ToArray();
+            if (fullNewsContentElements != null)
+            {
+                bool startDeletion = false;
+                foreach (var fullNewsContentElement in fullNewsContentElements)
+                {
+                    if (startDeletion)
+                        fullNewsContentElement.ParentNode.RemoveChild(fullNewsContentElement);
+                    else if (fullNewsContentElement.GetAttributeValue("id", "").StartsWith("news-id-"))
+                        startDeletion = true;
+                }
+            }
+
+            var rightCol = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("right-col"));
+            rightCol?.ParentNode.RemoveChild(rightCol);
+            var footer = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("footer"));
+            footer?.ParentNode.RemoveChild(footer);
+
+            var charSet = document.DocumentNode.GetNodes("meta", "content", item=>item.Contains("charset=")).FirstOrDefault();
+            charSet?.SetAttributeValue("content", charSet.GetAttributeValue("content", "").Replace("windows-1251", "utf-8"));
+
+            var textNodes = document.DocumentNode.Descendants("#text").Where(item=>item.InnerHtml.Replace("\n","").Trim() == string.Empty).ToArray();
+            foreach (var textNode in textNodes)
+            {
+                textNode.ParentNode.RemoveChild(textNode);
+            }
+
+#if DEBUG
+            var text = document.DocumentNode.InnerHtml;
+#endif
         }
 
         [CanBeNull]
@@ -98,7 +130,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
                         document.Load(ms);
                         if (cancellationToken.IsCancellationRequested) return null;
 
-                        ClearRecordPage(document);
+                        CleanupRecordPage(document);
                         result = document.DocumentNode.InnerHtml;
 
                         if (cancellationToken.IsCancellationRequested) return null;
@@ -119,7 +151,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
                         document.LoadHtml(result);
                         if (cancellationToken.IsCancellationRequested) return null;
 
-                        ClearRecordPage(document);
+                        CleanupRecordPage(document);
                         result = document.DocumentNode.InnerHtml;
 
                         if (cancellationToken.IsCancellationRequested) return null;
@@ -156,7 +188,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
                         var doc = new HtmlDocument();
                         doc.Load(ms);
                         var savedHtml = doc.DocumentNode.OuterHtml;
-                        ClearRecordPage(doc);
+                        CleanupRecordPage(doc);
                         pageHtml = doc.DocumentNode.InnerHtml;
 
                         if (savedHtml != pageHtml)
@@ -230,27 +262,38 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
             var document = new HtmlDocument();
             document.LoadHtml(postHtml);
-            var topicMain = document.GetElementbyId("topic_main");
-            var postBody = topicMain?.Descendants().FirstOrDefault(item => item.HasClass("post_body"));
+            var postBody = document.DocumentNode.Descendants("div")
+                .FirstOrDefault(item => item.GetAttributeValue("id", "").StartsWith("news-id-"));
 
             if (postBody != null)
             {
                 var elementsByRows = ParsePostBodyElementsByRows(postBody.InnerHtml);
 
-                var sizeElement = document.DocumentNode.Descendants()
-                    .FirstOrDefault(item => item.HasClass("attach_link") && item.HasClass("guest"));
-
-                if (sizeElement != null && sizeElement.ChildNodes.Count == 3)
+                if (elementsByRows.TryGetValue("Общий размер", out var sizeText))
                 {
-                    var sizeNode = sizeElement.LastChild;
-                    var size = GetSizeInBytes(sizeNode.InnerText.ReplaceAll(new[] {"&middot;", "&nbsp;"}, " ")
-                        .Trim(' ', '\t'));
+                    var size = GetSizeInBytes(sizeText);
                     record.Size = size;
                 }
 
                 foreach (var element in elementsByRows)
                 {
                     FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
+                }
+
+                if (record.Author.IsNullOrEmpty())
+                {
+                    if (!record.AuthorNameForParse.IsNullOrEmpty() || !record.AuthorSurnameForParse.IsNullOrEmpty())
+                    {
+                        record.Author = string.Join(", ", record.AuthorSurnameForParse, record.AuthorNameForParse);
+                    }
+                    else
+                    {
+                        var titleParts = record.Title.Split(" - ");
+                        if (titleParts.Length > 1)
+                        {
+                            record.Author = titleParts.First();
+                        }
+                    }
                 }
             }
         }
@@ -259,18 +302,23 @@ namespace ABCat.Plugins.Parsers.Audioboo
         {
             long result = 0;
             var subSize = sizeString.Split(' ');
-            if (subSize.Length == 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
+            subSize[0] = subSize[0].Replace(',', '.');
+
+            if (subSize.Length >= 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
             {
                 int multiplier = 0;
 
                 switch (subSize[1])
                 {
+                    case "Гб":
                     case "GB":
                         multiplier = 1024 * 1024 * 1024;
                         break;
+                    case "Мб":
                     case "MB":
                         multiplier = 1024 * 1024;
                         break;
+                    case "Кб":
                     case "KB":
                         multiplier = 1024;
                         break;
@@ -316,13 +364,6 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return mainContentWrap.GetNodesByClass("div", "biography-main");
         }
 
-        private static string GetTopicTitle(HtmlNode topicNode, string topicId)
-        {
-            var result = topicNode.GetNodes("a", "id", "tt-" + topicId).First().InnerText.Replace("&quot;", "\"");
-            result = result.Split('[')[0];
-            return result;
-        }
-
         private string DownloadRecordMetaPageFromWeb(IAudioBook record, IDbContainer dbContainer,
             CancellationToken cancellationToken)
         {
@@ -345,7 +386,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
             document.LoadHtml(page);
             if (cancellationToken.IsCancellationRequested) return null;
 
-            ClearRecordPage(document);
+            CleanupRecordPage(document);
             page = document.DocumentNode.InnerHtml;
 
             var pageKey = record.GetPageKey();
@@ -549,28 +590,26 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
         private Dictionary<string, string> ParsePostBodyElementsByRows([NotNull] string postBodyHtml)
         {
-            var result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             var rows = postBodyHtml
-                .Split(new[] {"<br>", "<hr class=\"post-hr\">", "<span class=\"post-b\">"},
-                    StringSplitOptions.RemoveEmptyEntries).Select(item => item.TrimStart('\n', '"'))
-                .Where(item => !item.IsNullOrEmpty() && item != "</span>").ToArray();
+                .Split(new[] {"<br>", "<tr class='row1'>"}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(item => item.ReplaceAll(new[] {"&nbsp;", "\n"}, "")).ToArray();
 
+            //"\n  <td class='genmed'>Общий размер:</td>\n  <td class='genmed'><font color='#123456'>409,93 Мб b</font></td>\n </tr>\n "
 
             if (rows.Length > 1)
             {
-                rows[1] = string.Join("", rows[1].Split("</var>").Skip(1));
-
-                // Skip(1) - skip post title
+                // Skip(1) - skip title element
                 foreach (var row in rows.Skip(1))
                 {
                     var doc = new HtmlDocument();
                     doc.LoadHtml(row);
-                    var str = doc.DocumentNode.InnerText.TrimStart('\n', '"');
+                    var str = doc.DocumentNode.InnerText.Trim();
 
                     if (!str.IsNullOrEmpty() && ParseKeyValue(str, out var key, out var value))
                     {
-                        result[key] = value;
+                        result[key] = value.Trim();
                     }
                 }
             }
