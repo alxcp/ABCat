@@ -8,7 +8,6 @@ namespace ABCat.Shared.Plugins.DataProviders
     {
         IAudioBookGroupSet AudioBookGroupSet { get; }
         IAudioBookSet AudioBookSet { get; }
-        IAudioBookWebSiteSet WebSiteSet { get; }
         bool AutoSaveChanges { get; set; }
         IBinaryDataSet BinaryDataSet { get; }
         IHiddenRecordSet HiddenRecordSet { get; }
@@ -16,6 +15,7 @@ namespace ABCat.Shared.Plugins.DataProviders
         HashSet<string> RecordsCache { get; }
         IReplacementStringSet ReplacementStringSet { get; }
         IUserDataSet UserDataSet { get; }
+        Queue<string> WaitForParse { get; }
 
         void SaveChanges();
     }

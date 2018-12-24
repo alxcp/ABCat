@@ -20,5 +20,7 @@ namespace ABCat.Shared.Plugins.DataSets
         void ClearMetaInfo();
         string GetPageKey();
         string GetPageMetaKey();
+
+        Uri GetRecordPageUrl();
     }
 }

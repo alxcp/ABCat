@@ -86,7 +86,6 @@
     <Compile Include="AudioBooksDbContainerSQLiteConfig.cs" />
     <Compile Include="AudioBookSet.cs" />
     <Compile Include="AudioBooksDbContainerSQLite.cs" />
-    <Compile Include="AudioBookWebSite.cs" />
     <Compile Include="BinaryData.cs" />
     <Compile Include="BinaryDataSet.cs" />
     <Compile Include="DBSetBase.cs" />

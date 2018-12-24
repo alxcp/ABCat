@@ -16,7 +16,5 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         [Column("LastUpdate")] public DateTime LastUpdate { get; set; }
 
         [Column("Title")] public string Title { get; set; }
-
-        [Column("WebSiteId")] public int WebSiteId { get; set; }
     }
 }

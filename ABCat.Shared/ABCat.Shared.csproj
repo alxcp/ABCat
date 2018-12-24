@@ -110,7 +110,6 @@
     <Compile Include="Plugins\DataSets\IAudioBookGroup.cs" />
     <Compile Include="Plugins\DataSets\IAudioBookGroupSet.cs" />
     <Compile Include="Plugins\DataSets\IAudioBookSet.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBookWebSiteSet.cs" />
     <Compile Include="Plugins\DataSets\IBinaryData.cs" />
     <Compile Include="Plugins\DataSets\IBinaryDataSet.cs" />
     <Compile Include="Plugins\DataSets\IHiddenRecord.cs" />
@@ -123,7 +122,6 @@
     <Compile Include="Plugins\DataSets\IReplacementStringSet.cs" />
     <Compile Include="Plugins\DataSets\IUserData.cs" />
     <Compile Include="Plugins\DataSets\IUserDataSet.cs" />
-    <Compile Include="Plugins\DataSets\IWebSite.cs" />
     <Compile Include="Plugins\Downloaders\ITorrentFileDownloaderPlugin.cs" />
     <Compile Include="Plugins\Sites\IRecordTargetDownloaderPlugin.cs" />
     <Compile Include="Plugins\Sites\ISiteParserPlugin.cs" />
