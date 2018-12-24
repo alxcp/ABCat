@@ -6,7 +6,7 @@ using ABCat.Shared.Plugins.DataSets;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {
-    public class AudioBookSet : DBSetBase, IAudioBookSet, IAudioBookGroupSet
+    public class AudioBookSet : DBSetBase, IAudioBookSet, IAudioBookGroupSet, IAudioBookWebSiteSet
     {
         private static volatile bool _isTablesCreated;
 
@@ -29,6 +29,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                     {
                         CreateTable<AudioBook>();
                         CreateTable<AudioBookGroup>();
+                        CreateTable<AudioBookWebSite>();
                         _isTablesCreated = true;
 
                         if (vacuum) Execute("VACUUM");
@@ -114,7 +115,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                     {
                         Execute(@"
 DELETE FROM AudioBookGroup
-WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => item.Key))));
+WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => $"'{item.Key}'"))));
                     }
 
                     InsertAll(bookGroups4Add.Union(bookGroups4Replace));
@@ -170,11 +171,28 @@ WHERE GroupKey = ?;", linkedObjectString));
             });
         }
 
-        public IEnumerable<IAudioBook> GetRecordsUpdatedBefore(DateTime lastUpdate)
+        public IEnumerable<IAudioBook> GetRecordsUpdatedBefore(int webSiteId, DateTime lastUpdate)
         {
             return ExecuteWithLock(() =>
             {
-                return Table<AudioBook>().ToArray().Where(audioBook => audioBook.LastUpdate <= lastUpdate);
+                return ExecuteWithLock(() => Query<AudioBook>(@"
+SELECT ab.* FROM AudioBook ab
+JOIN AudioBookGroup abg
+ON ab.GroupKey = abg.Key
+AND abg.WebSiteId = ?
+AND ab.lastUpdate<= ?", webSiteId, lastUpdate.Ticks));
+            });
+        }
+
+        public IEnumerable<IAudioBook> GetRecordsByWebSite(int webSiteId)
+        {
+            return ExecuteWithLock(() =>
+            {
+                return ExecuteWithLock(() => Query<AudioBook>(@"
+SELECT ab.* FROM AudioBook ab
+JOIN AudioBookGroup abg
+ON ab.GroupKey = abg.Key
+AND abg.WebSiteId = ?", webSiteId));
             });
         }
 
@@ -247,6 +265,21 @@ WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => item.Key))));
 SELECT * FROM AudioBook
 WHERE Key = ?
 LIMIT 1;", key));
+        }
+
+        public void AddWebSite(IAudioBookWebSite webSite)
+        {
+            ExecuteWithLock(() => { Insert(webSite); });
+        }
+
+        public IAudioBookWebSite CreateWebSite()
+        {
+            return new AudioBookWebSite();
+        }
+
+        public IEnumerable<IAudioBookWebSite> GetWebSitesAll()
+        {
+            return Table<AudioBookWebSite>();
         }
     }
 }

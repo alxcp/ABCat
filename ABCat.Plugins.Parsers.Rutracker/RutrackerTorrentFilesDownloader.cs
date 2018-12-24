@@ -10,9 +10,11 @@ using ABCat.Shared.Plugins.Downloaders;
 using ABCat.Shared.Plugins.Sites;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
+using JetBrains.Annotations;
 
 namespace ABCat.Plugins.Parsers.Rutracker
 {
+    [UsedImplicitly]
     [SingletoneComponentInfo("2.2")]
     public class RutrackerTorrentFilesDownloader : RecordTargetDownloaderBase
     {

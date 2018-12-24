@@ -45,10 +45,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Downloaders", "Downloaders"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.TorrentFileDownloaders", "ABCat.Plugins.TorrentFileDownloaders\ABCat.Plugins.TorrentFileDownloaders.csproj", "{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCat.Plugins.Parsers.Audioboo", "ABCat.Plugins.Parsers.Audioboo\ABCat.Plugins.Parsers.Audioboo.csproj", "{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}"
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -226,6 +225,18 @@ Global
 		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Any CPU.Build.0 = Release|Any CPU
 		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F}.x86|Mixed Platforms.Build.0 = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.x86|Any CPU.ActiveCfg = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.x86|Any CPU.Build.0 = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.x86|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3}.x86|Mixed Platforms.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -246,9 +257,13 @@ Global
 		{E4D90D53-76B7-4FF2-98BF-E59A14B9BADD} = {D75A5FE6-6544-467B-A767-90A38BB298A4}
 		{111803D1-F920-443C-AE15-B26F77A5B27D} = {9961D052-EF38-4043-9A5C-F84B5483DF96}
 		{1168EDE1-C4F7-442A-9738-7CDB7F6E803F} = {111803D1-F920-443C-AE15-B26F77A5B27D}
+		{7EA941AE-8CEC-44E6-A7A8-56E9D15142A3} = {6DE1F333-8499-4577-B810-622FD9A15D7B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8444EB21-2B3F-4370-AC5A-51442C05D6B0}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
