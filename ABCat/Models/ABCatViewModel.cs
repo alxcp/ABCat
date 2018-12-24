@@ -36,8 +36,9 @@ namespace ABCat.UI.WPF.Models
                 Context.I.ComponentFactory.CreateActual<IRecordsListPlugin>();
             RecordsListUc.Data = new List<IAudioBook>();
             StatusBarStateModel = new StatusBarStateViewModel(IsCanCancelAsyncOperation, CancelAsyncOperation);
-            SiteParserModel = new SiteParserViewModel(this,
-                Context.I.ComponentFactory.CreateActual<ISiteParserPlugin>(), () => SelectedItems);
+
+            SiteParserModel = new SiteParserViewModel(this, () => SelectedItems);
+
             RecordTargetDownloaderModel = new RecordTargetDownloaderViewModel(StatusBarStateModel,
                 Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems,
                 async () => await Filter.UpdateCache(UpdateTypes.Loaded));
@@ -74,8 +75,9 @@ namespace ABCat.UI.WPF.Models
                 var selectedItem = SelectedItems.FirstOrDefault();
                 if (selectedItem != null)
                 {
-                    var url = selectedItem.GetRecordPageUrl();
-                    Process.Start(url.AbsoluteUri);
+                    var url = SiteParserModel.GetRecordPageUrl(selectedItem);
+                    if (url != null)
+                        Process.Start(url.AbsoluteUri);
                 }
             }, () => SelectedItems.AnySafe());
 
@@ -176,7 +178,7 @@ namespace ABCat.UI.WPF.Models
         public async Task ShowInBrowser([NotNull] IAudioBook record)
         {
             var pageHtml =
-                await SiteParserModel.SiteParserPlugin.DownloadRecordSourcePage(record,
+                await SiteParserModel.DownloadRecordSourcePage(record,
                     CancellationToken.None);
 
             Application.Current.Dispatcher.CheckAccess(() =>
