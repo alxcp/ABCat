@@ -113,9 +113,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 {
                     if (bookGroups4Replace.Any())
                     {
-                        Execute(@"
+                        var keys = string.Join(",", bookGroups4Replace.Select(item => $"'{item.Key}'"));
+                        Execute($@"
 DELETE FROM AudioBookGroup
-WHERE Key IN({0})".F(string.Join(",", bookGroups4Replace.Select(item => $"'{item.Key}'"))));
+WHERE Key IN({keys})");
                     }
 
                     InsertAll(bookGroups4Add.Union(bookGroups4Replace));
@@ -224,9 +225,10 @@ AND abg.WebSiteId = ?", webSiteId));
                 {
                     if (books4Replace.Any())
                     {
-                        Execute(@"
+                        var keys = string.Join(",", books4Replace.Select(item => $"'{item.Key}'"));
+                        Execute($@"
 DELETE FROM AudioBook
-WHERE Key IN({0})".F(string.Join(",", books4Replace.Select(item => $"'{item.Key}'"))));
+WHERE Key IN({keys})");
                     }
 
                     InsertAll(books4Add.Union(books4Replace));

@@ -17,7 +17,7 @@ using JetBrains.Annotations;
 
 namespace ABCat.Plugins.Parsers.Rutracker
 {
-    [SingletoneComponentInfo("1.0", false)]
+    [SingletoneComponentInfo("1.0")]
     [UsedImplicitly]
     public class SiteParserRutrackerAudioBooks : SiteParserBase
     {
@@ -48,13 +48,16 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
+        protected override string[] RecordPageJunkIdList { get; } =
+        {
+            "page_header", "page_footer", "ajax-loading", "ajax-error", "bb-alert-box", "modal-blocker", "pagination",
+            "misc-hidden-elements", "pg-jump", "old-browser-warn", "invisible-heap", "preload"
+        };
+
         protected override void CleanupRecordPage(HtmlDocument document)
         {
             base.CleanupRecordPage(document);
-            var pageHeader = document.GetElementbyId("page_header");
-            pageHeader?.ParentNode.RemoveChild(pageHeader);
-            var pageFooter = document.GetElementbyId("page_footer");
-            pageFooter?.ParentNode.RemoveChild(pageFooter);
+
             var attachComment = document.GetNodesByClass("div", "attach_comment med").FirstOrDefault();
             attachComment?.ParentNode.RemoveChild(attachComment);
             var boldTCenter = document.GetNodesByClass("div", "bold tCenter mrg_8").FirstOrDefault();
@@ -62,14 +65,23 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var charSet = document.DocumentNode.GetNodes("meta", "charset", "Windows-1251").FirstOrDefault();
             charSet?.SetAttributeValue("charset", "utf-8");
 
-            var nodeNames = new[] {"td", "p", "tbody", "div"};
-
-            foreach (var nodeName in nodeNames)
+            foreach (var hideForPrintNode in document.DocumentNode.Descendants().Where(item => item.HasClass("hide-for-print")).ToArray())
             {
-                foreach (var hideForPrintNode in document.GetNodes(nodeName, "class", cls=>!cls.IsNullOrEmpty() && cls.Contains("hide-for-print")).ToList())
-                {
-                    hideForPrintNode.ParentNode.RemoveChild(hideForPrintNode);
-                }
+                hideForPrintNode.ParentNode.RemoveChild(hideForPrintNode);
+            }
+
+            var textNodes = document.DocumentNode.Descendants("#text")
+                .Where(item => item.InnerHtml.ReplaceAll(new[] {"\n", "\t"}, string.Empty).Trim() == string.Empty).ToArray();
+
+            foreach (var textNode in textNodes)
+            {
+                textNode.ParentNode.RemoveChild(textNode);
+            }
+
+            var commentNodes = document.DocumentNode.Descendants("#comment").ToArray();
+            foreach (var commentNode in commentNodes)
+            {
+                commentNode.ParentNode.RemoveChild(commentNode);
             }
         }
 
@@ -163,7 +175,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 }
             }
 
-            if (pageHtml.IsNullOrEmpty())
+            if (pageHtml.IsNullOrEmpty() && pageSource != PageSources.CacheOnly)
             {
                 pageHtml = DownloadRecordMetaPageFromWeb(record, dbContainer, cancellationToken);
             }

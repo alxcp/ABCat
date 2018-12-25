@@ -51,8 +51,7 @@ namespace Component.Infrastructure
                 if (defaultCtor != null && defaultCtor.IsPublic) result = (Config) Activator.CreateInstance(configType);
                 else
                     throw new Exception(
-                        "Класс конфигурации '{0}' '{1}' не имеет поддерживаемых конструкторов".F(
-                            configType.Assembly.FullName, configType.FullName));
+                        $"Configuration class '{configType.Assembly.FullName}' '{configType.FullName}' has no supportable constructors");
             }
 
             return result;
@@ -142,13 +141,13 @@ namespace Component.Infrastructure
         {
             var invalid = new string(Path.GetInvalidFileNameChars());
             if (invalid.Any(layoutName.Contains))
-                throw new Exception("Имя лайяута '{0}' содержит недопустимые символы".F(layoutName));
+                throw new Exception($"Name of the layout '{layoutName}' contains invalid characters.");
             return Path.Combine(LayoutFolderPath, layoutName);
         }
 
         private static string GetPluginConfigFilePath(Type configType)
         {
-            return Path.Combine(ConfigFolderPath, "{0}.xml".F(configType.Name));
+            return Path.Combine(ConfigFolderPath, $"{configType.Name}.xml");
         }
     }
 }

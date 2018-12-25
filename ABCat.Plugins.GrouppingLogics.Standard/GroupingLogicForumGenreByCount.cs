@@ -36,13 +36,13 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                 foreach (var grouping in records.OrderBy(item => item.Key == null ? "" : recordGroups[item.Key].Title))
                 {
                     if (cancellationToken.IsCancellationRequested) return null;
+                    var title = grouping.Key == null ? "" : recordGroups[grouping.Key].Title;
                     var recordGroupGroup = new Group(this)
                     {
                         LinkedObjectString = grouping.Key ?? "",
                         Parent = root,
                         Level = 1,
-                        Caption = "{0} [{1}]".F(grouping.Key == null ? "" : recordGroups[grouping.Key].Title,
-                            grouping.Count())
+                        Caption = $"{title} [{grouping.Count()}]"
                     };
                     root.Children.Add(recordGroupGroup);
 
@@ -53,7 +53,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                     )
                     {
                         if (cancellationToken.IsCancellationRequested) return null;
-                        var groupCaption = "{0} [{1}]".F(genreRecord.Key, genreRecord.Count());
+                        var groupCaption = $"{genreRecord.Key} [{genreRecord.Count()}]";
 
                         var recordGenreGroup = new Group(this)
                         {

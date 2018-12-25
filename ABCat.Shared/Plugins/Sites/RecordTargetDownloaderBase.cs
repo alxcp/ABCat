@@ -26,7 +26,7 @@ namespace ABCat.Shared.Plugins.Sites
 
                     foreach (var record in records)
                     {
-                        totalProgressCallback(z, records.Count(), "{0} из {1}".F(z, records.Count()));
+                        totalProgressCallback(z, records.Length, $"{z} / {record.Length}");
                         DownloadRecordTarget(null, record, dbContainer, smallProgressCallback,
                             cancellationToken);
                         if (cancellationToken.IsCancellationRequested) break;
@@ -41,7 +41,7 @@ namespace ABCat.Shared.Plugins.Sites
 
         public void Dispose()
         {
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Disposed;

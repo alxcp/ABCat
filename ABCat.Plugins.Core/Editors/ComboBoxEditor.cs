@@ -33,8 +33,7 @@ namespace ABCat.Core.Editors
             }
 
             throw new Exception(
-                "Источник данных для редактора свойства '{0}' не зарегистрирован".F(
-                    propertyItem.PropertyDescriptor.Name));
+                $"There is no registered data sources for property '{propertyItem.PropertyDescriptor.Name}'");
         }
 
         public static void Register([NotNull] string propertyItemName,

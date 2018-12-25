@@ -116,63 +116,9 @@ namespace ABCat.Shared
         public static string CollectExceptionDetails(this Exception ex)
         {
             string result = null;
-            result += "Message: {0}\r\nStack: {1}\r\n---------\r\n".F(ex.Message, ex.StackTrace);
+            result += $"Message: {ex.Message}\r\nStack: {ex.StackTrace}\r\n---------\r\n";
             if (ex.InnerException != null) result += ex.InnerException.CollectExceptionDetails();
             return result;
-        }
-
-        public static bool CompareEnd<T>(this List<T> collection, List<T> search)
-        {
-            var result = false;
-
-            if (collection.Count >= search.Count)
-            {
-                result = true;
-                for (var z = 0; z < search.Count; z++)
-                {
-                    if (!Equals(collection[collection.Count - z - 1], search[search.Count - z - 1]))
-                    {
-                        result = false;
-                        break;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        public static IEnumerable<HtmlNode> EnumerateAllNodes(this HtmlNode rootNode)
-        {
-            var nodes = new Queue<HtmlNode>();
-
-            nodes.Enqueue(rootNode);
-
-            while (nodes.Count > 0)
-            {
-                var node = nodes.Dequeue();
-                yield return node;
-                foreach (var childNode in node.ChildNodes)
-                {
-                    nodes.Enqueue(childNode);
-                }
-            }
-        }
-
-        [StringFormatMethod("formatString")]
-        public static string F(this string formatString, params object[] args)
-        {
-            return string.Format(formatString, args);
-        }
-
-        public static void Fire(this EventHandler eventHandler, object sender, EventArgs e = null)
-        {
-            eventHandler?.Invoke(sender, e ?? EventArgs.Empty);
-        }
-
-        public static void Fire<T>(this EventHandler<T> eventHandler, object sender, T e)
-            where T : EventArgs
-        {
-            eventHandler?.Invoke(sender, e);
         }
 
         public static string GenerateRandomString(int size, int? seed = null)
@@ -269,43 +215,17 @@ namespace ABCat.Shared
 
         public static void InsertSpace(StringBuilder sb, string sign, bool spaceBefore, bool spaceAfter)
         {
-            sb.Replace("{0} ".F(sign), sign);
-            sb.Replace(" {0}".F(sign), sign);
+            sb.Replace(sign + " ", sign);
+            sb.Replace(" " + sign, sign);
 
-            if (spaceBefore) sb.Replace(sign, " {0}".F(sign));
-            if (spaceAfter) sb.Replace(sign, "{0} ".F(sign));
+            if (spaceBefore) sb.Replace(sign, " " + sign);
+            if (spaceAfter) sb.Replace(sign, sign + " ");
         }
 
         [ContractAnnotation("value:null => true")]
         public static bool IsNullOrEmpty([CanBeNull] this string value)
         {
             return string.IsNullOrEmpty(value);
-        }
-
-        public static void Pack(IEnumerable<string> sourceFiles, string topDirectory, string packFile)
-        {
-            if (File.Exists(packFile))
-            {
-                File.Delete(packFile);
-            }
-
-            using (var fs = new FileStream(packFile, FileMode.Create, FileAccess.Write))
-            {
-                using (var bw = new BinaryWriter(fs))
-                {
-                    bw.Write("1.0");
-                    bw.Write("1.0");
-                    bw.Write(sourceFiles.Count());
-
-                    foreach (var sourceFile in sourceFiles)
-                    {
-                        var sourceContent = File.ReadAllBytes(sourceFile);
-                        bw.Write(sourceFile.Replace(topDirectory, ""));
-                        bw.Write(sourceContent.Length);
-                        bw.Write(sourceContent);
-                    }
-                }
-            }
         }
 
         public static int Randomize(this int value, int range)
@@ -341,53 +261,6 @@ namespace ABCat.Shared
         public static string ToStringOrEmpty(this object value)
         {
             return value == null ? string.Empty : value.ToString();
-        }
-
-        public static void UnPack(string packFile, string targetPath, Action<int> reportProgressCallBack)
-        {
-            using (var fs = new FileStream(packFile, FileMode.Open, FileAccess.Read))
-            {
-                using (var br = new BinaryReader(fs))
-                {
-                    var version = br.ReadString();
-                    var softVersion = br.ReadString();
-
-                    if (version == "1.0")
-                    {
-                        try
-                        {
-                            var filesCount = br.ReadInt32();
-
-                            for (var z = 0; z < filesCount; z++)
-                            {
-                                var filePathName = Path.Combine(targetPath, br.ReadString());
-
-                                var length = br.ReadInt32();
-                                try
-                                {
-                                    File.WriteAllBytes(filePathName, br.ReadBytes(length));
-                                    reportProgressCallBack((int) (fs.Position / (double) fs.Length) * 100);
-                                }
-                                catch (Exception ex)
-                                {
-                                    throw new Exception("Ошибка создания файла '{0}'".F(filePathName), ex);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            throw new Exception("Ошибка чтения пакета '{0}'".F(packFile), ex);
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception(
-                            "Невозможно открыть пакет. Требуется версия программы не ниже '{0}'. Версия пакета: '{1}'."
-                                .F(
-                                    softVersion, version));
-                    }
-                }
-            }
         }
 
         private static IEnumerable<InstalledApplication> GetInstalledApplications([NotNull] RegistryKey key)

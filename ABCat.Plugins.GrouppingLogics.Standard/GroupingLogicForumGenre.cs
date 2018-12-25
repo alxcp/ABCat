@@ -6,10 +6,12 @@ using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
+using JetBrains.Annotations;
 
 namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("1.0")]
+    [UsedImplicitly]
     public class GroupingLogicForumGenre : GroupingLogicPluginBase
     {
         public override string Name => "Форум → Жанр";
@@ -36,13 +38,13 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                 foreach (var grouping in records.OrderBy(item => item.Key == null ? "" : recordGroups[item.Key].Title))
                 {
                     if (cancellationToken.IsCancellationRequested) return null;
+                    var title = grouping.Key == null ? "" : recordGroups[grouping.Key].Title;
                     var recordGroupGroup = new Group(this)
                     {
                         LinkedObjectString = grouping.Key ?? "",
                         Parent = root,
                         Level = 1,
-                        Caption = "{0} [{1}]".F(grouping.Key == null ? "" : recordGroups[grouping.Key].Title,
-                            grouping.Count())
+                        Caption = $"{title} [{grouping.Count()}]"
                     };
                     root.Children.Add(recordGroupGroup);
 
@@ -51,7 +53,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                     foreach (var genreRecord in genreRecords.OrderBy(item => item.Key))
                     {
                         if (cancellationToken.IsCancellationRequested) return null;
-                        var groupCaption = "{0} [{1}]".F(genreRecord.Key, genreRecord.Count());
+                        var groupCaption = $"{genreRecord.Key} [{genreRecord.Count()}]";
 
                         var recordGenreGroup = new Group(this)
                         {

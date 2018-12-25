@@ -89,9 +89,10 @@ LIMIT 1;", key));
                 {
                     if (data4Replace.AnySafe())
                     {
-                        Execute(@"
+                        var keys = string.Join(",", data4Replace.Select(item => $"'{item.Key}'"));
+                        Execute($@"
 DELETE FROM BinaryData
-WHERE Key IN({0})".F(string.Join(",", data4Replace.Select(item => "'{0}'".F(item.Key)))));
+WHERE Key IN({keys})");
                     }
 
                     InsertAll(data4Add.Union(data4Replace));

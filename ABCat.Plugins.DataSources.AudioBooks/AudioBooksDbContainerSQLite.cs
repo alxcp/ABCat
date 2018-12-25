@@ -91,7 +91,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         public void Dispose()
         {
             if (AutoSaveChanges) SaveChanges();
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public void SaveChanges()

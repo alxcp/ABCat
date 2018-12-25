@@ -29,14 +29,14 @@ namespace Component.Infrastructure
                 var creator = GetActualCreator<T>();
                 if (creator == null)
                 {
-                    throw new Exception("Creator of Type {0} not found".F(typeof(T).Name));
+                    throw new Exception($"Creator of Type {typeof(T).Name} not found");
                 }
 
                 return creator.GetInstance<T>();
             }
             catch (Exception ex)
             {
-                throw new Exception("Exception during creation component of type {0}".F(typeof(T).Name), ex);
+                throw new Exception($"Exception during creation component of type {typeof(T).Name}", ex);
             }
         }
 
