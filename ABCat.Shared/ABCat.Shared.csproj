@@ -83,6 +83,7 @@
     <Compile Include="Exceptions\DelegateCommandCannotBeNullException.cs" />
     <Compile Include="ExceptionTypes.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="HtmlExtensions.cs" />
     <Compile Include="IContext.cs" />
     <Compile Include="ILog.cs" />
     <Compile Include="ILoggerFactory.cs" />

@@ -100,7 +100,7 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         /// </summary>
         public void Dispose()
         {
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>

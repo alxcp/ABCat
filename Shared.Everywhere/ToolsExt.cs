@@ -171,35 +171,20 @@ public static class ToolsExt
         }
     }
 
-    /// <summary>
-    ///     Replaces the format item in a specified string with the string representation of a corresponding object in a
-    ///     specified array.
-    /// </summary>
-    /// <param name="format">A composite format string</param>
-    /// <param name="args">An object array that contains zero or more objects to format</param>
-    /// <returns>
-    ///     A copy of format in which the format items have been replaced by the string representation of the
-    ///     corresponding objects in args.
-    /// </returns>
-    public static string F(this string format, params object[] args)
-    {
-        return String.IsNullOrEmpty(format) ? format : Format(format, args);
-    }
+    //public static void Fire(this EventHandler eventHandler, object sender, EventArgs e)
+    //{
+    //    if (eventHandler == null)
+    //    {
+    //        return;
+    //    }
 
-    public static void Fire(this EventHandler eventHandler, object sender, EventArgs e)
-    {
-        if (eventHandler == null)
-        {
-            return;
-        }
+    //    eventHandler(sender, e);
+    //}
 
-        eventHandler(sender, e);
-    }
-
-    public static void Fire<T>(this EventHandler<T> eventHandler, object sender, T e) where T : EventArgs
-    {
-        eventHandler?.Invoke(sender, e);
-    }
+    //public static void Fire<T>(this EventHandler<T> eventHandler, object sender, T e) where T : EventArgs
+    //{
+    //    eventHandler?.Invoke(sender, e);
+    //}
 
     public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : new()
     {

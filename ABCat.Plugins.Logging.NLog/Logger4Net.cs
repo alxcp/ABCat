@@ -40,7 +40,7 @@ namespace ABCat.Plugins.Logging.NLog
 
         public void Debug(string format, params object[] args)
         {
-            _log.Debug(format.F(args));
+            _log.Debug(format, args);
         }
 
         public void Debug(Exception exception, string format, params object[] args)
@@ -67,7 +67,7 @@ namespace ABCat.Plugins.Logging.NLog
 
         public void Error(string format, params object[] args)
         {
-            _log.Error(format.F(args));
+            _log.Error(format, args);
         }
 
         public void Error(Exception exception, string format, params object[] args)
@@ -94,7 +94,7 @@ namespace ABCat.Plugins.Logging.NLog
 
         public void Fatal(string format, params object[] args)
         {
-            _log.Fatal(format.F(args));
+            _log.Fatal(format, args);
         }
 
         public void Fatal(Exception exception, string format, params object[] args)
@@ -121,7 +121,7 @@ namespace ABCat.Plugins.Logging.NLog
 
         public void Info(string format, params object[] args)
         {
-            _log.Info(format.F(args));
+            _log.Info(format, args);
         }
 
         public void Info(Exception exception, string format, params object[] args)
@@ -148,7 +148,7 @@ namespace ABCat.Plugins.Logging.NLog
 
         public void Warn(string format, params object[] args)
         {
-            _log.Warn(format.F(args));
+            _log.Warn(format, args);
         }
 
         public void Warn(Exception exception, string format, params object[] args)

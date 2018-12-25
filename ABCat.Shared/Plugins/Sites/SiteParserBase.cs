@@ -258,10 +258,11 @@ namespace ABCat.Shared.Plugins.Sites
         }
 
         public abstract bool CheckForConfig(bool correct, out Config incorrectConfigs);
+        protected abstract string[] RecordPageJunkIdList { get; }
 
         public void Dispose()
         {
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler Disposed;
@@ -304,6 +305,8 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 script.ParentNode.RemoveChild(script);
             }
+
+            document.RemoveNodesByIds(RecordPageJunkIdList);
         }
 
         protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken);

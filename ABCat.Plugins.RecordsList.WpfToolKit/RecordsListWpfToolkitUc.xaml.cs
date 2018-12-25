@@ -12,11 +12,13 @@ using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.UI;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
+using JetBrains.Annotations;
 using Xceed.Wpf.DataGrid;
 
 namespace ABCat.Plugins.RecordsList.WpfToolKit
 {
     [PerCallComponentInfo("1.0")]
+    [UsedImplicitly]
     public partial class RecordsListWpfToolkitUc : IRecordsListPlugin
     {
         public RecordsListWpfToolkitUc()
@@ -54,7 +56,7 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
 
         public void Dispose()
         {
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public void RestoreLayout()
@@ -111,7 +113,7 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
 
         private void GridMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            ItemDoubleClick.Fire(this, new ItemDoubleClickRowEventArgs((IAudioBook) Grid.CurrentItem));
+            ItemDoubleClick?.Invoke(this, new ItemDoubleClickRowEventArgs((IAudioBook) Grid.CurrentItem));
         }
 
         private void SetGridColumnsLayoutFromXml(DataGridControl grid, string xmlFragment)

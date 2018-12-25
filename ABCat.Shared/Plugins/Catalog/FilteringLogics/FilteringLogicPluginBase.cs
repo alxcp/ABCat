@@ -139,7 +139,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
 
         public virtual void Dispose()
         {
-            Disposed.Fire(this, EventArgs.Empty);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public abstract bool FilterRecord(IAudioBook record);

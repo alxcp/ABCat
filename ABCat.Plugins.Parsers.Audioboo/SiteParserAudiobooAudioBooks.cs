@@ -1,5 +1,4 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -47,6 +46,8 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return true;
         }
 
+        protected override string[] RecordPageJunkIdList { get; } = {"loading-layer"};
+
         public override IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer dbContainer)
         {
             var result = GroupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));
@@ -59,8 +60,6 @@ namespace ABCat.Plugins.Parsers.Audioboo
             base.CleanupRecordPage(document);
             var pageHeader = document.DocumentNode.Descendants("div").FirstOrDefault(item=>item.HasClass("header"));
             pageHeader?.ParentNode.RemoveChild(pageHeader);
-            var loadingLayer = document.GetElementbyId("loading-layer");
-            loadingLayer?.ParentNode.RemoveChild(loadingLayer);
             var noIndex = document.DocumentNode.Descendants("noindex").FirstOrDefault();
             noIndex?.ParentNode.RemoveChild(noIndex);
 
@@ -104,10 +103,6 @@ namespace ABCat.Plugins.Parsers.Audioboo
             {
                 textNode.ParentNode.RemoveChild(textNode);
             }
-
-#if DEBUG
-            var text = document.DocumentNode.InnerHtml;
-#endif
         }
 
         [CanBeNull]
@@ -280,21 +275,21 @@ namespace ABCat.Plugins.Parsers.Audioboo
                     FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
                 }
 
-                if (record.Author.IsNullOrEmpty())
-                {
-                    if (!record.AuthorNameForParse.IsNullOrEmpty() || !record.AuthorSurnameForParse.IsNullOrEmpty())
-                    {
-                        record.Author = string.Join(", ", record.AuthorSurnameForParse, record.AuthorNameForParse);
-                    }
-                    else
-                    {
-                        var titleParts = record.Title.Split(" - ");
-                        if (titleParts.Length > 1)
-                        {
-                            record.Author = titleParts.First();
-                        }
-                    }
-                }
+                //if (record.Author.IsNullOrEmpty())
+                //{
+                //    if (!record.AuthorNameForParse.IsNullOrEmpty() || !record.AuthorSurnameForParse.IsNullOrEmpty())
+                //    {
+                //        record.Author = string.Join(", ", record.AuthorSurnameForParse, record.AuthorNameForParse);
+                //    }
+                //    else
+                //    {
+                //        var titleParts = record.Title.Split(" - ");
+                //        if (titleParts.Length > 1)
+                //        {
+                //            record.Author = titleParts.First();
+                //        }
+                //    }
+                //}
             }
         }
 

@@ -14,7 +14,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
     [SingletoneComponentInfo("1.0")]
     public class NormalizationLogicStandardPlugin : INormalizationLogicPlugin
     {
-        private readonly ConcurrentDictionary<string, string> _authors = new ConcurrentDictionary<string, string>();
+        private readonly ConcurrentDictionary<string, string> _authors =
+            new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         public NormalizationLogicStandardPlugin()
         {
@@ -38,7 +39,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public void Dispose()
         {
-            Disposed.Fire(this);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public void Normalize(IReadOnlyCollection<IAudioBook> records, IDbContainer dbContainer)
@@ -108,27 +109,24 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public virtual string CalcAuthorName(IAudioBook record)
         {
-            var result = record.Author;
-
-            if (string.IsNullOrEmpty(result))
+            if (record.Author.IsNullOrEmpty())
             {
-                if (!string.IsNullOrEmpty(record.AuthorNameForParse) &&
-                    !string.IsNullOrEmpty(record.AuthorSurnameForParse))
+                if (!record.AuthorNameForParse.IsNullOrEmpty() &&
+                    !record.AuthorSurnameForParse.IsNullOrEmpty())
                 {
-                    result = "{0}, {1}".F(record.AuthorSurnameForParse, record.AuthorNameForParse);
+                    return $"{record.AuthorSurnameForParse}, {record.AuthorNameForParse}";
                 }
-                else if (string.IsNullOrEmpty(record.AuthorNameForParse) &&
-                         string.IsNullOrEmpty(record.AuthorSurnameForParse))
+
+                if (record.AuthorNameForParse.IsNullOrEmpty() &&
+                    record.AuthorSurnameForParse.IsNullOrEmpty())
                 {
-                    result = string.Empty;
+                    return string.Empty;
                 }
-                else
-                {
-                    result = record.AuthorSurnameForParse + record.AuthorNameForParse;
-                }
+
+                return record.AuthorSurnameForParse + record.AuthorNameForParse;
             }
 
-            return result;
+            return record.Author;
         }
     }
 }

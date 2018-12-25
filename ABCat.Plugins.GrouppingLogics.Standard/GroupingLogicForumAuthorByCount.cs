@@ -40,7 +40,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                         LinkedObjectString = grouping.Key,
                         Parent = root,
                         Level = 1,
-                        Caption = "{0} [{1}]".F(recordGroups[grouping.Key].Title, grouping.Count())
+                        Caption = $"{recordGroups[grouping.Key].Title} [{grouping.Count()}]"
                     };
                     root.Children.Add(recordGroupGroup);
 
@@ -52,7 +52,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                     {
                         if (cancellationToken.IsCancellationRequested) return null;
 
-                        var groupCaption = "{0} [{1}]".F(authorRecord.Key, authorRecord.Count());
+                        var groupCaption = $"{authorRecord.Key} [{authorRecord.Count()}]";
 
                         var recordAuthorGroup = new Group(this)
                         {

@@ -49,7 +49,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                     var authorGroup = new Group(this)
                     {
                         Parent = alphabetGroup,
-                        Caption = "{0} [{1}]".F(authorName, record.Count()),
+                        Caption = $"{authorName} [{record.Count()}]",
                         Level = 2
                     }; //,  LinkedObjectId = record.Key };
 
@@ -64,7 +64,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
                 foreach (var alphabetGroup in alphabetGroups)
                 {
-                    alphabetGroup.Value.Caption += " [{0}]".F(alphabetGroup.Value.LinkedRecords.Count);
+                    alphabetGroup.Value.Caption += $" [{alphabetGroup.Value.LinkedRecords.Count}]";
                 }
 
                 return root;

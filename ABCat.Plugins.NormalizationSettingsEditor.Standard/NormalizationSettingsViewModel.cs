@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using ABCat.Shared;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.UI;
 using Component.Infrastructure;
@@ -119,7 +120,7 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
                 _control = null;
             }
 
-            Disposed.Fire(this, EventArgs.Empty);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         public void RestoreLayout()

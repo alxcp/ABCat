@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace ABCat.UI.WPF.Models
                 {
                     await plugin.DownloadRecords(
                         audioBooks.Value,
-                        PageSources.CacheOrWeb,
+                        PageSources.CacheOnly,
                         CancellationTokenSource.Token);
 
                     await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()

@@ -139,18 +139,18 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         public string GetPageKey()
         {
             //ToDo: Group.Key!!! Not ID
-            return "TP_{0}_{1}".F(GroupKey, Key);
+            return $"TP_{GroupKey}_{Key}";
         }
 
         public string GetPageMetaKey()
         {
             //ToDo: Group.Key!!! Not ID
-            return "TPM_{0}_{1}".F(GroupKey, Key);
+            return $"TPM_{GroupKey}_{Key}";
         }
 
         public override string ToString()
         {
-            return "[{0}] {1}".F(Key, Title);
+            return $"[{Key}] {Title}";
         }
     }
 }
