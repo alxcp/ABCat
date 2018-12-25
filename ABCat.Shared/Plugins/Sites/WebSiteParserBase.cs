@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -15,7 +16,7 @@ using HtmlAgilityPack;
 
 namespace ABCat.Shared.Plugins.Sites
 {
-    public abstract class SiteParserBase : ISiteParserPlugin
+    public abstract class WebSiteParserBase : IWebSiteParserPlugin
     {
         public Config Config { get; set; }
         private int _webSiteId = -1;
@@ -252,6 +253,41 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
+        protected virtual long GetSizeInBytes(string sizeString)
+        {
+            long result = 0;
+            var subSize = sizeString.Split(' ');
+            subSize[0] = subSize[0].Replace(',', '.');
+
+            if (subSize.Length >= 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
+            {
+                int multiplier = 0;
+
+                switch (subSize[1])
+                {
+                    case "Гб":
+                    case "GB":
+                        multiplier = 1024 * 1024 * 1024;
+                        break;
+                    case "Мб":
+                    case "MB":
+                        multiplier = 1024 * 1024;
+                        break;
+                    case "Кб":
+                    case "KB":
+                        multiplier = 1024;
+                        break;
+                    default:
+                        var t = 0;
+                        break;
+                }
+
+                result = (long)(size * multiplier);
+            }
+
+            return result;
+        }
+
         public async Task<string> DownloadRecordSourcePage(IAudioBook audioBook, CancellationToken cancellationToken)
         {
             return await Task.Factory.StartNew(() => GetRecordSourcePageString(audioBook, PageSources.CacheOrWeb, cancellationToken), cancellationToken);
@@ -317,5 +353,149 @@ namespace ABCat.Shared.Plugins.Sites
             CancellationToken cancellationToken);
 
         protected abstract void ParseRecord(IDbContainer db, IAudioBook record, string postBodyHtml);
+
+
+        //private static class KeysCollection
+        //{
+        //    private static Stopwatch _sw = new Stopwatch();
+        //    private static readonly Dictionary<string, HashSet<string>> _values = new Dictionary<string, HashSet<string>>(StringComparer.InvariantCultureIgnoreCase);
+
+        //    public static void Add(string key, string value)
+        //    {
+        //        if (!_values.TryGetValue(key, out var values))
+        //        {
+        //            values = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
+        //            _values.Add(key, values);
+        //        }
+
+        //        values.Add(value);
+
+        //        if (!_sw.IsRunning)
+        //            _sw.Start();
+
+        //        if (_sw.Elapsed.TotalSeconds > 15)
+        //        {
+        //            Debug.WriteLine("===============================");
+        //            var top50 = _values.Where(item => item.Value.Count > 10);
+        //            foreach (var keyValuePair in top50.OrderByDescending(item=>item.Value.Count))
+        //            {
+        //                Debug.WriteLine($"{keyValuePair.Key}\t{keyValuePair.Value.Count}");
+        //            }
+
+        //            Debug.WriteLine("===============================");
+        //            _sw.Restart();
+        //        }
+        //    }
+        //}
+
+        protected virtual void FillRecordElement(IAudioBook record, string key, string value)
+        {
+            key = key.Trim(' ', '[', ']', '<', '>', ';', '\n', '\t', '.', ',', '"', '(');
+
+            //#if DEBUG
+            //            KeysCollection.Add(key, value);
+            //#endif
+
+            switch (key.ToLower())
+            {
+                case "автор":
+                case "авторы":
+                case "фамилия, имя автора":
+                case "фамилии авторов":
+                case "авторы произведений":
+                    record.Author = CleanupRecordValue(value, false, 500)
+                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    break;
+                case "фамилия автора":
+                    record.AuthorSurnameForParse =
+                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    break;
+                case "имя автора":
+                    record.AuthorNameForParse =
+                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    break;
+                case "издательство":
+                    record.Publisher =
+                        CleanupRecordValue(value, false, 500).ChangeCase(Extensions.CaseTypes.FirstWord, true, true);
+                    break;
+                case "исполнитель":
+                case "исполнители":
+                case "запись и обработка":
+                    record.Reader = CleanupRecordValue(value, false, 500)
+                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    break;
+                case "жанр":
+                    record.Genre =
+                        CleanupRecordValue(value, false, 200)
+                            .ChangeCase(Extensions.CaseTypes.AfterSplitter, false, true);
+                    break;
+                case "битрейт":
+                case "битрейт аудио":
+                    record.Bitrate = CleanupRecordValue(value, false, 100)
+                        .ChangeCase(Extensions.CaseTypes.FirstWord, true, true);
+                    break;
+                case "длительность":
+                case "прдолжительность":
+                case "продолжительность":
+                case "продолжительность звучания":
+                case "продолжительность книги":
+                case "общее время звучания":
+                case "общее время воспроизведения":
+                case "bремя звучания":
+                case "время звучания":
+                case "время воспроизведения":
+                case "время чтения":
+                case "общая продолжительность":
+                case "продолжительность аудиокниги":
+                case "продолжительность (время звучания)":
+                case "время":
+                case "длина записи":
+                    record.Length = CleanupRecordValue(value, false, 500);
+                    break;
+                case "описание":
+                case "аннотация":
+                    record.Description = CleanupRecordValue(value, true, 1000);
+                    break;
+                case "доп. информация":
+                    if (ParseKeyValue(value, out var secondKey, out var secondValue))
+                    {
+                        FillRecordElement(record, secondKey, secondValue);
+                    }
+
+                    break;
+            }
+        }
+
+        protected bool ParseKeyValue(string keyValue, out string key, out string value)
+        {
+            var result = false;
+
+            key = null;
+            value = null;
+
+            if (!keyValue.IsNullOrEmpty())
+            {
+                var iofColon = keyValue.IndexOf(':');
+                if (iofColon > 0 && iofColon < keyValue.Length - 1)
+                {
+                    key = keyValue.Substring(0, iofColon).ToLower();
+                    var iofSemiColon = key.LastIndexOf(';');
+                    if (iofSemiColon > 0)
+                    {
+                        key = key.Substring(iofSemiColon + 1, key.Length - iofSemiColon - 1);
+                    }
+
+                    key = key.TrimStart('-', '\n', '.').Trim(' ');
+
+                    if (key != string.Empty)
+                    {
+                        value = keyValue.Substring(iofColon + 1, keyValue.Length - iofColon - 1);
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

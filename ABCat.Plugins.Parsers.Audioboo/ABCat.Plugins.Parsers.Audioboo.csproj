@@ -46,7 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SiteParserAudiobooAudioBooks.cs" />
+    <Compile Include="WebSiteParserAudiobooAudioBooks.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ABCat.Shared\ABCat.Shared.csproj">

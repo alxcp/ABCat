@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,19 +10,19 @@ using ABCat.Shared.Plugins.Sites;
 
 namespace ABCat.UI.WPF.Models
 {
-    public class SiteParserViewModel : AsyncOperationViewModelBase
+    public class WebSiteParserViewModel : AsyncOperationViewModelBase
     {
         private readonly Func<IEnumerable<IAudioBook>> _getSelectedItems;
         private readonly AbCatViewModel _owner;
-        private readonly IReadOnlyCollection<ISiteParserPlugin> _siteParserPlugins;
+        private readonly IReadOnlyCollection<IWebSiteParserPlugin> _siteParserPlugins;
 
-        public SiteParserViewModel(AbCatViewModel owner, Func<IEnumerable<IAudioBook>> getSelectedItems)
+        public WebSiteParserViewModel(AbCatViewModel owner, Func<IEnumerable<IAudioBook>> getSelectedItems)
             : base(owner.StatusBarStateModel)
         {
             _owner = owner;
             _getSelectedItems = getSelectedItems;
-            _siteParserPlugins = Context.I.ComponentFactory.GetCreators<ISiteParserPlugin>()
-                .Select(item => item.GetInstance<ISiteParserPlugin>()).ToArray();
+            _siteParserPlugins = Context.I.ComponentFactory.GetCreators<IWebSiteParserPlugin>()
+                .Select(item => item.GetInstance<IWebSiteParserPlugin>()).ToArray();
         }
 
         public ICommand DownloadRecordGroupsCommand =>
@@ -66,13 +65,13 @@ namespace ABCat.UI.WPF.Models
                     await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
                         .UpdateCache(UpdateTypes.Values);
                 }
-
-                Executor.OnUiThread(() =>
-                {
-                    OnAsynOperationCompleted();
-                    _owner.RefreshRecordsListData();
-                });
             }
+
+            Executor.OnUiThread(() =>
+            {
+                OnAsynOperationCompleted();
+                _owner.RefreshRecordsListData();
+            });
         }
 
         public async Task OnDownloadRecordGroups()

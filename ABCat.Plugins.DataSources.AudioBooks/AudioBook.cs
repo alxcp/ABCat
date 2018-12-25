@@ -142,12 +142,6 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             return $"TP_{GroupKey}_{Key}";
         }
 
-        public string GetPageMetaKey()
-        {
-            //ToDo: Group.Key!!! Not ID
-            return $"TPM_{GroupKey}_{Key}";
-        }
-
         public override string ToString()
         {
             return $"[{Key}] {Title}";

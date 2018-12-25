@@ -171,21 +171,6 @@ public static class ToolsExt
         }
     }
 
-    //public static void Fire(this EventHandler eventHandler, object sender, EventArgs e)
-    //{
-    //    if (eventHandler == null)
-    //    {
-    //        return;
-    //    }
-
-    //    eventHandler(sender, e);
-    //}
-
-    //public static void Fire<T>(this EventHandler<T> eventHandler, object sender, T e) where T : EventArgs
-    //{
-    //    eventHandler?.Invoke(sender, e);
-    //}
-
     public static TValue GetOrNew<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key) where TValue : new()
     {
         if (!dictionary.TryGetValue(key, out var result))
