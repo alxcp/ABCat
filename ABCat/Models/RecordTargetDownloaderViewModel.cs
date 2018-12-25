@@ -37,10 +37,7 @@ namespace ABCat.UI.WPF.Models
             CancellationTokenSource = new CancellationTokenSource();
             var targetRecords = new HashSet<string>(_getSelectedRecordsFunc().Select(item => item.Key));
 
-            await _recordTargetDownloaderPlugin.DownloadRecordTarget(targetRecords,
-                ReportProgressSmall,
-                ReportProgressTotal,
-                CancellationTokenSource.Token);
+            await _recordTargetDownloaderPlugin.DownloadRecordTarget(targetRecords, CancellationTokenSource.Token);
 
             Executor.OnUiThread(() =>
             {

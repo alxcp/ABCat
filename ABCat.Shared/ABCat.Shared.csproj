@@ -127,11 +127,11 @@
     <Compile Include="Plugins\DataSets\IWebSite.cs" />
     <Compile Include="Plugins\Downloaders\ITorrentFileDownloaderPlugin.cs" />
     <Compile Include="Plugins\Sites\IRecordTargetDownloaderPlugin.cs" />
-    <Compile Include="Plugins\Sites\ISiteParserPlugin.cs" />
+    <Compile Include="Plugins\Sites\IWebSiteParserPlugin.cs" />
     <Compile Include="Plugins\Sites\PageSources.cs" />
     <Compile Include="Messages\ProgressMessageBase.cs" />
     <Compile Include="Plugins\Sites\RecordTargetDownloaderBase.cs" />
-    <Compile Include="Plugins\Sites\SiteParserBase.cs" />
+    <Compile Include="Plugins\Sites\WebSiteParserBase.cs" />
     <Compile Include="Plugins\UI\INormalizationSettingsEditorPlugin.cs" />
     <Compile Include="Plugins\UI\IRecordsListPlugin.cs" />
     <Compile Include="Plugins\UI\ISupportLayoutPlugin.cs" />

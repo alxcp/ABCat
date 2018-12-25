@@ -19,7 +19,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
 {
     [SingletoneComponentInfo("1.0")]
     [UsedImplicitly]
-    public class SiteParserRutrackerAudioBooks : SiteParserBase
+    public class WebSiteParserRutrackerAudioBooks : WebSiteParserBase
     {
         private const int RecordsOnPageCount = 50;
 
@@ -147,12 +147,12 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
             if (pageSource != PageSources.WebOnly)
             {
-                var pageMetaId = record.GetPageMetaKey();
-                var metaPage = dbContainer.BinaryDataSet.GetByKey(pageMetaId);
-                if (metaPage != null)
-                {
-                    pageHtml = metaPage.GetString();
-                }
+                //var pageMetaId = record.GetPageMetaKey();
+                //var metaPage = dbContainer.BinaryDataSet.GetByKey(pageMetaId);
+                //if (metaPage != null)
+                //{
+                //    pageHtml = metaPage.GetString();
+                //}
 
                 IBinaryData page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
 
@@ -248,7 +248,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 var sizeElement = document.DocumentNode.Descendants()
                     .FirstOrDefault(item => item.HasClass("attach_link") && item.HasClass("guest"));
 
-                if (sizeElement != null && sizeElement.ChildNodes.Count == 3)
+                if (sizeElement != null && sizeElement.ChildNodes.Count >= 2)
                 {
                     var sizeNode = sizeElement.LastChild;
                     var size = GetSizeInBytes(sizeNode.InnerText.ReplaceAll(new[] {"&middot;", "&nbsp;"}, " ")
@@ -261,36 +261,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
                     FillRecordElement(record, element.Key.TrimEnd(':'), element.Value);
                 }
             }
-        }
-
-        private static long GetSizeInBytes(string sizeString)
-        {
-            long result = 0;
-            var subSize = sizeString.Split(' ');
-            if (subSize.Length == 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
-            {
-                int multiplier = 0;
-
-                switch (subSize[1])
-                {
-                    case "GB":
-                        multiplier = 1024 * 1024 * 1024;
-                        break;
-                    case "MB":
-                        multiplier = 1024 * 1024;
-                        break;
-                    case "KB":
-                        multiplier = 1024;
-                        break;
-                    default:
-                        var t = 0;
-                        break;
-                }
-
-                result = (long) (size * multiplier);
-            }
-
-            return result;
         }
 
         private static int GetRecordGroupPageCount(HtmlDocument document)
@@ -371,7 +341,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             binaryData.SetString(page, true);
             dbContainer.BinaryDataSet.AddChangedBinaryData(binaryData);
 
-            var result = GetPostBody(document);
             var magnetA = document.DocumentNode.SelectSingleNode("//*[@class=\"magnet-link\"]");
 
             if (magnetA != null)
@@ -379,138 +348,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 record.MagnetLink = magnetA.GetAttributeValue("href", null);
             }
 
-            if (result != null)
-            {
-                var pageMetaBinaryData = dbContainer.BinaryDataSet.CreateBinaryData();
-                pageMetaBinaryData.Key = record.GetPageMetaKey();
-                pageMetaBinaryData.SetString(result.InnerHtml, false);
-                dbContainer.BinaryDataSet.AddChangedBinaryData(pageMetaBinaryData);
-            }
-            else
-            {
-                // ToDo: Скорее всего топик был удалён с сайта. Нужна проверка что это именно так - парсинг страницы удалённого топика и пометка записи как удалённой
-                return null;
-            }
-
-            return result.InnerHtml;
-        }
-
-        private HtmlNode GetPostBody(HtmlDocument document)
-        {
-            var postBody = document.DocumentNode.GetNodesByClass("div", "post_body").First();
-
-            return postBody;
-        }
-
-        //private static class KeysCollection
-        //{
-        //    private static Stopwatch _sw = new Stopwatch();
-        //    private static readonly Dictionary<string, HashSet<string>> _values = new Dictionary<string, HashSet<string>>(StringComparer.InvariantCultureIgnoreCase);
-
-        //    public static void Add(string key, string value)
-        //    {
-        //        if (!_values.TryGetValue(key, out var values))
-        //        {
-        //            values = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
-        //            _values.Add(key, values);
-        //        }
-
-        //        values.Add(value);
-
-        //        if (!_sw.IsRunning)
-        //            _sw.Start();
-
-        //        if (_sw.Elapsed.TotalSeconds > 15)
-        //        {
-        //            Debug.WriteLine("===============================");
-        //            var top50 = _values.Where(item => item.Value.Count > 10);
-        //            foreach (var keyValuePair in top50.OrderByDescending(item=>item.Value.Count))
-        //            {
-        //                Debug.WriteLine($"{keyValuePair.Key}\t{keyValuePair.Value.Count}");
-        //            }
-
-        //            Debug.WriteLine("===============================");
-        //            _sw.Restart();
-        //        }
-        //    }
-        //}
-
-        private void FillRecordElement(IAudioBook record, string key, string value)
-        {
-            key = key.Trim(' ', '[', ']', '<', '>', ';', '\n', '\t', '.', ',', '"', '(');
-
-//#if DEBUG
-//            KeysCollection.Add(key, value);
-//#endif
-
-            switch (key.ToLower())
-            {
-                case "автор":
-                case "авторы":
-                case "фамилия, имя автора":
-                case "фамилии авторов":
-                case "авторы произведений":
-                    record.Author = CleanupRecordValue(value, false, 500)
-                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
-                    break;
-                case "фамилия автора":
-                    record.AuthorSurnameForParse =
-                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
-                    break;
-                case "имя автора":
-                    record.AuthorNameForParse =
-                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
-                    break;
-                case "издательство":
-                    record.Publisher =
-                        CleanupRecordValue(value, false, 500).ChangeCase(Extensions.CaseTypes.FirstWord, true, true);
-                    break;
-                case "исполнитель":
-                case "исполнители":
-                case "запись и обработка":
-                    record.Reader = CleanupRecordValue(value, false, 500)
-                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
-                    break;
-                case "жанр":
-                    record.Genre =
-                        CleanupRecordValue(value, false, 200)
-                            .ChangeCase(Extensions.CaseTypes.AfterSplitter, false, true);
-                    break;
-                case "битрейт":
-                case "битрейт аудио":
-                    record.Bitrate = CleanupRecordValue(value, false, 100)
-                        .ChangeCase(Extensions.CaseTypes.FirstWord, true, true);
-                    break;
-                case "длительность":
-                case "прдолжительность":
-                case "продолжительность":
-                case "продолжительность звучания":
-                case "продолжительность книги":
-                case "общее время звучания":
-                case "общее время воспроизведения":
-                case "bремя звучания":
-                case "время звучания":
-                case "время воспроизведения":
-                case "время чтения":
-                case "общая продолжительность":
-                case "продолжительность аудиокниги":
-                case "продолжительность (время звучания)":
-                case "время":
-                case "длина записи":
-                    record.Length = CleanupRecordValue(value, false, 500);
-                    break;
-                case "описание":
-                case "аннотация":
-                    record.Description = CleanupRecordValue(value, true, 1000);
-                    break;
-                case "доп. информация":
-                    if (ParseKeyValue(value, out var secondKey, out var secondValue))
-                    {
-                        FillRecordElement(record, secondKey, secondValue);
-                    }
-
-                    break;
-            }
+            return page;
         }
 
         private IAudioBookGroup GetRecordGroup(string recordGroupKey, IDbContainer dbContainer)
@@ -522,38 +360,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 dbContainer.AudioBookGroupSet.AddRecordGroup(result);
                 result.Key = recordGroupKey;
                 result.Title = recordGroupKey;
-            }
-
-            return result;
-        }
-
-        private bool ParseKeyValue(string keyValue, out string key, out string value)
-        {
-            var result = false;
-
-            key = null;
-            value = null;
-
-            if (!keyValue.IsNullOrEmpty())
-            {
-                var iofColon = keyValue.IndexOf(':');
-                if (iofColon > 0 && iofColon < keyValue.Length - 1)
-                {
-                    key = keyValue.Substring(0, iofColon).ToLower();
-                    var iofSemiColon = key.LastIndexOf(';');
-                    if (iofSemiColon > 0)
-                    {
-                        key = key.Substring(iofSemiColon + 1, key.Length - iofSemiColon - 1);
-                    }
-
-                    key = key.TrimStart('-', '\n', '.').Trim(' ');
-
-                    if (!Extensions.IsNullOrEmpty(key))
-                    {
-                        value = keyValue.Substring(iofColon + 1, keyValue.Length - iofColon - 1);
-                        result = true;
-                    }
-                }
             }
 
             return result;

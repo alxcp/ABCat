@@ -140,7 +140,7 @@
     <Compile Include="Models\GroupingLogicViewModel.cs" />
     <Compile Include="Models\NormalizationSettingsEditorViewModel.cs" />
     <Compile Include="Models\RecordTargetDownloaderViewModel.cs" />
-    <Compile Include="Models\SiteParserViewModel.cs" />
+    <Compile Include="Models\WebSiteParserViewModel.cs" />
     <Compile Include="UI\Behaviors\BindableSelectedItemBehaviour.cs" />
     <Compile Include="UI\ConfigEditorWindow.xaml.cs">
       <DependentUpon>ConfigEditorWindow.xaml</DependentUpon>

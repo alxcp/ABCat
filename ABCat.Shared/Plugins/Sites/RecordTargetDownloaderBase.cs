@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
@@ -13,9 +14,7 @@ namespace ABCat.Shared.Plugins.Sites
     {
         public Config Config { get; set; }
 
-        public async Task DownloadRecordTarget(HashSet<string> recordsIds,
-            Action<int, int, string> smallProgressCallback, Action<int, int, string> totalProgressCallback,
-            CancellationToken cancellationToken)
+        public async Task DownloadRecordTarget(HashSet<string> recordsIds, CancellationToken cancellationToken)
         {
             await Task.Factory.StartNew(() =>
             {
@@ -26,9 +25,8 @@ namespace ABCat.Shared.Plugins.Sites
 
                     foreach (var record in records)
                     {
-                        totalProgressCallback(z, records.Length, $"{z} / {record.Length}");
-                        DownloadRecordTarget(null, record, dbContainer, smallProgressCallback,
-                            cancellationToken);
+                        ProgressMessage.Report(z, records.Length);
+                        DownloadRecordTarget(null, record, dbContainer, cancellationToken);
                         if (cancellationToken.IsCancellationRequested) break;
                         dbContainer.SaveChanges();
                         z++;
@@ -46,8 +44,7 @@ namespace ABCat.Shared.Plugins.Sites
 
         public event EventHandler Disposed;
 
-        public abstract void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer,
-            Action<int, int, string> progressCallback, CancellationToken cancellationToken);
+        public abstract void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer, CancellationToken cancellationToken);
 
         public abstract string GetAbsoluteLibraryPath(IAudioBook record);
 

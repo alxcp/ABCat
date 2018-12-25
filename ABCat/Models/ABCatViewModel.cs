@@ -37,7 +37,7 @@ namespace ABCat.UI.WPF.Models
             RecordsListUc.Data = new List<IAudioBook>();
             StatusBarStateModel = new StatusBarStateViewModel(IsCanCancelAsyncOperation, CancelAsyncOperation);
 
-            SiteParserModel = new SiteParserViewModel(this, () => SelectedItems);
+            SiteParserModel = new WebSiteParserViewModel(this, () => SelectedItems);
 
             RecordTargetDownloaderModel = new RecordTargetDownloaderViewModel(StatusBarStateModel,
                 Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems,
@@ -138,7 +138,7 @@ namespace ABCat.UI.WPF.Models
         public ICommand ShowCachedInBrowserCommand =>
             CommandFactory.Get(async ()=> await ShowCachedInBrowserCommandExecute(), ShowCachedInBrowserCommandCanExecute);
 
-        public SiteParserViewModel SiteParserModel { get; }
+        public WebSiteParserViewModel SiteParserModel { get; }
         public StatusBarStateViewModel StatusBarStateModel { get; }
 
         public void Dispose()

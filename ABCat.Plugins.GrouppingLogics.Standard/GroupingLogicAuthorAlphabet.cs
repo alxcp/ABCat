@@ -6,10 +6,12 @@ using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
+using JetBrains.Annotations;
 
 namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("1.0")]
+    [UsedImplicitly]
     public class GroupingLogicAuthorAlphabet : GroupingLogicPluginBase
     {
         public override string Name => "Автор";

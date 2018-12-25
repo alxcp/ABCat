@@ -15,10 +15,7 @@ namespace ABCat.Shared.Plugins.Sites
         ///     Метод асинхронной загрузки контента
         /// </summary>
         /// <param name="records">Список ID загружаемых записей</param>
-        /// <param name="smallProgressCallback">Метод сообщения о прогрессе выполнения загрузки одной записи</param>
-        /// <param name="totalProgressCallback">Метод сообщения о прогрессе общего выполнения операции</param>
         /// <param name="cancellationToken">Токен отмены операции</param>
-        Task DownloadRecordTarget(HashSet<string> records, Action<int, int, string> smallProgressCallback,
-            Action<int, int, string> totalProgressCallback, CancellationToken cancellationToken);
+        Task DownloadRecordTarget(HashSet<string> records, CancellationToken cancellationToken);
     }
 }

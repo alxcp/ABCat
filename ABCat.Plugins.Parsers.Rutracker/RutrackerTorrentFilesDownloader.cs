@@ -20,8 +20,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
     {
         private RutrackerTorrentFilesDownloaderConfig _config;
 
-        public override void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer,
-            Action<int, int, string> progressCallback, CancellationToken cancellationToken)
+        public override void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer, CancellationToken cancellationToken)
         {
             var config = Config.Load<RutrackerTorrentFilesDownloaderConfig>();
 

@@ -8,9 +8,7 @@ using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.Sites
 {
-    //public delegate void ProgressCallback(int current, int total, string message);
-
-    public interface ISiteParserPlugin : IExtComponent
+    public interface IWebSiteParserPlugin : IExtComponent
     {
         /// <summary>
         ///     Начать обновление списка записей
