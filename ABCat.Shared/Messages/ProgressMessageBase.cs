@@ -29,6 +29,9 @@ namespace ABCat.Shared.Messages
         {
             if (completed == total || !SwComplex.IsRunning || SwComplex.Elapsed > MinIntervalComplex)
             {
+                if (completed == 0 && total == 0)
+                    total = 1;
+
                 Context.I.EventAggregator.PublishOnUIThread(new ProgressMessage(completed, total, true, message));
                 SwComplex.Restart();
             }
@@ -38,6 +41,9 @@ namespace ABCat.Shared.Messages
         {
             if (completed == total || !SwSmall.IsRunning || SwSmall.Elapsed > MinIntervalSmall)
             {
+                if (completed == 0 && total == 0)
+                    total = 1;
+
                 Context.I.EventAggregator.PublishOnUIThread(new ProgressMessage(completed, total, false, message));
                 SwSmall.Restart();
             }

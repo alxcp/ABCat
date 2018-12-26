@@ -133,6 +133,26 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             return Genre.Split(',', '/', '.', '>', '|').Select(item => item.Trim()).Where(item=>!item.IsNullOrEmpty()).ToArray();
         }
 
+        public IReadOnlyCollection<string> GetAuthors()
+        {
+            if (Author.IsNullOrEmpty())
+                return new string[0];
+
+            if (GetWordsCount(Author) <= 2)
+                return new[] {Author};
+
+            return Author.Split(',', '/', '>', '|').Select(item => item.Trim()).Where(item => !item.IsNullOrEmpty())
+                .ToArray();
+        }
+
+        private int GetWordsCount(string value)
+        {
+            if (value.IsNullOrEmpty())
+                return 0;
+
+            return value.Split(' ').Select(item => !item.Trim().IsNullOrEmpty()).Count();
+        }
+
         public void ClearMetaInfo()
         {
             Author = null;

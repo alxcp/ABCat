@@ -88,7 +88,7 @@ namespace ABCat.Shared.Plugins.Sites
                     {
                         try
                         {
-                            ProgressMessage.ReportComplex(z, groups.Length);
+                            ProgressMessage.ReportComplex(z, groups.Length, $"{DisplayName}: {z} / {groups.Length}");
                             DownloadRecordGroup(dbContainer, group, cancellationToken);
                             if (cancellationToken.IsCancellationRequested) break;
                             dbContainer.SaveChanges();
@@ -152,7 +152,7 @@ namespace ABCat.Shared.Plugins.Sites
                         try
                         {
                             var record = records[z];
-                            ProgressMessage.ReportComplex(z, records.Length);
+                            ProgressMessage.ReportComplex(z, records.Length, $"{DisplayName}: {z} / {records.Length}");
                             DownloadRecord(dbContainer, record, pageSource, cancellationToken);
                             record.LastUpdate = DateTime.Now;
                             waitingForSave.Add(record);
@@ -333,6 +333,12 @@ namespace ABCat.Shared.Plugins.Sites
             return result;
         }
 
+        protected virtual string CleanupHumanNameValue(string value, int maxLength)
+        {
+            return CleanupRecordValue(value, false, maxLength).TrimStart('©', '…', '—', ' ', '๖', 'ۣ', 'ۜ')
+                .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+        }
+
         static string HtmlSpecCharRegexReplacer(Match m)
         {
             return WebUtility.HtmlDecode(m.Value);
@@ -410,16 +416,13 @@ namespace ABCat.Shared.Plugins.Sites
                 case "фамилия, имя автора":
                 case "фамилии авторов":
                 case "авторы произведений":
-                    record.Author = CleanupRecordValue(value, false, 500)
-                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    record.Author = CleanupHumanNameValue(value, 500);
                     break;
                 case "фамилия автора":
-                    record.AuthorSurnameForParse =
-                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    record.AuthorSurnameForParse = CleanupHumanNameValue(value, 250);
                     break;
                 case "имя автора":
-                    record.AuthorNameForParse =
-                        CleanupRecordValue(value, false, 250).ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    record.AuthorNameForParse = CleanupHumanNameValue(value, 250);
                     break;
                 case "издательство":
                     record.Publisher =
@@ -428,8 +431,7 @@ namespace ABCat.Shared.Plugins.Sites
                 case "исполнитель":
                 case "исполнители":
                 case "запись и обработка":
-                    record.Reader = CleanupRecordValue(value, false, 500)
-                        .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
+                    record.Reader = CleanupHumanNameValue(value, 500);
                     break;
                 case "жанр":
                     record.Genre =

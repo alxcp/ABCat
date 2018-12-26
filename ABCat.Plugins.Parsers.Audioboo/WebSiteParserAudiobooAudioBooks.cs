@@ -215,7 +215,10 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
             do
             {
-                ProgressMessage.Report(pageIndex, pageCount, audioBookGroup.Title);
+                string progressMessage = audioBookGroup.Title +
+                                         (pageCount > 0 ? $": {pageIndex} / {pageCount}" : string.Empty);
+
+                ProgressMessage.Report(pageIndex, pageCount, progressMessage);
 
                 string pageHtml;
 
