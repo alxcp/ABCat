@@ -31,14 +31,14 @@ namespace ABCat.Shared.Plugins.Sites
                     using (var dbContainer = Context.I.CreateDbContainer(false))
                     {
                         var ws = dbContainer.WebSiteSet.GetWebSitesAll()
-                            .FirstOrDefault(item => item.SiteParserPluginName.Compare(GetType().Name));
+                            .FirstOrDefault(item => item.WebSiteParserPluginName.Compare(GetType().Name));
                         if (ws == null)
                         {
                             ws = dbContainer.WebSiteSet.CreateWebSite();
-                            ws.SiteParserPluginName = GetType().Name;
+                            ws.WebSiteParserPluginName = GetType().Name;
                             dbContainer.WebSiteSet.AddWebSite(ws);
                             ws = dbContainer.WebSiteSet.GetWebSitesAll()
-                                .First(item => item.SiteParserPluginName.Compare(GetType().Name));
+                                .First(item => item.WebSiteParserPluginName.Compare(GetType().Name));
                         }
 
                         _webSiteId = ws.Id;
@@ -65,6 +65,7 @@ namespace ABCat.Shared.Plugins.Sites
         }
 
         public abstract Uri GetRecordPageUrl(IAudioBook record);
+        public abstract string DisplayName { get; }
 
         public async Task DownloadRecordGroups(HashSet<string> recordGroupsKeys, CancellationToken cancellationToken)
         {

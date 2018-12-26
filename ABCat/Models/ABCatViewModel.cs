@@ -203,7 +203,7 @@ namespace ABCat.UI.WPF.Models
             Process.Start(_previousFileName);
         }
 
-        private static async Task<IEnumerable<IAudioBook>> GetCurrentRecords(
+        private async Task<IEnumerable<IAudioBook>> GetCurrentRecords(
             IDbContainer dbContainer,
             Group currentGroup,
             IFilteringLogicPlugin filteringLogicPlugin,
@@ -227,24 +227,38 @@ namespace ABCat.UI.WPF.Models
             return groupedRecords;
         }
 
-        private async void FilterPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private Timer _updateTimer;
+
+        private void FilterPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsOnUpdate") return;
+
+            _updateTimer?.Dispose();
+            _updateTimer = new Timer(FilterRecordsAsync, null, 500, Timeout.Infinite);
+        }
+
+        private void FilterRecordsAsync(object o)
         {
             try
             {
-                if (e.PropertyName == "IsOnUpdate") return;
                 _getRecordsCancellationTokenSource?.Cancel();
                 _getRecordsCancellationTokenSource = new CancellationTokenSource();
 
-                var dbContainer = Context.I.CreateDbContainer(false);
-                var records =
-                    await
-                        GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
-                            _getRecordsCancellationTokenSource.Token);
-                _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
+                using (var dbContainer = Context.I.CreateDbContainer(false))
+                {
+                    var records = GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
+                        _getRecordsCancellationTokenSource.Token).Result;
+                    _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                    SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
+                }
             }
             catch (OperationCanceledException)
             {
+            }
+            catch (AggregateException ex)
+            {
+                if (!ex.Flatten().InnerExceptions.OfType<TaskCanceledException>().Any())
+                    throw;
             }
         }
 

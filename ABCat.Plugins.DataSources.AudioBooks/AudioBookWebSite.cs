@@ -6,7 +6,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     [Table("WebSite")]
     public class AudioBookWebSite : IAudioBookWebSite
     {
-        [Column("SiteParserPluginName")] public string SiteParserPluginName { get; set; }
+        [Column("WebSiteParserPluginName")] public string WebSiteParserPluginName { get; set; }
         [PrimaryKey] [AutoIncrement] [Column("Id")] public int Id { get; set; }
+        [Column("DisplayName")] public string DisplayName { get; set; }
     }
 }

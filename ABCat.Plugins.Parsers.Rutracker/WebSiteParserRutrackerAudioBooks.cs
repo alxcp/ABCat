@@ -30,6 +30,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
 
+        public override string DisplayName => "Rutracker";
+
         public override Uri GetRecordPageUrl(IAudioBook record)
         {
             return new Uri($"http://rutracker.org/forum/viewtopic.php?t={record.Key}");

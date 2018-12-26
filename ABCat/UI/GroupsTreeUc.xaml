@@ -8,9 +8,10 @@
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:primitives="clr-namespace:ABCat.UI.WPF.UI.Primitives"
+    xmlns:models="clr-namespace:ABCat.UI.WPF.Models"
     d:DesignHeight="300"
     d:DesignWidth="300"
-    mc:Ignorable="d">
+    mc:Ignorable="d" d:DataContext="{d:DesignInstance models:GroupingLogicViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="Btvc" />
     </UserControl.Resources>

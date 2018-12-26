@@ -55,9 +55,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GroupingLogicAuthorAlphabet.cs" />
     <Compile Include="GroupingLogicForumAuthor.cs" />
     <Compile Include="GroupingLogicForumGenre.cs" />
-    <Compile Include="GroupingLogicAuthorAlphabet.cs" />
+    <Compile Include="GroupingLogicGenreAlphabet.cs" />
     <Compile Include="GroupingLogicForumAuthorByCount.cs" />
     <Compile Include="GroupingLogicForumGenreByCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

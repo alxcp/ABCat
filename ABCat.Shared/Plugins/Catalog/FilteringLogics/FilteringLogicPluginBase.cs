@@ -81,15 +81,13 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
         public virtual async Task<IEnumerable<IAudioBook>> Filter(IEnumerable<IAudioBook> records,
             CancellationToken cancellationToken)
         {
+            IsOnUpdate = true;
+
             var asyncResult = await Task.Factory.StartNew(
                 () =>
                 {
                     try
                     {
-                        IsOnUpdate = true;
-                        Thread.Sleep(500);
-                        cancellationToken.ThrowIfCancellationRequested();
-
                         IAudioBook[] result;
                         try
                         {

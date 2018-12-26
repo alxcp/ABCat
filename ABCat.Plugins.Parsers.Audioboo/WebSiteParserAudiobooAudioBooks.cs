@@ -35,6 +35,8 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
 
+        public override string DisplayName => "Audioboo";
+
         public override Uri GetRecordPageUrl(IAudioBook record)
         {
             return new Uri($"http://audioboo.ru/{record.GroupKey}/{record.Key}");
