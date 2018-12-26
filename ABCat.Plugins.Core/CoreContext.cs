@@ -35,6 +35,7 @@ namespace ABCat.Core
 
             _dbPluginCreatorAttribute = ComponentFactory.GetCreators<IDbContainer>().First();
             Logger = ComponentFactory.CreateActual<ILoggerFactory>().GetLogger("MainLog");
+            DbContainer = CreateDbContainer(true);
         }
 
         public static CoreContext I { get; } = new CoreContext();
@@ -45,12 +46,16 @@ namespace ABCat.Core
 
         public IComponentFactory ComponentFactory { get; }
 
-        public IDbContainer CreateDbContainer(bool autoSave)
+        private IDbContainer CreateDbContainer(bool autoSave)
         {
             var result = _dbPluginCreatorAttribute.GetInstance<IDbContainer>();
             result.AutoSaveChanges = autoSave;
             return result;
         }
+
+        public IDbContainer DbContainer { get; }
+
+        public DbContainerAutoSave DbContainerAutoSave => new DbContainerAutoSave(DbContainer);
 
         public IEventAggregatorShared EventAggregator { get; } = new EventAggregatorShared();
 

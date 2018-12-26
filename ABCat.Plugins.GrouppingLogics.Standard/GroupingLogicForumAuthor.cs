@@ -24,22 +24,16 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
-            var root = new Group(this) { Parent = null, Caption = "Все группы", Level = 0 };
+            var root = new Group(this) {Caption = "Все группы", Level = 0};
 
-            Dictionary<string, IAudioBookGroup> recordGroups;
-            Dictionary<int, IAudioBookWebSite> webSites;
-            Dictionary<string, IAudioBook[]> recordsByGroup;
+            var dbContainer = Context.I.DbContainer;
+            var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
+                .ToDictionary(item => item.Key, item => item);
+            cancellationToken.ThrowIfCancellationRequested();
+            var recordsByGroup = dbContainer.AudioBookSet.GetRecordsAllWithCache().GroupBy(record => record.GroupKey)
+                .ToDictionary(item => item.Key, item => item.ToArray());
 
-            using (var dbContainer = Context.I.CreateDbContainer(false))
-            {
-                recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
-                    .ToDictionary(item => item.Key, item => item);
-                cancellationToken.ThrowIfCancellationRequested();
-                recordsByGroup = dbContainer.AudioBookSet.GetRecordsAll().ToArray().GroupBy(record => record.GroupKey)
-                    .ToDictionary(item => item.Key, item => item.ToArray());
-
-                webSites = dbContainer.WebSiteSet.GetWebSitesAll().ToDictionary(item => item.Id, item => item);
-            }
+            var webSites = dbContainer.WebSiteSet.GetWebSitesAll().ToDictionary(item => item.Id, item => item);
 
             var orderedRecords = recordsByGroup.Where(item => item.Key != null)
                 .OrderBy(item => recordGroups[item.Key].Title);
@@ -55,22 +49,20 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                 {
                     webSiteGroup = new WebSiteGroup(this, webSites[recordGroup.WebSiteId])
                     {
-                        Parent = root,
                         Level = 1,
                         Caption = webSites[recordGroup.WebSiteId].DisplayName
                     };
 
-                    root.Children.Add(webSiteGroup);
+                    root.Add(webSiteGroup);
                 }
 
                 var recordGroupGroup = new Group(this)
                 {
                     LinkedObjectString = grouping.Key,
-                    Parent = webSiteGroup,
                     Level = 2,
                     Caption = $"{recordGroup.Title} [{grouping.Value.Length}]"
                 };
-                webSiteGroup.Children.Add(recordGroupGroup);
+                webSiteGroup.Add(recordGroupGroup);
 
                 var authorRecords = grouping.Value.GroupBy(record => record.Author).ToArray();
 
@@ -82,25 +74,23 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
                     var recordAuthorGroup = new Group(this)
                     {
-                        Parent = recordGroupGroup,
                         Caption = groupCaption,
                         Level = 3
                     };
                     foreach (var audioBookKey in authorRecord.Select(item => item.Key))
                         recordAuthorGroup.LinkedRecords.Add(audioBookKey);
-                    recordGroupGroup.Children.Add(recordAuthorGroup);
+                    recordGroupGroup.Add(recordAuthorGroup);
                 }
             }
 
             return root;
-
         }
 
         protected override IEnumerable<IAudioBook> GetRecordsInner(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken)
         {
             if (group == null || group.Level == 0)
-                return dbContainer.AudioBookSet.GetRecordsAll().ToArray();
+                return dbContainer.AudioBookSet.GetRecordsAllWithCache();
 
             if (@group.Level == 1)
                 return dbContainer.AudioBookSet.GetRecordsByWebSite(((WebSiteGroup)@group).WebSite.Id).ToArray();

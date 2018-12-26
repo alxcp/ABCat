@@ -52,9 +52,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
         {
             var node = (ReplacementTreeNode) parameter;
 
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var dbContainer = Context.I.DbContainerAutoSave)
             {
-                dbContainer.ReplacementStringSet.Delete(node.RecordPropertyName, node.ReplaceValue,
+                dbContainer.DBContainer.ReplacementStringSet.Delete(node.RecordPropertyName, node.ReplaceValue,
                     node.PossibleValue);
             }
 
@@ -96,74 +96,72 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
                 try
                 {
-                    using (var dbContainer = Context.I.CreateDbContainer(false))
+                    var dbContainer = Context.I.DbContainer;
+                    var hiddenRecords = dbContainer.HiddenValueSet.GetHiddenValuesAll().ToArray();
+
+                    var result = new List<ReplacementTreeNode>();
+                    var cache =
+                        dbContainer.ReplacementStringSet.GetReplacementStringsAll()
+                            .ToArray()
+                            .GroupBy(item => item.RecordPropertyName);
+
+                    foreach (var recordPropertyGroup in cache)
                     {
-                        var hiddenRecords = dbContainer.HiddenValueSet.GetHiddenValuesAll().ToArray();
-
-                        var result = new List<ReplacementTreeNode>();
-                        var cache =
-                            dbContainer.ReplacementStringSet.GetReplacementStringsAll()
-                                .ToArray()
-                                .GroupBy(item => item.RecordPropertyName);
-
-                        foreach (var recordPropertyGroup in cache)
+                        var groupNode = new ReplacementTreeNode(false) {CanRemove = false};
+                        var property =
+                            typeof(IAudioBook).GetProperties()
+                                .FirstOrDefault(item => item.Name.ToLower() == recordPropertyGroup.Key);
+                        if (property != null)
                         {
-                            var groupNode = new ReplacementTreeNode(false) {CanRemove = false};
-                            var property =
-                                typeof(IAudioBook).GetProperties()
-                                    .FirstOrDefault(item => item.Name.ToLower() == recordPropertyGroup.Key);
-                            if (property != null)
+                            var displayNameAttribute =
+                                (DisplayNameAttribute)
+                                property.GetCustomAttributes(typeof(DisplayNameAttribute), false)
+                                    .FirstOrDefault();
+                            if (displayNameAttribute != null)
                             {
-                                var displayNameAttribute =
-                                    (DisplayNameAttribute)
-                                    property.GetCustomAttributes(typeof(DisplayNameAttribute), false)
-                                        .FirstOrDefault();
-                                if (displayNameAttribute != null)
-                                {
-                                    groupNode.Value = displayNameAttribute.DisplayName;
-                                }
-                                else groupNode.Value = recordPropertyGroup.Key;
+                                groupNode.Value = displayNameAttribute.DisplayName;
                             }
                             else groupNode.Value = recordPropertyGroup.Key;
+                        }
+                        else groupNode.Value = recordPropertyGroup.Key;
 
-                            groupNode.Children = new ObservableCollection<ReplacementTreeNode>();
-                            result.Add(groupNode);
+                        groupNode.Children = new ObservableCollection<ReplacementTreeNode>();
+                        result.Add(groupNode);
 
-                            var sets = recordPropertyGroup.GroupBy(item => item.ReplaceValue,
-                                item => item.PossibleValue);
-                            foreach (var setValueGroup in sets)
+                        var sets = recordPropertyGroup.GroupBy(item => item.ReplaceValue,
+                            item => item.PossibleValue);
+                        foreach (var setValueGroup in sets)
+                        {
+                            var setNode = new ReplacementTreeNode(true);
+                            var hiddenValue =
+                                hiddenRecords.FirstOrDefault(
+                                    item =>
+                                        item.PropertyName == recordPropertyGroup.Key &&
+                                        item.Value == setValueGroup.Key);
+                            setNode.IsHidden = hiddenValue != null;
+                            setNode.RecordPropertyName = recordPropertyGroup.Key;
+                            setNode.ReplaceValue = setValueGroup.Key;
+                            setNode.CanRemove = true;
+                            setNode.Value = setValueGroup.Key;
+                            setNode.Children = new ObservableCollection<ReplacementTreeNode>();
+                            groupNode.Children.Add(setNode);
+
+                            foreach (var possibleValue in setValueGroup)
                             {
-                                var setNode = new ReplacementTreeNode(true);
-                                var hiddenValue =
-                                    hiddenRecords.FirstOrDefault(
-                                        item =>
-                                            item.PropertyName == recordPropertyGroup.Key &&
-                                            item.Value == setValueGroup.Key);
-                                setNode.IsHidden = hiddenValue != null;
-                                setNode.RecordPropertyName = recordPropertyGroup.Key;
-                                setNode.ReplaceValue = setValueGroup.Key;
-                                setNode.CanRemove = true;
-                                setNode.Value = setValueGroup.Key;
-                                setNode.Children = new ObservableCollection<ReplacementTreeNode>();
-                                groupNode.Children.Add(setNode);
-
-                                foreach (var possibleValue in setValueGroup)
+                                var itemNode = new ReplacementTreeNode(false)
                                 {
-                                    var itemNode = new ReplacementTreeNode(false)
-                                    {
-                                        Value = possibleValue,
-                                        RecordPropertyName = recordPropertyGroup.Key,
-                                        ReplaceValue = setValueGroup.Key,
-                                        PossibleValue = possibleValue,
-                                        CanRemove = true
-                                    };
-                                    setNode.Children.Add(itemNode);
-                                }
+                                    Value = possibleValue,
+                                    RecordPropertyName = recordPropertyGroup.Key,
+                                    ReplaceValue = setValueGroup.Key,
+                                    PossibleValue = possibleValue,
+                                    CanRemove = true
+                                };
+                                setNode.Children.Add(itemNode);
                             }
                         }
-
-                        return result;
                     }
+
+                    return result;
                 }
                 finally
                 {

@@ -7,11 +7,12 @@
     xmlns:groupingLogics1="clr-namespace:ABCat.Shared.Plugins.Catalog.GroupingLogics;assembly=ABCat.Shared"
     xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:primitives="clr-namespace:ABCat.UI.WPF.UI.Primitives"
     xmlns:models="clr-namespace:ABCat.UI.WPF.Models"
+    xmlns:primitives="clr-namespace:ABCat.UI.WPF.UI.Primitives"
+    d:DataContext="{d:DesignInstance models:GroupingLogicViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="300"
-    mc:Ignorable="d" d:DataContext="{d:DesignInstance models:GroupingLogicViewModel}">
+    mc:Ignorable="d">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="Btvc" />
     </UserControl.Resources>

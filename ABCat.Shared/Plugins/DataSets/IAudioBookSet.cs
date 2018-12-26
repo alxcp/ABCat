@@ -8,7 +8,8 @@ namespace ABCat.Shared.Plugins.DataSets
         void AddChangedRecords(params IAudioBook[] audioBooks);
         void AddRecord(IAudioBook record);
         IAudioBook CreateRecord();
-        IEnumerable<IAudioBook> GetRecordsAll();
+        IReadOnlyCollection<IAudioBook> GetRecordsAllWithCache();
+        IReadOnlyCollection<IAudioBook> GetRecordsAll();
         IEnumerable<IAudioBook> GetRecordsByGroup(string linkedObjectString);
         IEnumerable<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys);
         IEnumerable<IAudioBook> GetRecordsUpdatedBefore(int webSiteId, DateTime lastUpdate);

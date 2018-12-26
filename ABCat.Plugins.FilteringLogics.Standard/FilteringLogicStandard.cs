@@ -225,7 +225,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                     while (_hiddenCache == null)
                     {
                         Thread.Sleep(500);
-                    } 
+                    }
 
                     if (!_hiddenCache.TryGetValue(audioBook.Key, out var isHidden))
                     {
@@ -238,6 +238,11 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
                 if (!IsLoaded)
                 {
+                    while (_loadedCache == null)
+                    {
+                        Thread.Sleep(500);
+                    }
+
                     if (!_loadedCache.TryGetValue(audioBook.Key, out var isLoaded))
                     {
                         UpdateCacheInternal(UpdateTypes.Loaded | UpdateTypes.Values);
@@ -253,149 +258,147 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
         protected override void UpdateCacheInternal(UpdateTypes updateType)
         {
-            using (var dbContainer = Context.I.CreateDbContainer(false))
+            var dbContainer = Context.I.DbContainer;
+            if (updateType.HasFlag(UpdateTypes.Values))
             {
-                if (updateType.HasFlag(UpdateTypes.Values))
+                _booksCache = dbContainer.AudioBookSet.GetRecordsAllWithCache();
+
+                FillFilterValueCollection("Author",
+                    _booksCache.Select(item => item.Author).Distinct().OrderBy(item => item));
+                FillFilterValueCollection("Bitrate",
+                    _booksCache.Select(item => item.Bitrate).Distinct().OrderBy(item => item));
+
+                FillFilterValueCollection("Genre", GetGenres(_booksCache));
+
+                FillFilterValueCollection("Publisher",
+                    _booksCache.Select(item => item.Publisher).Distinct().OrderBy(item => item));
+                FillFilterValueCollection("Reader",
+                    _booksCache.Select(item => item.Reader).Distinct().OrderBy(item => item));
+            }
+
+            var updateHidden = (updateType & UpdateTypes.Hidden) == UpdateTypes.Hidden;
+            var updateLoaded = (updateType & UpdateTypes.Loaded) == UpdateTypes.Loaded;
+
+            if (updateLoaded || updateHidden)
+            {
+                var keys =
+                    dbContainer.AudioBookSet.GetRecordsAllWithCache()
+                        .ToDictionary(item => item.GroupKey + "\\" + item.Key, item => item.Key);
+
+                if (updateHidden)
                 {
-                    _booksCache = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
+                    _hiddenCache = keys.ToDictionary(item => item.Value, item => false);
 
-                    FillFilterValueCollection("Author",
-                        _booksCache.Select(item => item.Author).Distinct().OrderBy(item => item));
-                    FillFilterValueCollection("Bitrate",
-                        _booksCache.Select(item => item.Bitrate).Distinct().OrderBy(item => item));
-
-                    FillFilterValueCollection("Genre", GetGenres(_booksCache));
-
-                    FillFilterValueCollection("Publisher",
-                        _booksCache.Select(item => item.Publisher).Distinct().OrderBy(item => item));
-                    FillFilterValueCollection("Reader",
-                        _booksCache.Select(item => item.Reader).Distinct().OrderBy(item => item));
-                }
-
-                var updateHidden = (updateType & UpdateTypes.Hidden) == UpdateTypes.Hidden;
-                var updateLoaded = (updateType & UpdateTypes.Loaded) == UpdateTypes.Loaded;
-
-                if (updateLoaded || updateHidden)
-                {
-                    var keys =
-                        dbContainer.AudioBookSet.GetRecordsAll()
-                            .ToDictionary(item => item.GroupKey + "\\" + item.Key, item => item.Key);
-
-                    if (updateHidden)
+                    foreach (var hiddenRecord in dbContainer.HiddenRecordSet.GetHiddenRecordsAll())
                     {
-                        _hiddenCache = keys.ToDictionary(item => item.Value, item => false);
-
-                        foreach (var hiddenRecord in dbContainer.HiddenRecordSet.GetHiddenRecordsAll())
+                        var key = hiddenRecord.RecordGroupKey + "\\" + hiddenRecord.RecordKey;
+                        if (keys.TryGetValue(key, out var recordKey))
                         {
-                            var key = hiddenRecord.RecordGroupKey + "\\" + hiddenRecord.RecordKey;
-                            if (keys.TryGetValue(key, out var recordKey))
-                            {
-                                _hiddenCache[recordKey] = true;
-                            }
+                            _hiddenCache[recordKey] = true;
                         }
+                    }
 
-                        var replacementStrings =
-                            dbContainer.ReplacementStringSet.GetReplacementStringsAll()
-                                .GroupBy(item => item.ReplaceValue);
+                    var replacementStrings =
+                        dbContainer.ReplacementStringSet.GetReplacementStringsAll()
+                            .GroupBy(item => item.ReplaceValue);
 
-                        foreach (var hiddenValue in dbContainer.HiddenValueSet.GetHiddenValuesAll())
+                    foreach (var hiddenValue in dbContainer.HiddenValueSet.GetHiddenValuesAll())
+                    {
+                        var replacementString =
+                            replacementStrings.FirstOrDefault(item => item.Key == hiddenValue.Value);
+                        if (replacementString == null) continue;
+
+                        var hiddenValues =
+                            new HashSet<string>(replacementString.Select(item => item.PossibleValue));
+                        hiddenValues.Add(hiddenValue.Value);
+
+                        foreach (var audioBook in _booksCache)
                         {
-                            var replacementString =
-                                replacementStrings.FirstOrDefault(item => item.Key == hiddenValue.Value);
-                            if (replacementString == null) continue;
+                            if (_hiddenCache[audioBook.Key]) continue;
 
-                            var hiddenValues =
-                                new HashSet<string>(replacementString.Select(item => item.PossibleValue));
-                            hiddenValues.Add(hiddenValue.Value);
+                            var hidden = false;
 
-                            foreach (var audioBook in _booksCache)
+                            string value = null;
+                            switch (hiddenValue.PropertyName)
                             {
-                                if (_hiddenCache[audioBook.Key]) continue;
+                                case "bitrate":
+                                    value = audioBook.Bitrate;
+                                    break;
+                                case "publisher":
+                                    value = audioBook.Publisher;
+                                    break;
+                                case "reader":
+                                    value = audioBook.Reader;
+                                    break;
+                                case "author":
+                                    value = audioBook.Author;
+                                    break;
+                                case "genre":
+                                    value = audioBook.Genre;
+                                    break;
+                            }
 
-                                var hidden = false;
-
-                                string value = null;
-                                switch (hiddenValue.PropertyName)
+                            if (!Extensions.IsNullOrEmpty(value))
+                            {
+                                if (hiddenValue.IgnoreCase)
                                 {
-                                    case "bitrate":
-                                        value = audioBook.Bitrate;
-                                        break;
-                                    case "publisher":
-                                        value = audioBook.Publisher;
-                                        break;
-                                    case "reader":
-                                        value = audioBook.Reader;
-                                        break;
-                                    case "author":
-                                        value = audioBook.Author;
-                                        break;
-                                    case "genre":
-                                        value = audioBook.Genre;
-                                        break;
-                                }
-
-                                if (!Extensions.IsNullOrEmpty(value))
-                                {
-                                    if (hiddenValue.IgnoreCase)
+                                    if (hiddenValue.WholeWord)
                                     {
-                                        if (hiddenValue.WholeWord)
+                                        foreach (var hiddenValue1 in hiddenValues)
                                         {
-                                            foreach (var hiddenValue1 in hiddenValues)
-                                            {
-                                                hidden =
-                                                    string.Compare(value, hiddenValue1,
-                                                        StringComparison.OrdinalIgnoreCase) == 0;
-                                                if (hidden) break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            foreach (var hiddenValue1 in hiddenValues)
-                                            {
-                                                hidden =
-                                                    value.IndexOf(hiddenValue1,
-                                                        StringComparison.OrdinalIgnoreCase) >= 0;
-                                                if (hidden) break;
-                                            }
+                                            hidden =
+                                                string.Compare(value, hiddenValue1,
+                                                    StringComparison.OrdinalIgnoreCase) == 0;
+                                            if (hidden) break;
                                         }
                                     }
                                     else
                                     {
-                                        if (hiddenValue.WholeWord)
+                                        foreach (var hiddenValue1 in hiddenValues)
                                         {
-                                            foreach (var hiddenValue1 in hiddenValues)
-                                            {
-                                                hidden = string.CompareOrdinal(value, hiddenValue1) == 0;
-                                                if (hidden) break;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            foreach (var hiddenValue1 in hiddenValues)
-                                            {
-                                                hidden = value.IndexOf(hiddenValue1, StringComparison.Ordinal) >= 0;
-                                                if (hidden) break;
-                                            }
+                                            hidden =
+                                                value.IndexOf(hiddenValue1,
+                                                    StringComparison.OrdinalIgnoreCase) >= 0;
+                                            if (hidden) break;
                                         }
                                     }
                                 }
-
-                                _hiddenCache[audioBook.Key] = hidden;
+                                else
+                                {
+                                    if (hiddenValue.WholeWord)
+                                    {
+                                        foreach (var hiddenValue1 in hiddenValues)
+                                        {
+                                            hidden = string.CompareOrdinal(value, hiddenValue1) == 0;
+                                            if (hidden) break;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (var hiddenValue1 in hiddenValues)
+                                        {
+                                            hidden = value.IndexOf(hiddenValue1, StringComparison.Ordinal) >= 0;
+                                            if (hidden) break;
+                                        }
+                                    }
+                                }
                             }
+
+                            _hiddenCache[audioBook.Key] = hidden;
                         }
                     }
+                }
 
-                    if (updateLoaded)
+                if (updateLoaded)
+                {
+                    _loadedCache = keys.ToDictionary(item => item.Value, item => false);
+
+                    foreach (var loadedRecord in dbContainer.UserDataSet.GetUserDataAll())
                     {
-                        _loadedCache = keys.ToDictionary(item => item.Value, item => false);
-
-                        foreach (var loadedRecord in dbContainer.UserDataSet.GetUserDataAll())
+                        var key = loadedRecord.RecordGroupKey + "\\" + loadedRecord.RecordKey;
+                        if (keys.TryGetValue(key, out var recordKey))
                         {
-                            var key = loadedRecord.RecordGroupKey + "\\" + loadedRecord.RecordKey;
-                            if (keys.TryGetValue(key, out var recordKey))
-                            {
-                                _loadedCache[recordKey] = true;
-                            }
+                            _loadedCache[recordKey] = true;
                         }
                     }
                 }
@@ -404,10 +407,16 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
         private IReadOnlyCollection<string> GetGenres(IEnumerable<IAudioBook> records)
         {
-            var allGenres = records.SelectMany(item => item.Genre.Split(',', '/')).Select(item => item.Trim()).GroupBy(item => item.ToLower())
+            var allGenres = records
+                .SelectMany(item => item.GetGenres())
+                .GroupBy(item => item)
                 .ToDictionary(item => item.Key, item => item.Count());
 
-            return allGenres.OrderByDescending(item => item.Value).Where(item=>!item.Key.IsNullOrEmpty()).Select(item=>item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false)).ToArray();
+            return allGenres
+                .OrderByDescending(item => item.Value)
+                .Where(item=>!item.Key.IsNullOrEmpty())
+                .Select(item=>item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false))
+                .ToArray();
         }
 
         private void FillFilterValueCollection(string collectionName, IEnumerable<string> filterValues)

@@ -19,13 +19,11 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public NormalizationLogicStandardPlugin()
         {
-            using (var dbContainer = Context.I.CreateDbContainer(false))
+            var dbContainer = Context.I.DbContainer;
+            var allBooks = dbContainer.AudioBookSet.GetRecordsAllWithCache();
+            foreach (var audioBook in allBooks)
             {
-                var allBooks = dbContainer.AudioBookSet.GetRecordsAll();
-                foreach (var audioBook in allBooks)
-                {
-                    _authors.TryAdd(audioBook.Author.ToLower(), audioBook.Author);
-                }
+                _authors.TryAdd(audioBook.Author.ToLower(), audioBook.Author);
             }
         }
 

@@ -26,70 +26,81 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
-            using (var dbContainer = Context.I.CreateDbContainer(false))
+            var dbContainer = Context.I.DbContainer;
+            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+
+            var records = dbContainer.AudioBookSet.GetRecordsAllWithCache();
+            var recordsByGenre = new Dictionary<string, Group>(StringComparer.InvariantCultureIgnoreCase);
+            var alphabetGroups = new Dictionary<string, Group>(StringComparer.InvariantCultureIgnoreCase);
+
+            var emptyGenreGroup = new Group(this)
             {
-                var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+                Caption = "<Не задано>",
+                Level = 1,
+            };
+            root.Add(emptyGenreGroup);
 
-                var records = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
-                var genres = GetGenres(records);
-
-                var alphabetGroups = new Dictionary<char, Group>();
-
-                foreach (var genre in genres)
+            foreach (var audioBook in records)
+            {
+                var genres = audioBook.GetGenres();
+                if (genres.Any())
                 {
-                    if (!alphabetGroups.TryGetValue(genre[0], out var alphabetGroup))
+                    foreach (var genre in genres)
                     {
-                        alphabetGroup = new Group(this)
+                        var firstLetter = genre[0].ToString().ToUpper();
+
+                        if (!alphabetGroups.TryGetValue(firstLetter, out var alphabetGroup))
                         {
-                            Caption = genre[0].ToString(),
-                            Level = 1,
-                            Parent = root
-                        };
-                        alphabetGroups.Add(genre[0], alphabetGroup);
-                        root.Children.Add(alphabetGroup);
+                            alphabetGroup = new Group(this)
+                            {
+                                Caption = firstLetter,
+                                Level = 1,
+                            };
+                            alphabetGroups.Add(firstLetter.ToUpper(), alphabetGroup);
+                            root.Add(alphabetGroup);
+                        }
+
+                        if (!recordsByGenre.TryGetValue(genre, out var group))
+                        {
+                            var genreForDisplay =
+                                (genre.Length <= 40 ? genre : genre.Substring(0, 39) + "…").ChangeCase(
+                                    Extensions.CaseTypes.AllWords, false, false);
+
+                            group = new Group(this)
+                            {
+                                Caption = genreForDisplay,
+                                Level = 2
+                            };
+
+                            recordsByGenre[genre] = group;
+                            alphabetGroup.Add(group);
+                        }
+
+                        group.LinkedRecords.Add(audioBook.Key);
+                        alphabetGroup.LinkedRecords.Add(audioBook.Key);
                     }
-
-                    var genreForDisplay = genre.Length <= 40 ? genre : genre.Substring(0, 37) + "...";
-                    var recordsByGenre = records.Where(item =>
-                            item.Genre.ToStringOrEmpty().IndexOf(genre, StringComparison.InvariantCultureIgnoreCase) >=
-                            0)
-                        .ToArray();
-
-                    var genreGroup = new Group(this)
-                    {
-                        Parent = alphabetGroup,
-                        Caption = $"{genreForDisplay} [{recordsByGenre.Length}]",
-                        Level = 2
-                    };
-
-                    foreach (var audioBookKey in recordsByGenre.Select(item=>item.Key))
-                    {
-                        alphabetGroup.LinkedRecords.Add(audioBookKey);
-                        genreGroup.LinkedRecords.Add(audioBookKey);
-                    }
-
-                    alphabetGroup.Children.Add(genreGroup);
                 }
-
-                foreach (var alphabetGroup in alphabetGroups)
+                else
                 {
-                    alphabetGroup.Value.Caption += $" [{alphabetGroup.Value.LinkedRecords.Count}]";
+                    emptyGenreGroup.LinkedRecords.Add(audioBook.Key);
                 }
-
-                return root;
             }
+
+            foreach (var genreGroup in recordsByGenre)
+            {
+                genreGroup.Value.Caption = $"{genreGroup.Value.Caption} [{genreGroup.Value.LinkedRecords.Count}]";
+            }
+
+            foreach (var alphabetGroup in alphabetGroups)
+            {
+                alphabetGroup.Value.Caption += $" [{alphabetGroup.Value.LinkedRecords.Count}]";
+                alphabetGroup.Value.OrderByLinkedRecordsQuantity();
+            }
+
+            root.OrderByCaption();
+
+            return root;
         }
-
-        private IReadOnlyCollection<string> GetGenres(IEnumerable<IAudioBook> records)
-        {
-            var allGenres = records.SelectMany(item => item.Genre.Split(',', '/')).Select(item => item.Trim())
-                .GroupBy(item => item.ToLower())
-                .ToDictionary(item => item.Key, item => item.Count());
-
-            return allGenres.OrderByDescending(item => item.Value).Where(item => !item.Key.IsNullOrEmpty())
-                .Select(item => item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false)).ToArray();
-        }
-
 
         protected override IEnumerable<IAudioBook> GetRecordsInner(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken)
@@ -98,7 +109,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
             if (group == null || group.Level == 0)
             {
-                result = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
+                result = dbContainer.AudioBookSet.GetRecordsAllWithCache();
             }
             else
             {

@@ -34,7 +34,7 @@ namespace Shared.Everywhere
 
         public void PublishOnUIThread(object message)
         {
-            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle,
+            Dispatcher?.BeginInvoke(DispatcherPriority.ApplicationIdle,
                 new Action(() => { _aggregator.Publish(message, action => action()); }));
         }
     }

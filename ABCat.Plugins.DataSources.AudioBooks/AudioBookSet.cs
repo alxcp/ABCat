@@ -142,9 +142,20 @@ WHERE Key IN({keys})");
             return new AudioBook();
         }
 
-        public IEnumerable<IAudioBook> GetRecordsAll()
+        private IReadOnlyCollection<IAudioBook> _recordsCache;
+
+        public IReadOnlyCollection<IAudioBook> GetRecordsAllWithCache()
         {
-            return ExecuteWithLock<IEnumerable<IAudioBook>>(Table<AudioBook>);
+            return _recordsCache ?? GetRecordsAll();
+        }
+
+        public IReadOnlyCollection<IAudioBook> GetRecordsAll()
+        {
+            return ExecuteWithLock(() =>
+            {
+                _recordsCache = Table<AudioBook>().ToArray();
+                return _recordsCache;
+            });
         }
 
         public IEnumerable<IAudioBook> GetRecordsByGroup(string linkedObjectString)
@@ -201,6 +212,8 @@ AND abg.WebSiteId = ?", webSiteId));
         {
             ExecuteWithLock(() =>
             {
+                _recordsCache = null;
+
                 var books4Add = new List<AudioBook>();
 
                 while (_addedAudioBooks.Count > 0)
