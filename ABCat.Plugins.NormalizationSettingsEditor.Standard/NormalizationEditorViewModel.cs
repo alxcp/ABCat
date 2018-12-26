@@ -135,8 +135,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         private void Save()
         {
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var autoSave = Context.I.DbContainerAutoSave)
             {
+                var dbContainer = autoSave.DBContainer;
                 var existed =
                     dbContainer.ReplacementStringSet.GetReplacementStringsBy(SelectedProperty.FieldName)
                         .Where(

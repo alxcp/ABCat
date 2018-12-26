@@ -19,8 +19,10 @@ namespace ABCat.Shared.Plugins.Sites
             await Task.Factory.StartNew(() =>
             {
                 var z = 0;
-                using (var dbContainer = Context.I.CreateDbContainer(true))
+                using (var autoSave = Context.I.DbContainerAutoSave)
                 {
+                    var dbContainer = autoSave.DBContainer;
+
                     var records = dbContainer.AudioBookSet.GetRecordsByKeys(recordsIds).ToArray();
 
                     foreach (var record in records)
@@ -32,6 +34,7 @@ namespace ABCat.Shared.Plugins.Sites
                         z++;
                     }
                 }
+
             }, cancellationToken);
         }
 

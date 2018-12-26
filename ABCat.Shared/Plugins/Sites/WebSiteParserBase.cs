@@ -28,21 +28,19 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 if (_webSiteId == -1)
                 {
-                    using (var dbContainer = Context.I.CreateDbContainer(false))
+                    var dbContainer = Context.I.DbContainer;
+                    var ws = dbContainer.WebSiteSet.GetWebSitesAll()
+                        .FirstOrDefault(item => item.WebSiteParserPluginName.Compare(GetType().Name));
+                    if (ws == null)
                     {
-                        var ws = dbContainer.WebSiteSet.GetWebSitesAll()
-                            .FirstOrDefault(item => item.WebSiteParserPluginName.Compare(GetType().Name));
-                        if (ws == null)
-                        {
-                            ws = dbContainer.WebSiteSet.CreateWebSite();
-                            ws.WebSiteParserPluginName = GetType().Name;
-                            dbContainer.WebSiteSet.AddWebSite(ws);
-                            ws = dbContainer.WebSiteSet.GetWebSitesAll()
-                                .First(item => item.WebSiteParserPluginName.Compare(GetType().Name));
-                        }
-
-                        _webSiteId = ws.Id;
+                        ws = dbContainer.WebSiteSet.CreateWebSite();
+                        ws.WebSiteParserPluginName = GetType().Name;
+                        dbContainer.WebSiteSet.AddWebSite(ws);
+                        ws = dbContainer.WebSiteSet.GetWebSitesAll()
+                            .First(item => item.WebSiteParserPluginName.Compare(GetType().Name));
                     }
+
+                    _webSiteId = ws.Id;
                 }
 
                 return _webSiteId;
@@ -54,11 +52,9 @@ namespace ABCat.Shared.Plugins.Sites
             if (_groupKeys == null || forceRefresh)
             {
                 var webSiteId = WebSiteId;
-                using (var dbContainer = Context.I.CreateDbContainer(false))
-                {
-                    _groupKeys = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
-                        .Where(item => item.WebSiteId == webSiteId).Select(item => item.Key).ToHashSet();
-                }
+                var dbContainer = Context.I.DbContainer;
+                _groupKeys = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
+                    .Where(item => item.WebSiteId == webSiteId).Select(item => item.Key).ToHashSet();
             }
 
             return _groupKeys;
@@ -73,10 +69,12 @@ namespace ABCat.Shared.Plugins.Sites
 
             await Task.Factory.StartNew(() =>
             {
-                var groupActualityPeriod = mainConfig.GroupActualityPeriod;
-                var z = 0;
-                using (var dbContainer = Context.I.CreateDbContainer(true))
+                using (var autoSave = Context.I.DbContainerAutoSave)
                 {
+                    var dbContainer = autoSave.DBContainer;
+
+                    var groupActualityPeriod = mainConfig.GroupActualityPeriod;
+                    var z = 0;
                     IAudioBookGroup[] groups;
                     if (recordGroupsKeys == null) groups = GetAllRecordGroups(dbContainer).ToArray();
                     else
@@ -85,7 +83,8 @@ namespace ABCat.Shared.Plugins.Sites
                                 .Where(item => recordGroupsKeys.Contains(item.Key))
                                 .ToArray();
 
-                    foreach (var group in groups.Where(item => (DateTime.Now - item.LastUpdate).TotalDays > groupActualityPeriod))
+                    foreach (var group in groups.Where(item =>
+                        (DateTime.Now - item.LastUpdate).TotalDays > groupActualityPeriod))
                     {
                         try
                         {
@@ -101,10 +100,12 @@ namespace ABCat.Shared.Plugins.Sites
                         }
                     }
                 }
+
             }, cancellationToken);
         }
 
-        public async Task DownloadRecords(HashSet<string> recordsKeys, PageSources pageSource, CancellationToken cancellationToken)
+        public async Task DownloadRecords(HashSet<string> recordsKeys, PageSources pageSource,
+            CancellationToken cancellationToken)
         {
             var mainConfig = Config.Load<MainConfig>();
 
@@ -112,8 +113,10 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 var recordActualityPeriod = mainConfig.RecordActualityPeriod;
 
-                using (var dbContainer = Context.I.CreateDbContainer(true))
+                using(var autoSave = Context.I.DbContainerAutoSave)
                 {
+                    var dbContainer = autoSave.DBContainer;
+
                     IAudioBook[] records;
 
                     if (recordsKeys == null)
@@ -125,7 +128,7 @@ namespace ABCat.Shared.Plugins.Sites
                         else
                         {
                             records =
-                                dbContainer.AudioBookSet.GetRecordsUpdatedBefore(WebSiteId, 
+                                dbContainer.AudioBookSet.GetRecordsUpdatedBefore(WebSiteId,
                                     DateTime.Now.Subtract(TimeSpan.FromDays(recordActualityPeriod))).ToArray();
                         }
                     }
@@ -192,18 +195,19 @@ namespace ABCat.Shared.Plugins.Sites
 
             await Task.Factory.StartNew(() =>
             {
-                var recordActualityPeriod = mainConfig.RecordActualityPeriod;
-
-                using (var dbContainer = Context.I.CreateDbContainer(true))
+                using (var autoSave = Context.I.DbContainerAutoSave)
                 {
-                    List<IAudioBook> records = dbContainer.AudioBookSet.GetRecordsAll().ToList();
+                    var dbContainer = autoSave.DBContainer;
+                    var recordActualityPeriod = mainConfig.RecordActualityPeriod;
+                    var records = dbContainer.AudioBookSet.GetRecordsAll().ToList();
 
                     var sw = new Stopwatch();
                     sw.Start();
 
                     var symbolicDistancePlugin = Context.I.ComponentFactory.GetActualCreator<ISymbolicDistance>();
 
-                    var allGenres = records.SelectMany(item => item.Genre.Split(',')).Select(item=>item.Trim()).GroupBy(item => item)
+                    var allGenres = records.SelectMany(item => item.Genre.Split(',')).Select(item => item.Trim())
+                        .GroupBy(item => item)
                         .ToDictionary(item => item.Key, item => item.Count());
 
                     var topMost = allGenres.Where(item => item.Value > 3).OrderByDescending(item => item.Value)
@@ -306,6 +310,7 @@ namespace ABCat.Shared.Plugins.Sites
 
         public abstract IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer container);
         private static readonly Regex HtmlSpecCharRegex = new Regex("&#[0-9]+;");
+        private static readonly Regex HtmlEscCharRegex = new Regex("&[A-Za-z]+;");
 
         protected virtual string CleanupRecordValue(string value, bool allowMultiLine, int maxLength)
         {
@@ -322,12 +327,13 @@ namespace ABCat.Shared.Plugins.Sites
                 result = result.Substring(0, maxLength - 1) + "…";
             }
 
-            result = HtmlSpecCharRegex.Replace(result, RegexReadTerm);
+            result = HtmlSpecCharRegex.Replace(result, HtmlSpecCharRegexReplacer);
+            result = HtmlEscCharRegex.Replace(result, HtmlSpecCharRegexReplacer);
 
             return result;
         }
 
-        static string RegexReadTerm(Match m)
+        static string HtmlSpecCharRegexReplacer(Match m)
         {
             return WebUtility.HtmlDecode(m.Value);
         }

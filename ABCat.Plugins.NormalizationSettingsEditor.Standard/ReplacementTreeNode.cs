@@ -21,8 +21,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public ICommand HideCommand => CommandFactory.Get(async () =>
         {
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var autoSave = Context.I.DbContainerAutoSave)
             {
+                var dbContainer = autoSave.DBContainer;
                 var newHiddenValue = dbContainer.HiddenValueSet.CreateHiddenValue();
                 newHiddenValue.WholeWord = true;
                 newHiddenValue.IgnoreCase = true;
@@ -52,9 +53,9 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
 
         public ICommand UnHideCommand => CommandFactory.Get(async () =>
         {
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var dbContainer = Context.I.DbContainerAutoSave)
             {
-                dbContainer.HiddenValueSet.Delete(RecordPropertyName, Value);
+                dbContainer.DBContainer.HiddenValueSet.Delete(RecordPropertyName, Value);
             }
 
             IsHidden = false;

@@ -22,7 +22,6 @@ namespace ABCat.UI.WPF.Models
 {
     public sealed class AbCatViewModel : ViewModelBase, IDisposable
     {
-        private IDbContainer _dbContainer4Ui;
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;
         private GroupingLogicViewModel _groupingLogicModel;
@@ -54,12 +53,11 @@ namespace ABCat.UI.WPF.Models
                     {
                         try
                         {
-                            var dbContainer = Context.I.CreateDbContainer(false);
                             _getRecordsCancellationTokenSource?.Cancel();
                             _getRecordsCancellationTokenSource = new CancellationTokenSource();
-                            var records = await GetCurrentRecords(dbContainer, group, Filter,
+                            var records = await GetCurrentRecords(group, Filter,
                                 _getRecordsCancellationTokenSource.Token);
-                            SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
+                            SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
                             OnPropertyChanged();
                         }
                         catch (OperationCanceledException)
@@ -143,7 +141,6 @@ namespace ABCat.UI.WPF.Models
 
         public void Dispose()
         {
-            _dbContainer4Ui?.Dispose();
             _filter?.Dispose();
             _getRecordsCancellationTokenSource?.Dispose();
             _recordsListUc?.Dispose();
@@ -165,10 +162,9 @@ namespace ABCat.UI.WPF.Models
         {
             try
             {
-                var dbContainer = Context.I.CreateDbContainer(false);
-                var records = await GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
+                var records = await GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
                     _getRecordsCancellationTokenSource.Token);
-                SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
+                SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -184,11 +180,9 @@ namespace ABCat.UI.WPF.Models
             Application.Current.Dispatcher.CheckAccess(() =>
             {
                 ShowInDefaultWebBrowser(pageHtml);
-                using (var dbContainer = Context.I.CreateDbContainer(true))
-                {
-                    record.OpenCounter++;
-                    dbContainer.AudioBookSet.AddChangedRecords(record);
-                }
+                var dbContainer = Context.I.DbContainer;
+                record.OpenCounter++;
+                dbContainer.AudioBookSet.AddChangedRecords(record);
             });
         }
 
@@ -204,7 +198,6 @@ namespace ABCat.UI.WPF.Models
         }
 
         private async Task<IEnumerable<IAudioBook>> GetCurrentRecords(
-            IDbContainer dbContainer,
             Group currentGroup,
             IFilteringLogicPlugin filteringLogicPlugin,
             CancellationToken cancellationToken)
@@ -213,7 +206,7 @@ namespace ABCat.UI.WPF.Models
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var groupedRecords = await currentGroup.GetRecords(dbContainer, cancellationToken);
+            var groupedRecords = await currentGroup.GetRecords(Context.I.DbContainer, cancellationToken);
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -244,13 +237,10 @@ namespace ABCat.UI.WPF.Models
                 _getRecordsCancellationTokenSource?.Cancel();
                 _getRecordsCancellationTokenSource = new CancellationTokenSource();
 
-                using (var dbContainer = Context.I.CreateDbContainer(false))
-                {
-                    var records = GetCurrentRecords(dbContainer, GroupingLogicModel.SelectedGroup, Filter,
-                        _getRecordsCancellationTokenSource.Token).Result;
-                    _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                    SetCurrentRecords(dbContainer, records, _getRecordsCancellationTokenSource.Token);
-                }
+                var records = GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
+                    _getRecordsCancellationTokenSource.Token).Result;
+                _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
+                SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
@@ -271,8 +261,9 @@ namespace ABCat.UI.WPF.Models
         {
             var selected = SelectedItems.ToDictionary(item => item.GroupKey + "\\" + item.Key, item => item);
 
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var autoSave = Context.I.DbContainerAutoSave)
             {
+                var dbContainer = autoSave.DBContainer;
                 var groups = selected.Values.GroupBy(item => item.GroupKey);
 
                 var existedHidden = new Dictionary<string, IHiddenRecord>();
@@ -313,8 +304,7 @@ namespace ABCat.UI.WPF.Models
             return SelectedItems.AnySafe();
         }
 
-        private void SetCurrentRecords(IDbContainer dbContainer, IEnumerable<IAudioBook> records,
-            CancellationToken cancellationToken)
+        private void SetCurrentRecords(IEnumerable<IAudioBook> records, CancellationToken cancellationToken)
         {
             if (!cancellationToken.IsCancellationRequested)
             {
@@ -322,12 +312,10 @@ namespace ABCat.UI.WPF.Models
                 {
                     records = records.ToArray();
                     _recordsListUc.Data = records;
-                    _dbContainer4Ui?.Dispose();
-                    _dbContainer4Ui = dbContainer;
                 }
                 else
                 {
-                    _recordsListUc.Dispatcher.Invoke(() => SetCurrentRecords(dbContainer, records, cancellationToken));
+                    _recordsListUc.Dispatcher.Invoke(() => SetCurrentRecords(records, cancellationToken));
                 }
             }
         }

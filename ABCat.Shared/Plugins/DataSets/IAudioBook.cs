@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using JetBrains.Annotations;
 
@@ -33,5 +34,8 @@ namespace ABCat.Shared.Plugins.DataSets
         [Browsable(false)] string MagnetLink { get; set; }
 
         [DisplayName("Просмотрено")] int OpenCounter { get; set; }
+
+        [Browsable(false)]
+        IReadOnlyCollection<string> GetGenres();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -123,6 +124,14 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         [Column("Title")] public string Title { get; set; }
 
         [Column("OpenCounter")] public int OpenCounter { get; set; }
+
+        public IReadOnlyCollection<string> GetGenres()
+        {
+            if (Genre.IsNullOrEmpty())
+                return new string[0];
+
+            return Genre.Split(',', '/', '.', '>', '|').Select(item => item.Trim()).Where(item=>!item.IsNullOrEmpty()).ToArray();
+        }
 
         public void ClearMetaInfo()
         {

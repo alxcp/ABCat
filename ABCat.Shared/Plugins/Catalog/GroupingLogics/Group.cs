@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared.Plugins.DataProviders;
@@ -19,6 +20,7 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
 
         private bool _isExpanded;
         private bool _isSelected;
+        private List<Group> _children = new List<Group>();
 
         /// <summary>
         ///     Группа записей каталога
@@ -27,7 +29,6 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         public Group(GroupingLogicPluginBase ownerLogic)
         {
             OwnerLogic = ownerLogic;
-            Children = new List<Group>();
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         /// <summary>
         ///     Список непосредственных потомков группы
         /// </summary>
-        public List<Group> Children { get; }
+        public IReadOnlyCollection<Group> Children => _children;
 
         public bool IsExpanded
         {
@@ -80,7 +81,7 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         /// <summary>
         ///     Родительская группа
         /// </summary>
-        public Group Parent { get; set; }
+        public Group Parent { get; private set; }
 
         /// <summary>
         ///     Начать асинхронное получение записей
@@ -91,6 +92,38 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
             CancellationToken cancellationToken)
         {
             return await OwnerLogic.GetRecords(dbContainer, this, cancellationToken);
+        }
+
+        public void Add(Group child)
+        {
+            _children.Add(child);
+            child.Parent = this;
+        }
+
+        public void OrderByCaption()
+        {
+            _children.Sort(new ComparerByCaption());
+        }
+
+        public void OrderByLinkedRecordsQuantity()
+        {
+            _children.Sort(new ComparerByQuantity());
+        }
+
+        private class ComparerByCaption : IComparer<Group>
+        {
+            public int Compare(Group x, Group y)
+            {
+                return x.Caption.CompareTo(y.Caption);
+            }
+        }
+
+        private class ComparerByQuantity : IComparer<Group>
+        {
+            public int Compare(Group x, Group y)
+            {
+                return y.LinkedRecords.Count.CompareTo(x.LinkedRecords.Count);
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel;
 using System.Text;
 using ABCat.Shared.Plugins.DataProviders;
@@ -11,6 +12,8 @@ namespace ABCat.Shared
         IComponentFactory ComponentFactory { get; }
         IEventAggregatorShared EventAggregator { get; }
         Encoding DefaultEncoding { get; }
-        IDbContainer CreateDbContainer(bool autoSave);
+        //IDbContainer CreateDbContainer(bool autoSave);
+        IDbContainer DbContainer { get; }
+        DbContainerAutoSave DbContainerAutoSave { get; }
     }
 }

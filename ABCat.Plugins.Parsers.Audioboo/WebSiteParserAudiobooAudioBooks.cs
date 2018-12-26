@@ -113,8 +113,9 @@ namespace ABCat.Plugins.Parsers.Audioboo
         {
             string result = null;
 
-            using (var dbContainer = Context.I.CreateDbContainer(true))
+            using (var autoSave = Context.I.DbContainerAutoSave)
             {
+                var dbContainer = autoSave.DBContainer;
                 var recordPageKey = audioBook.GetPageKey();
                 var pageData = pageSource == PageSources.WebOnly ? null : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
 
