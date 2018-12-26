@@ -244,7 +244,7 @@ DELETE FROM AudioBook
 WHERE Key IN({keys})");
                     }
 
-                    InsertAll(books4Add.Union(books4Replace));
+                    InsertAll(books4Add.Union(books4Replace).GroupBy(item => item.Key).Select(item => item.First()));
                 });
             });
         }

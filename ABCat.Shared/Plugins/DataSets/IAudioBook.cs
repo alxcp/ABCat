@@ -37,5 +37,8 @@ namespace ABCat.Shared.Plugins.DataSets
 
         [Browsable(false)]
         IReadOnlyCollection<string> GetGenres();
+
+        [Browsable(false)]
+        IReadOnlyCollection<string> GetAuthors();
     }
 }
