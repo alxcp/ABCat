@@ -102,6 +102,7 @@
     <Compile Include="Plugins\Catalog\GroupingLogics\Group.cs" />
     <Compile Include="Plugins\Catalog\GroupingLogics\GroupingLogicPluginBase.cs" />
     <Compile Include="Plugins\Catalog\GroupingLogics\IGrouppingLogicPlugin.cs" />
+    <Compile Include="Plugins\Catalog\GroupingLogics\WebSiteGroup.cs" />
     <Compile Include="Plugins\Catalog\INormalizationLogicPlugin.cs" />
     <Compile Include="Plugins\Catalog\ISymbolicDistance.cs" />
     <Compile Include="Plugins\Catalog\ParsingLogics\INaturalBitrateParserPlugin.cs" />

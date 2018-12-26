@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
@@ -221,6 +222,11 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             {
                 if (!IsHidden)
                 {
+                    while (_hiddenCache == null)
+                    {
+                        Thread.Sleep(500);
+                    } 
+
                     if (!_hiddenCache.TryGetValue(audioBook.Key, out var isHidden))
                     {
                         UpdateCacheInternal(UpdateTypes.Hidden | UpdateTypes.Values);

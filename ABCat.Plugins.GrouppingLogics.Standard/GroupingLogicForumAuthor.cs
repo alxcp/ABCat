@@ -24,72 +24,91 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
+            var root = new Group(this) { Parent = null, Caption = "Все группы", Level = 0 };
+
+            Dictionary<string, IAudioBookGroup> recordGroups;
+            Dictionary<int, IAudioBookWebSite> webSites;
+            Dictionary<string, IAudioBook[]> recordsByGroup;
+
             using (var dbContainer = Context.I.CreateDbContainer(false))
             {
-                var root = new Group(this) {Parent = null, Caption = "Все группы произведений", Level = 0};
-
-                var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
+                recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
                     .ToDictionary(item => item.Key, item => item);
-                if (cancellationToken.IsCancellationRequested) return null;
-                var records =
-                    dbContainer.AudioBookSet.GetRecordsAll().ToArray().GroupBy(record => record.GroupKey).ToArray();
+                cancellationToken.ThrowIfCancellationRequested();
+                recordsByGroup = dbContainer.AudioBookSet.GetRecordsAll().ToArray().GroupBy(record => record.GroupKey)
+                    .ToDictionary(item => item.Key, item => item.ToArray());
 
-                foreach (var grouping in records.Where(item => item.Key != null)
-                    .OrderBy(item => recordGroups[item.Key].Title))
+                webSites = dbContainer.WebSiteSet.GetWebSitesAll().ToDictionary(item => item.Id, item => item);
+            }
+
+            var orderedRecords = recordsByGroup.Where(item => item.Key != null)
+                .OrderBy(item => recordGroups[item.Key].Title);
+
+            foreach (var grouping in orderedRecords)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var recordGroup = recordGroups[grouping.Key];
+                var webSiteGroup = root.Children.OfType<WebSiteGroup>()
+                    .FirstOrDefault(item => item.WebSite.Id == recordGroup.WebSiteId);
+
+                if (webSiteGroup == null)
                 {
-                    if (cancellationToken.IsCancellationRequested) return null;
-                    var recordGroupGroup = new Group(this)
+                    webSiteGroup = new WebSiteGroup(this, webSites[recordGroup.WebSiteId])
                     {
-                        LinkedObjectString = grouping.Key,
                         Parent = root,
                         Level = 1,
-                        Caption = $"{recordGroups[grouping.Key].Title} [{grouping.Count()}]"
+                        Caption = webSites[recordGroup.WebSiteId].DisplayName
                     };
-                    root.Children.Add(recordGroupGroup);
 
-                    var authorRecords = grouping.GroupBy(record => record.Author).ToArray();
-
-                    foreach (var authorRecord in authorRecords.OrderBy(item => item.Key))
-                    {
-                        if (cancellationToken.IsCancellationRequested) return null;
-
-                        var groupCaption = $"{authorRecord.Key} [{authorRecord.Count()}]";
-
-                        var recordAuthorGroup = new Group(this)
-                        {
-                            Parent = recordGroupGroup,
-                            Caption = groupCaption,
-                            Level = 2
-                        };
-                        foreach (var audioBookKey in authorRecord.Select(item => item.Key))
-                            recordAuthorGroup.LinkedRecords.Add(audioBookKey);
-                        recordGroupGroup.Children.Add(recordAuthorGroup);
-                    }
+                    root.Children.Add(webSiteGroup);
                 }
 
-                return root;
+                var recordGroupGroup = new Group(this)
+                {
+                    LinkedObjectString = grouping.Key,
+                    Parent = webSiteGroup,
+                    Level = 2,
+                    Caption = $"{recordGroup.Title} [{grouping.Value.Length}]"
+                };
+                webSiteGroup.Children.Add(recordGroupGroup);
+
+                var authorRecords = grouping.Value.GroupBy(record => record.Author).ToArray();
+
+                foreach (var authorRecord in authorRecords.OrderBy(item => item.Key))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var groupCaption = $"{authorRecord.Key} [{authorRecord.Count()}]";
+
+                    var recordAuthorGroup = new Group(this)
+                    {
+                        Parent = recordGroupGroup,
+                        Caption = groupCaption,
+                        Level = 3
+                    };
+                    foreach (var audioBookKey in authorRecord.Select(item => item.Key))
+                        recordAuthorGroup.LinkedRecords.Add(audioBookKey);
+                    recordGroupGroup.Children.Add(recordAuthorGroup);
+                }
             }
+
+            return root;
+
         }
 
         protected override IEnumerable<IAudioBook> GetRecordsInner(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken)
         {
-            IEnumerable<IAudioBook> result;
-
             if (group == null || group.Level == 0)
-            {
-                result = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
-            }
-            else if (group.Level == 1)
-            {
-                result = dbContainer.AudioBookSet.GetRecordsByGroup(group.LinkedObjectString).ToArray();
-            }
-            else
-            {
-                result = dbContainer.AudioBookSet.GetRecordsByKeys(group.LinkedRecords);
-            }
+                return dbContainer.AudioBookSet.GetRecordsAll().ToArray();
 
-            return result;
+            if (@group.Level == 1)
+                return dbContainer.AudioBookSet.GetRecordsByWebSite(((WebSiteGroup)@group).WebSite.Id).ToArray();
+
+            if (@group.Level == 2)
+                return dbContainer.AudioBookSet.GetRecordsByGroup(@group.LinkedObjectString).ToArray();
+
+            return dbContainer.AudioBookSet.GetRecordsByKeys(@group.LinkedRecords).ToArray();
         }
     }
 }

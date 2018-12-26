@@ -28,5 +28,6 @@ namespace ABCat.Shared.Plugins.Sites
 
         HashSet<string> GetGroupKeys(bool forceRefresh);
         Uri GetRecordPageUrl([NotNull] IAudioBook record);
+        string DisplayName { get; }
     }
 }

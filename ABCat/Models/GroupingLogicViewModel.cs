@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.ViewModels;
 using JetBrains.Annotations;
@@ -42,7 +43,7 @@ namespace ABCat.UI.WPF.Models
 
         public bool IsOnUpdate
         {
-            get => _isOnUpdate;
+            get => _isOnUpdate || (_selectedGroupingLogicPlugin?.IsOnUpdate).GetValueOrDefault();
             set
             {
                 if (value.Equals(_isOnUpdate)) return;
@@ -80,9 +81,22 @@ namespace ABCat.UI.WPF.Models
             set
             {
                 if (Equals(value, _selectedGroupingLogicPlugin)) return;
+                if (_selectedGroupingLogicPlugin!= null)
+                    _selectedGroupingLogicPlugin.PropertyChanged -= _selectedGroupingLogicPlugin_PropertyChanged;
                 _selectedGroupingLogicPlugin = value;
+                if (_selectedGroupingLogicPlugin != null)
+                    _selectedGroupingLogicPlugin.PropertyChanged += _selectedGroupingLogicPlugin_PropertyChanged;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsOnUpdate));
                 GenerateGroups(value);
+            }
+        }
+
+        private void _selectedGroupingLogicPlugin_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == "IsOnUpdate")
+            {
+                OnPropertyChanged(nameof(IsOnUpdate));
             }
         }
 

@@ -8,7 +8,8 @@ namespace ABCat.Shared.Plugins.DataSets
 {
     public interface IAudioBookWebSite
     {
-        string SiteParserPluginName { get; set; }
+        string WebSiteParserPluginName { get; set; }
         int Id { get; }
+        string DisplayName { get; set; }
     }
 }

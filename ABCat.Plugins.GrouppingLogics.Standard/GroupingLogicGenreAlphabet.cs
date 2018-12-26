@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
@@ -12,9 +14,9 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("1.0")]
     [UsedImplicitly]
-    public class GroupingLogicAuthorAlphabet : GroupingLogicPluginBase
+    public class GroupingLogicGenreAlphabet : GroupingLogicPluginBase
     {
-        public override string Name => "Автор";
+        public override string Name => "Жанр";
 
         public override bool CheckForConfig(bool correct, out Config incorrectConfig)
         {
@@ -27,41 +29,46 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             using (var dbContainer = Context.I.CreateDbContainer(false))
             {
                 var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
-                var records = dbContainer.AudioBookSet.GetRecordsAll()
-                    .GroupBy(item => item.Author).ToArray();
+
+                var records = dbContainer.AudioBookSet.GetRecordsAll().ToArray();
+                var genres = GetGenres(records);
 
                 var alphabetGroups = new Dictionary<char, Group>();
 
-                foreach (var record in records.OrderBy(item => item.Key))
+                foreach (var genre in genres)
                 {
-                    if (cancellationToken.IsCancellationRequested) return null;
-                    var authorName = record.Key.IsNullOrEmpty() ? " " : record.Key;
-
-                    if (!alphabetGroups.TryGetValue(authorName[0], out var alphabetGroup))
+                    if (!alphabetGroups.TryGetValue(genre[0], out var alphabetGroup))
                     {
-                        alphabetGroup = new Group(this);
-                        alphabetGroup.Caption = authorName[0].ToString();
-                        alphabetGroup.Level = 1;
-                        alphabetGroup.Parent = root;
-                        alphabetGroups.Add(authorName[0], alphabetGroup);
+                        alphabetGroup = new Group(this)
+                        {
+                            Caption = genre[0].ToString(),
+                            Level = 1,
+                            Parent = root
+                        };
+                        alphabetGroups.Add(genre[0], alphabetGroup);
                         root.Children.Add(alphabetGroup);
                     }
 
-                    if (authorName.Length > 40) authorName = authorName.Substring(0, 37) + "...";
-                    var authorGroup = new Group(this)
+                    var genreForDisplay = genre.Length <= 40 ? genre : genre.Substring(0, 37) + "...";
+                    var recordsByGenre = records.Where(item =>
+                            item.Genre.ToStringOrEmpty().IndexOf(genre, StringComparison.InvariantCultureIgnoreCase) >=
+                            0)
+                        .ToArray();
+
+                    var genreGroup = new Group(this)
                     {
                         Parent = alphabetGroup,
-                        Caption = $"{authorName} [{record.Count()}]",
+                        Caption = $"{genreForDisplay} [{recordsByGenre.Length}]",
                         Level = 2
-                    }; //,  LinkedObjectId = record.Key };
+                    };
 
-                    foreach (var audioBookKey in record.Select(item => item.Key))
+                    foreach (var audioBookKey in recordsByGenre.Select(item=>item.Key))
                     {
                         alphabetGroup.LinkedRecords.Add(audioBookKey);
-                        authorGroup.LinkedRecords.Add(audioBookKey);
+                        genreGroup.LinkedRecords.Add(audioBookKey);
                     }
 
-                    alphabetGroup.Children.Add(authorGroup);
+                    alphabetGroup.Children.Add(genreGroup);
                 }
 
                 foreach (var alphabetGroup in alphabetGroups)
@@ -72,6 +79,17 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                 return root;
             }
         }
+
+        private IReadOnlyCollection<string> GetGenres(IEnumerable<IAudioBook> records)
+        {
+            var allGenres = records.SelectMany(item => item.Genre.Split(',', '/')).Select(item => item.Trim())
+                .GroupBy(item => item.ToLower())
+                .ToDictionary(item => item.Key, item => item.Count());
+
+            return allGenres.OrderByDescending(item => item.Value).Where(item => !item.Key.IsNullOrEmpty())
+                .Select(item => item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false)).ToArray();
+        }
+
 
         protected override IEnumerable<IAudioBook> GetRecordsInner(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken)
