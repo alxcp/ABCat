@@ -29,7 +29,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
         private readonly ConcurrentDictionary<string, ObservableCollection<string>> _filterValuesCache =
             new ConcurrentDictionary<string, ObservableCollection<string>>();
 
-        private IEnumerable<IAudioBook> _booksCache;
+        private IReadOnlyCollection<IAudioBook> _booksCache;
         private Dictionary<string, bool> _hiddenCache;
         private Dictionary<string, bool> _loadedCache;
 
@@ -263,8 +263,8 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             {
                 _booksCache = dbContainer.AudioBookSet.GetRecordsAllWithCache();
 
-                FillFilterValueCollection("Author",
-                    _booksCache.Select(item => item.Author).Distinct().OrderBy(item => item));
+                FillFilterValueCollection("Author", GetAuthors(_booksCache));
+
                 FillFilterValueCollection("Bitrate",
                     _booksCache.Select(item => item.Bitrate).Distinct().OrderBy(item => item));
 
@@ -300,7 +300,7 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
                     var replacementStrings =
                         dbContainer.ReplacementStringSet.GetReplacementStringsAll()
-                            .GroupBy(item => item.ReplaceValue);
+                            .GroupBy(item => item.ReplaceValue).ToArray();
 
                     foreach (var hiddenValue in dbContainer.HiddenValueSet.GetHiddenValuesAll())
                     {
@@ -309,8 +309,10 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                         if (replacementString == null) continue;
 
                         var hiddenValues =
-                            new HashSet<string>(replacementString.Select(item => item.PossibleValue));
-                        hiddenValues.Add(hiddenValue.Value);
+                            new HashSet<string>(replacementString.Select(item => item.PossibleValue))
+                            {
+                                hiddenValue.Value
+                            };
 
                         foreach (var audioBook in _booksCache)
                         {
@@ -404,6 +406,21 @@ namespace ABCat.Plugins.FilteringLogics.Standard
                 }
             }
         }
+
+        private IReadOnlyCollection<string> GetAuthors(IEnumerable<IAudioBook> records)
+        {
+            var allAuthors = records
+                .SelectMany(item => item.GetAuthors())
+                .GroupBy(item => item)
+                .ToDictionary(item => item.Key, item => item.Count());
+
+            return allAuthors
+                .OrderByDescending(item => item.Value)
+                .Where(item => !item.Key.IsNullOrEmpty())
+                .Select(item => item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false))
+                .ToArray();
+        }
+
 
         private IReadOnlyCollection<string> GetGenres(IEnumerable<IAudioBook> records)
         {

@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace ABCat.Plugins.GroupingLogics.Standard
 {
-    [SingletoneComponentInfo("1.0")]
+    [SingletoneComponentInfo("2.2")]
     [UsedImplicitly]
     public class GroupingLogicAuthorAlphabet : GroupingLogicByPropertyAlphabet
     {

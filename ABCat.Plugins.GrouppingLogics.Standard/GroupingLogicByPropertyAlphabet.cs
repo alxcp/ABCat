@@ -101,7 +101,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             foreach (var alphabetGroup in alphabetGroups)
             {
                 alphabetGroup.Value.Caption += $" [{alphabetGroup.Value.LinkedRecords.Count}]";
-                alphabetGroup.Value.OrderByLinkedRecordsQuantity();
+                alphabetGroup.Value.OrderByCaption();
             }
 
             root.OrderByCaption();

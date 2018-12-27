@@ -57,11 +57,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             }
         }
 
-        [Browsable(false)]
-        public string CoockieFileName => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-            "ABCat",
-            "Coockies", "rutracker");
-
         public override string DisplayName => "Загрузка торрент-файлов";
 
         [DisplayName("Torrent-клиент")]
@@ -111,11 +106,9 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var result = true;
 
             if (Extensions.IsNullOrEmpty(AudioCatalogFolder))
-                AudioCatalogFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    "ABCat", "AudioCatalog");
+                AudioCatalogFolder = SharedContext.I.GetAppDataFolderPath("AudioCatalog");
             if (Extensions.IsNullOrEmpty(TorrentFilesFolder))
-                TorrentFilesFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                    "ABCat", "TorrentFiles");
+                TorrentFilesFolder = SharedContext.I.GetAppDataFolderPath("TorrentFiles");
 
             var downloaders = Context.I.ComponentFactory.GetCreators<ITorrentFileDownloaderPlugin>()
                 .Select(item => item.GetInstance<ITorrentFileDownloaderPlugin>()).ToArray();
@@ -132,14 +125,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             {
                 TorrentClientName = TorrentClientName.Split('[').First().Trim();
             }
-
-            var coockiesDirectoryName = Path.GetDirectoryName(CoockieFileName);
-            if (Extensions.IsNullOrEmpty(coockiesDirectoryName))
-                throw new AbCatException(
-                    "Неожиданно не удалось вычислить заданный хардкодом путь к папке куков. Привет JetBrains и их проверке на PossibleNullReferenceException.",
-                    ExceptionTypes.Stop, null);
-
-            if (!Directory.Exists(coockiesDirectoryName)) Directory.CreateDirectory(coockiesDirectoryName);
 
             if (!Directory.Exists(AudioCatalogFolder))
             {

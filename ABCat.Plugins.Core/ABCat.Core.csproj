@@ -84,9 +84,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ABCatComponentFactory.cs" />
-    <Compile Include="CoreContext.cs" />
+    <Compile Include="ContextInitializer.cs" />
     <Compile Include="Converters\ValueToVisibilityConverter.cs" />
-    <Compile Include="CoreContextInitializer.cs" />
+    <Compile Include="CoreContext.cs" />
     <Compile Include="Editors\ComboBoxEditor.cs" />
     <Compile Include="Editors\EnumEditor.cs" />
     <Compile Include="Editors\FilePathEditor.cs" />

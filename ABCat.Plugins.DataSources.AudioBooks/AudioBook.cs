@@ -145,6 +145,18 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 .ToArray();
         }
 
+        public IReadOnlyCollection<string> GetReaders()
+        {
+            if (Reader.IsNullOrEmpty())
+                return new string[0];
+
+            if (GetWordsCount(Reader) <= 2)
+                return new[] { Reader };
+
+            return Reader.Split(',', '/', '>', '|').Select(item => item.Trim()).Where(item => !item.IsNullOrEmpty())
+                .ToArray();
+        }
+
         private int GetWordsCount(string value)
         {
             if (value.IsNullOrEmpty())
