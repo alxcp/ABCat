@@ -53,17 +53,18 @@ namespace ABCat.UI.WPF.Models
             foreach (var audioBooks in forReparse)
             {
                 var plugin = _siteParserPlugins.FirstOrDefault(item=>item.WebSiteId == audioBooks.Key);
-                //await SiteParserPlugin.OrganizeKeywords(ReportProgressTotal, CancellationTokenSource.Token);
 
                 if (plugin != null)
                 {
-                    await plugin.DownloadRecords(
-                        audioBooks.Value,
-                        PageSources.CacheOnly,
-                        CancellationTokenSource.Token);
+                    await plugin.OrganizeKeywords(CancellationTokenSource.Token);
 
-                    await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                        .UpdateCache(UpdateTypes.Values);
+                    //    await plugin.DownloadRecords(
+                    //        audioBooks.Value,
+                    //        PageSources.CacheOnly,
+                    //        CancellationTokenSource.Token);
+
+                    //    await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                    //        .UpdateCache(UpdateTypes.Values);
                 }
             }
 

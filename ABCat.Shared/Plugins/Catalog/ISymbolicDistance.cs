@@ -6,7 +6,7 @@ namespace ABCat.Shared.Plugins.Catalog
 {
     public interface ISymbolicDistance : IExtComponent
     {
-        void SetData(List<Tuple<string, string>> datas);
-        List<Tuple<string, string, double, int>> Search(string targetStr);
+        void SetData(IReadOnlyCollection<Tuple<string, string>> datas);
+        IReadOnlyCollection<ISymbolicDistanceResult> Search(string targetStr);
     }
 }

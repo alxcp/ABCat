@@ -6,7 +6,7 @@ namespace ABCat.Shared
 {
     public interface IContext : ISharedContext
     {
-        ILog Logger { get; }
+        ILog MainLog { get; }
         IComponentFactory ComponentFactory { get; }
         IDbContainer DbContainer { get; }
         DbContainerAutoSave DbContainerAutoSave { get; }

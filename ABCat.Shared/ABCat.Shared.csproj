@@ -106,6 +106,7 @@
     <Compile Include="Plugins\Catalog\GroupingLogics\WebSiteGroup.cs" />
     <Compile Include="Plugins\Catalog\INormalizationLogicPlugin.cs" />
     <Compile Include="Plugins\Catalog\ISymbolicDistance.cs" />
+    <Compile Include="Plugins\Catalog\ISymbolicDistanceResult.cs" />
     <Compile Include="Plugins\Catalog\ParsingLogics\INaturalBitrateParserPlugin.cs" />
     <Compile Include="Plugins\Catalog\ParsingLogics\INaturalTimeSpanParserPlugin.cs" />
     <Compile Include="Plugins\DataProviders\IDbContainer.cs" />

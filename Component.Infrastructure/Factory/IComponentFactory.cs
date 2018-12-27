@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Component.Infrastructure.Factory
 {
-    public interface IComponentFactory
+    public interface IComponentFactory : IDisposable
     {
         T CreateActual<T>() where T : IExtComponent;
 
@@ -15,5 +15,7 @@ namespace Component.Infrastructure.Factory
         void Init();
 
         IEnumerable<Type> GetConfigAttributes();
+
+        string ComponentsFolderPath { get; }
     }
 }

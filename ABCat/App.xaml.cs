@@ -52,7 +52,7 @@ namespace ABCat.UI.WPF
                 log = aex.Log;
             }
 
-            if (log) Context.I.Logger.Error(targetException, targetException.Message);
+            if (log) Context.I.MainLog.Error(targetException, targetException.Message);
 
             MessageBox.Show(ex.Message + (log ? "\r\nБолее подробная информация в файле лога ошибок." : null));
 
