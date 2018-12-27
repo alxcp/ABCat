@@ -59,6 +59,7 @@
     <Compile Include="GroupingLogicByPropertyAlphabet.cs" />
     <Compile Include="GroupingLogicForumAuthor.cs" />
     <Compile Include="GroupingLogicForumGenre.cs" />
+    <Compile Include="GroupingLogicReaderAlphabet.cs" />
     <Compile Include="GroupingLogicGenreAlphabet.cs" />
     <Compile Include="GroupingLogicForumAuthorByCount.cs" />
     <Compile Include="GroupingLogicForumGenreByCount.cs" />

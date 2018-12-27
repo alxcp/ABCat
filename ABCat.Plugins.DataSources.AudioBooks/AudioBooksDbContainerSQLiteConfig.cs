@@ -73,8 +73,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 if (Extensions.IsNullOrEmpty(DatabaseFolder))
                 {
                     result = false;
-                    DatabaseFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                        "ABCat", "DataBases");
+                    DatabaseFolder = SharedContext.I.GetAppDataFolderPath("DataBases");
                 }
 
                 if (LastAudioBooksVacuum == DateTime.MinValue) LastAudioBooksVacuum = DateTime.Now;

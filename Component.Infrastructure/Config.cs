@@ -15,11 +15,9 @@ namespace Component.Infrastructure
 
         static Config()
         {
-            ConfigFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "ABCat", "Configs");
+            ConfigFolderPath = SharedContext.I.GetAppDataFolderPath("Configs");
             Directory.CreateDirectory(ConfigFolderPath);
-            LayoutFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "ABCat", "Layouts");
+            LayoutFolderPath = SharedContext.I.GetAppDataFolderPath("Layouts");
             Directory.CreateDirectory(LayoutFolderPath);
         }
 

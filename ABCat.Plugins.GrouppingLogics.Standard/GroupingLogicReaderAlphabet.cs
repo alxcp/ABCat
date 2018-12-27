@@ -7,14 +7,13 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 {
     [SingletoneComponentInfo("2.2")]
     [UsedImplicitly]
-    public class GroupingLogicGenreAlphabet : GroupingLogicByPropertyAlphabet
+    public class GroupingLogicReaderAlphabet : GroupingLogicByPropertyAlphabet
     {
-        public override string Name => "Жанр";
-
+        public override string Name => "Исполнитель";
 
         protected override IReadOnlyCollection<string> GetPropertyValues(IAudioBook audioBook)
         {
-            return audioBook.GetGenres();
+            return audioBook.GetReaders();
         }
     }
 }

@@ -107,20 +107,13 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public virtual string CalcAuthorName(IAudioBook record)
         {
+            if (!record.AuthorNameForParse.IsNullOrEmpty() && !record.AuthorSurnameForParse.IsNullOrEmpty())
+            {
+                return $"{record.AuthorSurnameForParse}, {record.AuthorNameForParse}";
+            }
+
             if (record.Author.IsNullOrEmpty())
             {
-                if (!record.AuthorNameForParse.IsNullOrEmpty() &&
-                    !record.AuthorSurnameForParse.IsNullOrEmpty())
-                {
-                    return $"{record.AuthorSurnameForParse}, {record.AuthorNameForParse}";
-                }
-
-                if (record.AuthorNameForParse.IsNullOrEmpty() &&
-                    record.AuthorSurnameForParse.IsNullOrEmpty())
-                {
-                    return string.Empty;
-                }
-
                 return record.AuthorSurnameForParse + record.AuthorNameForParse;
             }
 

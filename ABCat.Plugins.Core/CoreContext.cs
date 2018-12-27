@@ -19,7 +19,7 @@ namespace ABCat.Core
 
         public CoreContext()
         {
-            Context.I = this;
+            SharedContext.I = this;
             ComponentFactory =
                 new AbCatComponentFactory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plug-ins"));
             try
@@ -38,8 +38,6 @@ namespace ABCat.Core
             DbContainer = CreateDbContainer(true);
         }
 
-        public static CoreContext I { get; } = new CoreContext();
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ILog Logger { get; }
@@ -56,6 +54,14 @@ namespace ABCat.Core
         public IDbContainer DbContainer { get; }
 
         public DbContainerAutoSave DbContainerAutoSave => new DbContainerAutoSave(DbContainer);
+
+        public string AppDataFolderPath { get; } =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ABCat");
+
+        public string GetAppDataFolderPath(string subfolderName)
+        {
+            return Path.Combine(AppDataFolderPath, subfolderName);
+        }
 
         public IEventAggregatorShared EventAggregator { get; } = new EventAggregatorShared();
 

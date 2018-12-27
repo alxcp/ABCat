@@ -15,7 +15,7 @@ namespace ABCat.UI.WPF
     {
         public App()
         {
-            var context = CoreContextInitializer.Initialize();
+            var context = ContextInitializer.Init();
             context.EventAggregator.Dispatcher = Dispatcher;
             TaskScheduler.UnobservedTaskException += TaskSchedulerUnobservedTaskException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
