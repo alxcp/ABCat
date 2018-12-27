@@ -9,15 +9,13 @@ namespace Component.Infrastructure
 {
     public abstract class ComponentFactoryBase : IComponentFactory
     {
-        private readonly string _componentFolder;
-
         private readonly List<ComponentCreatorBase> _creators = new List<ComponentCreatorBase>();
 
         private readonly HashSet<Type> _pluginConfigTypes = new HashSet<Type>();
 
-        protected ComponentFactoryBase(string componentFolder)
+        protected ComponentFactoryBase(string componentsFolder)
         {
-            _componentFolder = componentFolder;
+            ComponentsFolderPath = componentsFolder;
         }
 
         protected abstract string ComponentAssemblyNamePattern { get; }
@@ -45,6 +43,8 @@ namespace Component.Infrastructure
             return _pluginConfigTypes.ToArray();
         }
 
+        public string ComponentsFolderPath { get; }
+
         public ComponentCreatorBase GetActualCreator<T>() where T : IExtComponent
         {
             return
@@ -61,8 +61,8 @@ namespace Component.Infrastructure
 
         public void Init()
         {
-            LoadComponents(_componentFolder, ComponentAssemblyNamePattern + ".dll");
-            LoadComponents(_componentFolder, ComponentAssemblyNamePattern + ".exe");
+            LoadComponents(ComponentsFolderPath, ComponentAssemblyNamePattern + ".dll");
+            LoadComponents(ComponentsFolderPath, ComponentAssemblyNamePattern + ".exe");
             InitInternal();
         }
 
@@ -140,6 +140,10 @@ namespace Component.Infrastructure
                     _creators.Add(new SingletoneComponentCreator(componentType, componentInfoAttribute));
                     break;
             }
+        }
+
+        public virtual void Dispose()
+        {
         }
     }
 }

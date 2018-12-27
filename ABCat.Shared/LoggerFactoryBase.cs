@@ -42,7 +42,7 @@ namespace ABCat.Shared
         /// <returns>The newly-created logger.</returns>
         public abstract ILog CreateLogger(string name);
 
-        public void Dispose()
+        public virtual void Dispose()
         {
         }
 

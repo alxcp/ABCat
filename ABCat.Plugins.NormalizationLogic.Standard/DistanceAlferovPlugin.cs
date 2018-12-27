@@ -7,6 +7,22 @@ using Component.Infrastructure.Factory;
 
 namespace ABCat.Plugins.NormalizationLogic.Standard
 {
+    internal class AlferovSymbolicDistanceResult : ISymbolicDistanceResult
+    {
+        public AlferovSymbolicDistanceResult(string rusOriginal, string latOriginal, double cost, int languageType)
+        {
+            RusOriginal = rusOriginal;
+            LatOriginal = latOriginal;
+            Cost = cost;
+            LanguageType = languageType;
+        }
+
+        public string RusOriginal { get; }
+        public string LatOriginal { get; }
+        public double Cost { get; }
+        public int LanguageType { get; }
+    }
+
     [SingletoneComponentInfo("2.2")]
     public class DistanceAlferovPlugin : ISymbolicDistance
     {
@@ -18,8 +34,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         private class AnalizeObject
         {
-            public string Origianl { get; set; }
             public List<Word> Words { get; set; } = new List<Word>();
+            public string Original { get; set; }
         }
 
         private class LanguageSet
@@ -29,12 +45,12 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
         }
 
         List<LanguageSet> Samples { get; set; } = new List<LanguageSet>();
-        public void SetData(List<Tuple<string, string>> datas)
+        public void SetData(IReadOnlyCollection<Tuple<string, string>> datas)
         {
             List<KeyValuePair<char, int>> codeKeys = CodeKeysRus.Concat(CodeKeysEng).ToList();
             foreach (var data in datas)
             {
-                LanguageSet languageSet = new LanguageSet {Rus = {Origianl = data.Item1}};
+                LanguageSet languageSet = new LanguageSet {Rus = {Original = data.Item1}};
                 if (data.Item1.Length > 0)
                 {
                     languageSet.Rus.Words = data.Item1.Split(' ').Select(w => new Word()
@@ -43,7 +59,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                         Codes = GetKeyCodes(codeKeys, w)
                     }).ToList();
                 }
-                languageSet.Eng.Origianl = data.Item2;
+                languageSet.Eng.Original = data.Item2;
                 if (data.Item2.Length > 0)
                 {
                     languageSet.Eng.Words = data.Item2.Split(' ').Select(w => new Word()
@@ -56,7 +72,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
             }
         }
 
-        public List<Tuple<string, string, double, int>> Search(string targetStr)
+        public IReadOnlyCollection<ISymbolicDistanceResult> Search(string targetStr)
         {
             List<KeyValuePair<char, int>> codeKeys = CodeKeysRus.Concat(CodeKeysEng).ToList();
             AnalizeObject originalSearchObj = new AnalizeObject();
@@ -80,7 +96,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                     };
                 }).ToList();
             }
-            var result = new List<Tuple<string, string, double, int>>();
+            var result = new List<ISymbolicDistanceResult>();
             foreach (LanguageSet sampl in Samples)
             {
                 int languageType = 1;
@@ -104,7 +120,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                     cost = tempCost;
                     languageType = 3;
                 }
-                result.Add(new Tuple<string, string, double, int>(sampl.Rus.Origianl, sampl.Eng.Origianl, cost, languageType));
+                result.Add(new AlferovSymbolicDistanceResult(sampl.Rus.Original, sampl.Eng.Original, cost, languageType));
             }
             return result;
         }
@@ -193,6 +209,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
             }
             return distance[currentRow, m];
         }
+
 
         private int CostDistanceSymbol(Word source, int sourcePosition, Word search, int searchPosition, bool translation)
         {

@@ -171,7 +171,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
                 }
                 catch (Exception ex)
                 {
-                    Context.I.Logger.Error(ex);
+                    Context.I.MainLog.Error(ex);
                 }
             }
 

@@ -34,15 +34,19 @@ namespace ABCat.Core
             }
 
             _dbPluginCreatorAttribute = ComponentFactory.GetCreators<IDbContainer>().First();
-            Logger = ComponentFactory.CreateActual<ILoggerFactory>().GetLogger("MainLog");
+            LoggerFactory = ComponentFactory.CreateActual<ILoggerFactory>();
+            LoggerFactory.Init();
+            MainLog = LoggerFactory.GetLogger("MainLog");
             DbContainer = CreateDbContainer(true);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ILog Logger { get; }
+        public ILog MainLog { get; }
 
         public IComponentFactory ComponentFactory { get; }
+
+        public ILoggerFactory LoggerFactory { get; }
 
         private IDbContainer CreateDbContainer(bool autoSave)
         {
