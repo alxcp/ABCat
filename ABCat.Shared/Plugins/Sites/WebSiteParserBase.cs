@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,6 +65,231 @@ namespace ABCat.Shared.Plugins.Sites
             }
             // Step 7
             return d[n, m];
+        }
+    }
+
+    public class Levenshtein
+    {
+
+
+        ///*****************************
+        /// Compute Levenshtein distance 
+        /// Memory efficient version
+        ///*****************************
+        public int iLD(String sRow, String sCol)
+        {
+            int RowLen = sRow.Length;  // length of sRow
+            int ColLen = sCol.Length;  // length of sCol
+            int RowIdx;                // iterates through sRow
+            int ColIdx;                // iterates through sCol
+            char Row_i;                // ith character of sRow
+            char Col_j;                // jth character of sCol
+            int cost;                   // cost
+
+            /// Test string length
+            if (Math.Max(sRow.Length, sCol.Length) > Math.Pow(2, 31))
+                throw (new Exception("\nMaximum string length in Levenshtein.iLD is " + Math.Pow(2, 31) + ".\nYours is " + Math.Max(sRow.Length, sCol.Length) + "."));
+
+            // Step 1
+
+            if (RowLen == 0)
+            {
+                return ColLen;
+            }
+
+            if (ColLen == 0)
+            {
+                return RowLen;
+            }
+
+            /// Create the two vectors
+            int[] v0 = new int[RowLen + 1];
+            int[] v1 = new int[RowLen + 1];
+            int[] vTmp;
+
+
+
+            /// Step 2
+            /// Initialize the first vector
+            for (RowIdx = 1; RowIdx <= RowLen; RowIdx++)
+            {
+                v0[RowIdx] = RowIdx;
+            }
+
+            // Step 3
+
+            /// Fore each column
+            for (ColIdx = 1; ColIdx <= ColLen; ColIdx++)
+            {
+                /// Set the 0'th element to the column number
+                v1[0] = ColIdx;
+
+                Col_j = sCol[ColIdx - 1];
+
+
+                // Step 4
+
+                /// Fore each row
+                for (RowIdx = 1; RowIdx <= RowLen; RowIdx++)
+                {
+                    Row_i = sRow[RowIdx - 1];
+
+
+                    // Step 5
+
+                    if (Row_i == Col_j)
+                    {
+                        cost = 0;
+                    }
+                    else
+                    {
+                        cost = 1;
+                    }
+
+                    // Step 6
+
+                    /// Find minimum
+                    int m_min = v0[RowIdx] + 1;
+                    int b = v1[RowIdx - 1] + 1;
+                    int c = v0[RowIdx - 1] + cost;
+
+                    if (b < m_min)
+                    {
+                        m_min = b;
+                    }
+                    if (c < m_min)
+                    {
+                        m_min = c;
+                    }
+
+                    v1[RowIdx] = m_min;
+                }
+
+                /// Swap the vectors
+                vTmp = v0;
+                v0 = v1;
+                v1 = vTmp;
+
+            }
+
+
+            // Step 7
+
+            /// Value between 0 - 100
+            /// 0==perfect match 100==totaly different
+            /// 
+            /// The vectors where swaped one last time at the end of the last loop,
+            /// that is why the result is now in v0 rather than in v1
+            System.Console.WriteLine("iDist=" + v0[RowLen]);
+            int max = System.Math.Max(RowLen, ColLen);
+            return ((100 * v0[RowLen]) / max);
+        }
+
+
+
+
+
+        ///*****************************
+        /// Compute the min
+        ///*****************************
+
+        private int Minimum(int a, int b, int c)
+        {
+            int mi = a;
+
+            if (b < mi)
+            {
+                mi = b;
+            }
+            if (c < mi)
+            {
+                mi = c;
+            }
+
+            return mi;
+        }
+
+        ///*****************************
+        /// Compute Levenshtein distance         
+        ///*****************************
+
+        public int LD(String sNew, String sOld)
+        {
+            int[,] matrix;              // matrix
+            int sNewLen = sNew.Length;  // length of sNew
+            int sOldLen = sOld.Length;  // length of sOld
+            int sNewIdx; // iterates through sNew
+            int sOldIdx; // iterates through sOld
+            char sNew_i; // ith character of sNew
+            char sOld_j; // jth character of sOld
+            int cost; // cost
+
+            /// Test string length
+            if (Math.Max(sNew.Length, sOld.Length) > Math.Pow(2, 31))
+                throw (new Exception("\nMaximum string length in Levenshtein.LD is " + Math.Pow(2, 31) + ".\nYours is " + Math.Max(sNew.Length, sOld.Length) + "."));
+
+            // Step 1
+
+            if (sNewLen == 0)
+            {
+                return sOldLen;
+            }
+
+            if (sOldLen == 0)
+            {
+                return sNewLen;
+            }
+
+            matrix = new int[sNewLen + 1, sOldLen + 1];
+
+            // Step 2
+
+            for (sNewIdx = 0; sNewIdx <= sNewLen; sNewIdx++)
+            {
+                matrix[sNewIdx, 0] = sNewIdx;
+            }
+
+            for (sOldIdx = 0; sOldIdx <= sOldLen; sOldIdx++)
+            {
+                matrix[0, sOldIdx] = sOldIdx;
+            }
+
+            // Step 3
+
+            for (sNewIdx = 1; sNewIdx <= sNewLen; sNewIdx++)
+            {
+                sNew_i = sNew[sNewIdx - 1];
+
+                // Step 4
+
+                for (sOldIdx = 1; sOldIdx <= sOldLen; sOldIdx++)
+                {
+                    sOld_j = sOld[sOldIdx - 1];
+
+                    // Step 5
+
+                    if (sNew_i == sOld_j)
+                    {
+                        cost = 0;
+                    }
+                    else
+                    {
+                        cost = 1;
+                    }
+
+                    // Step 6
+
+                    matrix[sNewIdx, sOldIdx] = Minimum(matrix[sNewIdx - 1, sOldIdx] + 1, matrix[sNewIdx, sOldIdx - 1] + 1, matrix[sNewIdx - 1, sOldIdx - 1] + cost);
+
+                }
+            }
+
+            // Step 7
+
+            /// Value between 0 - 100
+            /// 0==perfect match 100==totaly different
+            int max = System.Math.Max(sNewLen, sOldLen);
+            return (100 * matrix[sNewLen, sOldLen]) / max;
         }
     }
 
@@ -240,144 +466,6 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
-        //private class Word
-        //{
-        //    public string Text { get; set; }
-        //    public List<int> Codes { get; set; } = new List<int>();
-        //}
-
-        //private int LevenshteinDistance(Word source, Word target, bool fullWord, bool translation)
-        //{
-        //    if (String.IsNullOrEmpty(source.Text))
-        //    {
-        //        if (String.IsNullOrEmpty(target.Text))
-        //            return 0;
-        //        return target.Text.Length * 2;
-        //    }
-        //    if (String.IsNullOrEmpty(target.Text))
-        //        return source.Text.Length * 2;
-        //    int n = source.Text.Length;
-        //    int m = target.Text.Length;
-        //    //TODO Убрать в параметры (для оптимизации)
-        //    int[,] distance = new int[3, m + 1];
-        //    // Initialize the distance 'matrix'
-        //    for (var j = 1; j <= m; j++)
-        //        distance[0, j] = j * 2;
-        //    var currentRow = 0;
-        //    for (var i = 1; i <= n; ++i)
-        //    {
-        //        currentRow = i % 3;
-        //        var previousRow = (i - 1) % 3;
-        //        distance[currentRow, 0] = i * 2;
-        //        for (var j = 1; j <= m; j++)
-        //        {
-        //            distance[currentRow, j] = Math.Min(Math.Min(
-        //                    distance[previousRow, j] + ((!fullWord && i == n) ? 2 - 1 : 2),
-        //                    distance[currentRow, j - 1] + ((!fullWord && i == n) ? 2 - 1 : 2)),
-        //                distance[previousRow, j - 1] + CostDistanceSymbol(source, i - 1, target, j - 1, translation));
-
-        //            if (i > 1 && j > 1 && source.Text[i - 1] == target.Text[j - 2]
-        //                && source.Text[i - 2] == target.Text[j - 1])
-        //            {
-        //                distance[currentRow, j] = Math.Min(distance[currentRow, j], distance[(i - 2) % 3, j - 2] + 2);
-        //            }
-        //        }
-        //    }
-        //    return distance[currentRow, m];
-        //}
-
-        //private int CostDistanceSymbol(Word source, int sourcePosition, Word search, int searchPosition, bool translation)
-        //{
-        //    if (source.Text[sourcePosition] == search.Text[searchPosition])
-        //        return 0;
-        //    if (translation)
-        //        return 2;
-        //    if (source.Codes[sourcePosition] != 0 && source.Codes[sourcePosition] == search.Codes[searchPosition])
-        //        return 0;
-        //    int resultWeight;
-        //    if (!DistanceCodeKey.TryGetValue(source.Codes[sourcePosition], out var nearKeys))
-        //        resultWeight = 2;
-        //    else
-        //        resultWeight = nearKeys.Contains(search.Codes[searchPosition]) ? 1 : 2;
-        //    if (PhoneticGroupsRus.TryGetValue(search.Text[searchPosition], out var phoneticGroups))
-        //        resultWeight = Math.Min(resultWeight, phoneticGroups.Contains(source.Text[sourcePosition]) ? 1 : 2);
-        //    if (PhoneticGroupsEng.TryGetValue(search.Text[searchPosition], out phoneticGroups))
-        //        resultWeight = Math.Min(resultWeight, phoneticGroups.Contains(source.Text[sourcePosition]) ? 1 : 2);
-        //    return resultWeight;
-        //}
-
-        //#region Блок Фонетических групп
-        //static Dictionary<char, List<char>> PhoneticGroupsRus = new Dictionary<char, List<char>>();
-        //static Dictionary<char, List<char>> PhoneticGroupsEng = new Dictionary<char, List<char>>();
-        //#endregion
-
-        //static WebSiteParserBase()
-        //{
-        //    SetPhoneticGroups(PhoneticGroupsRus, new List<string>() { "ыий", "эе", "ая", "оёе", "ую", "шщ", "оа" });
-        //    SetPhoneticGroups(PhoneticGroupsEng, new List<string>() { "aeiouy", "bp", "ckq", "dt", "lr", "mn", "gj", "fpv", "sxz", "csz" });
-        //}
-
-        //private static void SetPhoneticGroups(Dictionary<char, List<char>> resultPhoneticGroups, List<string> phoneticGroups)
-        //{
-        //    foreach (string group in phoneticGroups)
-        //    foreach (char symbol in group)
-        //        if (!resultPhoneticGroups.ContainsKey(symbol))
-        //            resultPhoneticGroups.Add(symbol, phoneticGroups.Where(pg => pg.Contains(symbol)).SelectMany(pg => pg).Distinct().Where(ch => ch != symbol).ToList());
-        //}
-
-        ///// <summary>
-        ///// Близость кнопок клавиатуры
-        ///// </summary>
-        //private static Dictionary<int, List<int>> DistanceCodeKey = new Dictionary<int, List<int>>
-        //{
-        //    /* '`' */ { 192 , new List<int>(){ 49 }},
-        //    /* '1' */ { 49 , new List<int>(){ 50, 87, 81 }},
-        //    /* '2' */ { 50 , new List<int>(){ 49, 81, 87, 69, 51 }},
-        //    /* '3' */ { 51 , new List<int>(){ 50, 87, 69, 82, 52 }},
-        //    /* '4' */ { 52 , new List<int>(){ 51, 69, 82, 84, 53 }},
-        //    /* '5' */ { 53 , new List<int>(){ 52, 82, 84, 89, 54 }},
-        //    /* '6' */ { 54 , new List<int>(){ 53, 84, 89, 85, 55 }},
-        //    /* '7' */ { 55 , new List<int>(){ 54, 89, 85, 73, 56 }},
-        //    /* '8' */ { 56 , new List<int>(){ 55, 85, 73, 79, 57 }},
-        //    /* '9' */ { 57 , new List<int>(){ 56, 73, 79, 80, 48 }},
-        //    /* '0' */ { 48 , new List<int>(){ 57, 79, 80, 219, 189 }},
-        //    /* '-' */ { 189 , new List<int>(){ 48, 80, 219, 221, 187 }},
-        //    /* '+' */ { 187 , new List<int>(){ 189, 219, 221 }},
-        //    /* 'q' */ { 81 , new List<int>(){ 49, 50, 87, 83, 65 }},
-        //    /* 'w' */ { 87 , new List<int>(){ 49, 81, 65, 83, 68, 69, 51, 50 }},
-        //    /* 'e' */ { 69 , new List<int>(){ 50, 87, 83, 68, 70, 82, 52, 51 }},
-        //    /* 'r' */ { 82 , new List<int>(){ 51, 69, 68, 70, 71, 84, 53, 52 }},
-        //    /* 't' */ { 84 , new List<int>(){ 52, 82, 70, 71, 72, 89, 54, 53 }},
-        //    /* 'y' */ { 89 , new List<int>(){ 53, 84, 71, 72, 74, 85, 55, 54 }},
-        //    /* 'u' */ { 85 , new List<int>(){ 54, 89, 72, 74, 75, 73, 56, 55 }},
-        //    /* 'i' */ { 73 , new List<int>(){ 55, 85, 74, 75, 76, 79, 57, 56 }},
-        //    /* 'o' */ { 79 , new List<int>(){ 56, 73, 75, 76, 186, 80, 48, 57 }},
-        //    /* 'p' */ { 80 , new List<int>(){ 57, 79, 76, 186, 222, 219, 189, 48 }},
-        //    /* '[' */ { 219 , new List<int>(){ 48, 186, 222, 221, 187, 189 }},
-        //    /* ']' */ { 221 , new List<int>(){ 189, 219, 187 }},
-        //    /* 'a' */ { 65 , new List<int>(){ 81, 87, 83, 88, 90 }},
-        //    /* 's' */ { 83 , new List<int>(){ 81, 65, 90, 88, 67, 68, 69, 87, 81 }},
-        //    /* 'd' */ { 68 , new List<int>(){ 87, 83, 88, 67, 86, 70, 82, 69 }},
-        //    /* 'f' */ { 70 , new List<int>(){ 69, 68, 67, 86, 66, 71, 84, 82 }},
-        //    /* 'g' */ { 71 , new List<int>(){ 82, 70, 86, 66, 78, 72, 89, 84 }},
-        //    /* 'h' */ { 72 , new List<int>(){ 84, 71, 66, 78, 77, 74, 85, 89 }},
-        //    /* 'j' */ { 74 , new List<int>(){ 89, 72, 78, 77, 188, 75, 73, 85 }},
-        //    /* 'k' */ { 75 , new List<int>(){ 85, 74, 77, 188, 190, 76, 79, 73 }},
-        //    /* 'l' */ { 76 , new List<int>(){ 73, 75, 188, 190, 191, 186, 80, 79 }},
-        //    /* ';' */ { 186 , new List<int>(){ 79, 76, 190, 191, 222, 219, 80 }},
-        //    /* '\''*/ { 222 , new List<int>(){ 80, 186, 191, 221, 219 }},
-        //    /* 'z' */ { 90 , new List<int>(){ 65, 83, 88 }},
-        //    /* 'x' */ { 88 , new List<int>(){ 90, 65, 83, 68, 67 }},
-        //    /* 'c' */ { 67 , new List<int>(){ 88, 83, 68, 70, 86 }},
-        //    /* 'v' */ { 86 , new List<int>(){ 67, 68, 70, 71, 66 }},
-        //    /* 'b' */ { 66 , new List<int>(){ 86, 70, 71, 72, 78 }},
-        //    /* 'n' */ { 78 , new List<int>(){ 66, 71, 72, 74, 77 }},
-        //    /* 'm' */ { 77 , new List<int>(){ 78, 72, 74, 75, 188 }},
-        //    /* '<' */ { 188 , new List<int>(){ 77, 74, 75, 76, 190 }},
-        //    /* '>' */ { 190 , new List<int>(){ 188, 75, 76, 186, 191 }},
-        //    /* '?' */ { 191 , new List<int>(){ 190, 76, 186, 222 }},
-        //};
-
         public async Task OrganizeKeywords(CancellationToken cancellationToken)
         {
             var mainConfig = Config.Load<MainConfig>();
@@ -395,47 +483,47 @@ namespace ABCat.Shared.Plugins.Sites
                     var symbolicDistancePlugin = Context.I.ComponentFactory.CreateActual<ISymbolicDistance>();
 
                     var allGenres = records.SelectMany(item => item.GetGenres())
-                        .Where(item=>item.Length > 3)
+                        .Where(item => item.Length > 3)
                         .GroupBy(item => item)
-                        .ToDictionary(item => item.Key, item => item.Count());
+                        .ToDictionary(item => item.Key,
+                            item => Tuple.Create(item.Key.ToLower().ReplaceAll(new[] {" ", "-", ",", "."}, ""), item.Count()));
 
-                    var topMost = allGenres.Where(item => item.Value >= 5 && item.Key.Length > 3).OrderByDescending(item => item.Value)
+                    var topMost = allGenres.Where(item => item.Value.Item2 >= 10 && item.Key.Length > 3).OrderByDescending(item => item.Value)
                         .ToDictionary(item => item.Key, item => item.Value);
 
                     symbolicDistancePlugin.SetData(topMost.Select(item => Tuple.Create(item.Key, item.Key)).ToList());
+
+                    var sb = new StringBuilder();
+                    sb.AppendLine($"genre.Key\tgenre.Value.Item2\tresult.Item1\tresult.Item2\tresult.Item3\tresult.Item4");
+
+                    var l = new Levenshtein();
 
                     foreach (var genre in allGenres)
                     {
                         if (!topMost.ContainsKey(genre.Key))
                         {
-                            //var candidates = symbolicDistancePlugin.Search(genre.Key).OrderByDescending(item=>item.Cost).ToArray();
+                            List<Tuple<string, int, int, int>> results = new List<Tuple<string, int, int, int>>();
 
-                            KeyValuePair<string, int> result = new KeyValuePair<string, int>();
-                            int minDistance = Int32.MaxValue;
-
-                            foreach (KeyValuePair<string, int> topMostKey in topMost)
+                            foreach (var topMostKey in topMost.Where(item =>
+                                Math.Abs(item.Value.Item1.Length - genre.Value.Item1.Length) < 4))
                             {
-                                var distance = LevenshteinDistance.Compute(topMostKey.Key, genre.Key);
-                                if (distance < 3)
+                                var distance = LevenshteinDistance.Compute(topMostKey.Value.Item1, genre.Value.Item1);
+                                var distance1 = l.iLD(topMostKey.Value.Item1, genre.Value.Item1);
+
+                                if (distance <= 2 || distance1 < 10)
                                 {
-                                    if (distance < minDistance)
-                                    {
-                                        result = topMostKey;
-                                        minDistance = distance;
-                                    }
-                                    else if (distance == minDistance && topMostKey.Value > result.Value)
-                                    {
-                                        result = topMostKey;
-                                    }
+                                    results.Add(Tuple.Create(topMostKey.Key, topMostKey.Value.Item2, distance, distance1));
                                 }
                             }
 
-                            if (result.Value > 0)
+                            foreach (var result in results.OrderByDescending(item=>item.Item2))
                             {
-                                Debug.WriteLine($"{genre.Key} => {result} ({minDistance})");
+                                sb.AppendLine($"{genre.Key}\t{genre.Value.Item2}\t{result.Item1}\t{result.Item2}\t{result.Item3}\t{result.Item4}");
                             }
                         }
                     }
+
+                    var s = sb.ToString();
 
                     //var waitingForSave = new List<IAudioBook>();
 
