@@ -130,7 +130,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             if (Genre.IsNullOrEmpty())
                 return new string[0];
 
-            return Genre.Split(',', '/', '.', '>', '|').Select(item => item.Trim()).Where(item=>!item.IsNullOrEmpty()).ToArray();
+            return Genre.Split(',', '/', '.', '>', '|').Select(item => item.Trim().ReplaceAll(new[] {"\"", "="}, ""))
+                .Where(item => !item.IsNullOrEmpty()).ToArray();
         }
 
         public IReadOnlyCollection<string> GetAuthors()
