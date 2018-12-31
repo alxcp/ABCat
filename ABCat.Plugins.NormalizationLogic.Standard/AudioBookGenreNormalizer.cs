@@ -141,7 +141,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        ProgressMessage.Report(abQuantity++, records.Count);
+                        ProgressMessage.ReportComplex(abQuantity++, records.Count);
 
                         if (sw.Elapsed > SaveTimer)
                         {

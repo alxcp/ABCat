@@ -22,7 +22,7 @@ using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>
+    public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>, IHandle<RecordsCacheUpdatedMessage>, IHandle<SelectedGroupChangedMessage>
     {
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;
@@ -45,27 +45,13 @@ namespace ABCat.UI.WPF.Models
             Filter =
                 Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>();
             Filter.PropertyChanged += FilterPropertyChanged;
-            Filter.UpdateCache(UpdateTypes.Hidden | UpdateTypes.Loaded | UpdateTypes.Values);
+            //Filter.UpdateCache(UpdateTypes.Hidden | UpdateTypes.Loaded | UpdateTypes.Values);
             NormalizationSettingsEditorModel = new NormalizationSettingsEditorViewModel();
             GroupingLogicModel =
                 new GroupingLogicViewModel(
                     Context.I.ComponentFactory.GetCreators<IGroupingLogicPlugin>()
-                        .Select(item => item.GetInstance<IGroupingLogicPlugin>()), async group =>
-                    {
-                        try
-                        {
-                            _getRecordsCancellationTokenSource?.Cancel();
-                            _getRecordsCancellationTokenSource = new CancellationTokenSource();
-                            var records = await GetCurrentRecords(group, Filter,
-                                _getRecordsCancellationTokenSource.Token);
-                            SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
-                            OnPropertyChanged();
-                        }
-                        catch (OperationCanceledException)
-                        {
-                        }
-                    });
-
+                        .Select(item => item.GetInstance<IGroupingLogicPlugin>()));
+            Context.I.EventAggregator.Subscribe(this);
         }
 
         public ICommand OpenOriginalUrlCommand =>
@@ -353,6 +339,40 @@ namespace ABCat.UI.WPF.Models
         public void Handle(RecordLoadedMessage message)
         {
             Filter.UpdateCache(UpdateTypes.Loaded);
+        }
+
+        public async void Handle(RecordsCacheUpdatedMessage message)
+        {
+            await Filter.UpdateCache(UpdateTypes.Values | UpdateTypes.Hidden | UpdateTypes.Loaded);
+            _refreshTimer?.Dispose();
+            _refreshTimer = new Timer(RefreshAll, null, 1000, Timeout.Infinite);
+        }
+
+        private async void RefreshAll(object state)
+        {
+            _refreshTimer?.Dispose();
+            _refreshTimer = null;
+
+            await Filter.UpdateCache(UpdateTypes.All);
+            GroupingLogicModel.Refresh();
+        }
+
+        private Timer _refreshTimer;
+
+        public async void Handle(SelectedGroupChangedMessage message)
+        {
+            try
+            {
+                _getRecordsCancellationTokenSource?.Cancel();
+                _getRecordsCancellationTokenSource = new CancellationTokenSource();
+                var records = await GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
+                    _getRecordsCancellationTokenSource.Token);
+                SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
+                OnPropertyChanged();
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
     }
 }
