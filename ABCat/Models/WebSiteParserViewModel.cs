@@ -74,11 +74,7 @@ namespace ABCat.UI.WPF.Models
                 await recordsTagNormalizer.Normalize(_getSelectedItems().Select(item => item.Key).ToArray(), CancellationTokenSource.Token);
             }
 
-            Executor.OnUiThread(() =>
-            {
-                OnAsynOperationCompleted();
-                _owner.RefreshRecordsListData();
-            });
+            Executor.OnUiThread(OnAsynOperationCompleted);
         }
 
         public async Task OnDownloadRecordGroups()
@@ -90,11 +86,7 @@ namespace ABCat.UI.WPF.Models
                 await siteParserPlugin.DownloadRecordGroups(null, CancellationTokenSource.Token);
             }
 
-            Executor.OnUiThread(() =>
-            {
-                OnAsynOperationCompleted();
-                _owner.RefreshRecordsListData();
-            });
+            Executor.OnUiThread(OnAsynOperationCompleted);
         }
 
         public async Task OnDownloadRecords()
@@ -108,11 +100,7 @@ namespace ABCat.UI.WPF.Models
                     CancellationTokenSource.Token);
             }
 
-            Executor.OnUiThread(() =>
-            {
-                OnAsynOperationCompleted();
-                _owner.RefreshRecordsListData();
-            });
+            Executor.OnUiThread(OnAsynOperationCompleted);
         }
 
         public async Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken)

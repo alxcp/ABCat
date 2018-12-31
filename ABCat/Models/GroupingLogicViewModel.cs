@@ -2,30 +2,27 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using ABCat.Shared.Plugins.Catalog.FilteringLogics;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.ViewModels;
+using Caliburn.Micro;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
     public sealed class GroupingLogicViewModel : ViewModelBase
     {
-        private readonly Action<Group> _selectedGroupChanged;
-
         private CancellationTokenSource _cancellationTokenSource;
         private IEnumerable<IGroupingLogicPlugin> _groupingPlugins;
         private bool _isOnUpdate;
+
         private IEnumerable<Group> _root;
         private Group _selectedGroup;
         private IGroupingLogicPlugin _selectedGroupingLogicPlugin;
 
-        public GroupingLogicViewModel(IEnumerable<IGroupingLogicPlugin> groupingPlugins,
-            Action<Group> selectedGroupChanged)
+        public GroupingLogicViewModel(IEnumerable<IGroupingLogicPlugin> groupingPlugins)
         {
-            _selectedGroupChanged = selectedGroupChanged;
             GroupingPlugins = groupingPlugins;
             SelectedGroupingLogicPlugin = GroupingPlugins.FirstOrDefault();
         }
@@ -70,7 +67,7 @@ namespace ABCat.UI.WPF.Models
             {
                 if (Equals(value, _selectedGroup)) return;
                 _selectedGroup = value;
-                _selectedGroupChanged?.Invoke(value);
+                Context.I.EventAggregator.PublishOnUIThread(new SelectedGroupChangedMessage(value));
                 OnPropertyChanged();
             }
         }
@@ -81,7 +78,7 @@ namespace ABCat.UI.WPF.Models
             set
             {
                 if (Equals(value, _selectedGroupingLogicPlugin)) return;
-                if (_selectedGroupingLogicPlugin!= null)
+                if (_selectedGroupingLogicPlugin != null)
                     _selectedGroupingLogicPlugin.PropertyChanged -= _selectedGroupingLogicPlugin_PropertyChanged;
                 _selectedGroupingLogicPlugin = value;
                 if (_selectedGroupingLogicPlugin != null)

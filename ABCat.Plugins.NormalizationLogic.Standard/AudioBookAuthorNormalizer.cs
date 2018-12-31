@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using ABCat.Shared;
@@ -14,10 +15,12 @@ using JetBrains.Annotations;
 
 namespace ABCat.Plugins.NormalizationLogic.Standard
 {
-    [SingletoneComponentInfo("2.2", IsEnabled = false)]
+    [SingletoneComponentInfo("2.2")]
     [UsedImplicitly]
     public class AudioBookAuthorNormalizer : IRecordsTagNormalizer
     {
+        private readonly Regex _mixedCyrLatRegex = new Regex("([A-Za-z]+[А-Яа-я]+)");
+
         public async Task Normalize(IReadOnlyCollection<string> recordKeys, CancellationToken cancellationToken)
         {
             await Task.Factory.StartNew(() =>
@@ -30,105 +33,115 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                     var sw = new Stopwatch();
                     sw.Start();
 
-                    var genres = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+                    //var genres = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
                     // Case SENSITIVE!!! As Designed.
-                    var referenceGenres = new HashSet<string>();
-                    var genreParts = new List<GenrePart>();
+                    //var referenceGenres = new HashSet<string>();
+                    //var genreParts = new List<GenrePart>();
 
-                    foreach (var genre in _referenceGenres)
-                    {
-                        string referenceGenre = genre;
-                        var iofReference = genre.IndexOf('|');
-                        if (iofReference > 0)
-                            referenceGenre = genre.Substring(0, iofReference);
+                    //foreach (var genre in _referenceGenres)
+                    //{
+                    //    string referenceGenre = genre;
+                    //    var iofReference = genre.IndexOf('|');
+                    //    if (iofReference > 0)
+                    //        referenceGenre = genre.Substring(0, iofReference);
 
-                        referenceGenres.Add(referenceGenre);
+                    //    referenceGenres.Add(referenceGenre);
 
-                        var genreVariants = genre.ToLower().ReplaceAll("", " ", "-", ".").Split('|');
-                        foreach (var genreVariant in genreVariants)
-                        {
-                            if (GenrePart.TryParse(genreVariant, referenceGenre, out var genrePart))
-                            {
-                                genreParts.Add(genrePart);
-                            }
-                            else
-                            {
-                                genres[genreVariant] = referenceGenre;
-                            }
-                        }
-                    }
+                    //    var genreVariants = genre.ToLower().ReplaceAll("", " ", "-", ".").Split('|');
+                    //    foreach (var genreVariant in genreVariants)
+                    //    {
+                    //        if (GenrePart.TryParse(genreVariant, referenceGenre, out var genrePart))
+                    //        {
+                    //            genreParts.Add(genrePart);
+                    //        }
+                    //        else
+                    //        {
+                    //            genres[genreVariant] = referenceGenre;
+                    //        }
+                    //    }
+                    //}
 
                     int abQuantity = 0;
 
                     foreach (var audioBook in records)
                     {
-                        var audioBookGenres = audioBook.GetGenres();
-                        var genresNormalized = new List<string>();
+                        var audioBookAuthors = audioBook.GetAuthors();
+                        var authorsNormalized = new List<string>();
 
-                        foreach (var audioBookGenre in audioBookGenres.Where(item => item.Length > 3))
+                        foreach (var audioBookAuthor in audioBookAuthors.Where(item => item.Length > 3))
                         {
-                            if (referenceGenres.Contains(audioBookGenre))
+                            var author4Resolve = _mixedCyrLatRegex.Replace(audioBookAuthor, CyrLatToCyrConverter);
+                            if (author4Resolve != audioBookAuthor)
                             {
-                                genresNormalized.Add(audioBookGenre);
+                                authorsNormalized.Add(author4Resolve);
                             }
-                            else
-                            {
-                                var genreForCompare = audioBookGenre.ToLower().ReplaceAll("", " ", "-", ",", ".");
 
-                                var results = new List<Tuple<string, int, string>>();
-                                if (genres.TryGetValue(genreForCompare, out var referenceGenre))
-                                {
-                                    results.Add(Tuple.Create(referenceGenre, 0, "Variant"));
-                                }
-                                else
-                                {
-                                    foreach (var genreVariant in genres.Where(item =>
-                                        Math.Abs(item.Key.Length - genreForCompare.Length) < 3))
-                                    {
-                                        var distance = LevenshteinDistance.Compute(genreVariant.Key, genreForCompare);
+                            //if (referenceGenres.Contains(audioBookAuthor))
+                            //{
+                            //    authorsNormalized.Add(audioBookAuthor);
+                            //}
+                            //else
+                            //{
+                            //var genreForCompare = audioBookAuthor.ToLower().ReplaceAll("", " ", "-", ",", ".");
 
-                                        if (distance <= 2)
-                                        {
-                                            results.Add(Tuple.Create(genreVariant.Value, distance,
-                                                $"Distance to {genreVariant.Key}"));
-                                        }
-                                    }
-                                }
+                            //var results = new List<Tuple<string, int, string>>();
+                            //if (genres.TryGetValue(genreForCompare, out var referenceGenre))
+                            //{
+                            //    results.Add(Tuple.Create(referenceGenre, 0, "Variant"));
+                            //}
+                            //else
+                            //{
+                            //    foreach (var genreVariant in genres.Where(item =>
+                            //        Math.Abs(item.Key.Length - genreForCompare.Length) < 3))
+                            //    {
+                            //        var distance = LevenshteinDistance.Compute(genreVariant.Key, genreForCompare);
 
-                                if (results.Any())
-                                {
-                                    var candidate = results.OrderBy(item => item.Item2).First();
-                                    genresNormalized.Add(candidate.Item1);
-                                }
-                                else
-                                {
-                                    var fitParts = genreParts.Where(gp => gp.IsFit(audioBookGenre))
-                                        .OrderBy(item => item.Priority).ToArray();
+                            //        if (distance <= 2)
+                            //        {
+                            //            results.Add(Tuple.Create(genreVariant.Value, distance,
+                            //                $"Distance to {genreVariant.Key}"));
+                            //        }
+                            //    }
+                            //}
 
-                                    if (fitParts.Any())
-                                    {
-                                        var minPriority = fitParts.Min(item => item.Priority);
-                                        var res = minPriority < int.MaxValue
-                                            ? fitParts.Where(item => item.Priority == minPriority).ToArray()
-                                            : fitParts;
+                            //if (results.Any())
+                            //{
+                            //    var candidate = results.OrderBy(item => item.Item2).First();
+                            //    authorsNormalized.Add(candidate.Item1);
+                            //}
+                            //else
+                            //{
+                            //    var fitParts = genreParts.Where(gp => gp.IsFit(audioBookAuthor))
+                            //        .OrderBy(item => item.Priority).ToArray();
 
-                                        genresNormalized.Add(audioBookGenre);
+                            //    if (fitParts.Any())
+                            //    {
+                            //        var minPriority = fitParts.Min(item => item.Priority);
+                            //        var res = minPriority < int.MaxValue
+                            //            ? fitParts.Where(item => item.Priority == minPriority).ToArray()
+                            //            : fitParts;
 
-                                        foreach (var genrePart in res)
-                                        {
-                                            genresNormalized.Add(genrePart.ReferenceGenre);
-                                        }
-                                    }
-                                }
-                            }
+                            //        authorsNormalized.Add(audioBookAuthor);
+
+                            //        foreach (var genrePart in res)
+                            //        {
+                            //            authorsNormalized.Add(genrePart.ReferenceGenre);
+                            //        }
+                            //    }
+                            //}
+                            //}
                         }
 
-                        audioBook.Genre = string.Join(", ", genresNormalized.OrderBy(item => item));
-                        dbContainer.AudioBookSet.AddChangedRecords(audioBook);
+                        if (authorsNormalized.Any())
+                        {
+                            audioBook.Author = string.Join("/ ", authorsNormalized.OrderBy(item => item));
+                            dbContainer.AudioBookSet.AddChangedRecords(audioBook);
+                        }
+
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        ProgressMessage.Report(abQuantity++, records.Count);
+                        ProgressMessage.ReportComplex(abQuantity++, records.Count);
 
                         if (sw.Elapsed > SaveTimer)
                         {
@@ -138,6 +151,70 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                     }
                 }
             }, cancellationToken);
+        }
+
+        private static string CyrLatToCyrConverter(Match m)
+        {
+            return new string(m.Value.Select(Resolve).ToArray());
+        }
+
+        private static char Resolve(char item)
+        {
+            switch (item)
+            {
+                case 'A':
+                    return 'А';
+                case 'a':
+                    return 'а';
+                case 'K':
+                    return 'К';
+                case 'k':
+                    return 'к';
+                case 'C':
+                    return 'С';
+                case 'c':
+                    return 'с';
+                case 'T':
+                    return 'Т';
+                case 't':
+                    return 'т';
+                case 'O':
+                    return 'О';
+                case 'o':
+                    return 'о';
+                case 'P':
+                    return 'Р';
+                case 'p':
+                    return 'р';
+                case 'H':
+                    return 'Н';
+                case 'h':
+                    return 'н';
+                case 'X':
+                    return 'Х';
+                case 'x':
+                    return 'х';
+                case 'M':
+                    return 'М';
+                case 'm':
+                    return 'м';
+                case 'E':
+                    return 'Е';
+                case 'e':
+                    return 'е';
+                case 'B':
+                    return 'В';
+                case 'G':
+                    return 'Г';
+                case 'g':
+                    return 'г';
+                case 'Z':
+                    return 'Z';
+                case 'z':
+                    return 'з';
+                default:
+                    return item;
+            }
         }
 
         private static readonly TimeSpan SaveTimer = TimeSpan.FromSeconds(5);

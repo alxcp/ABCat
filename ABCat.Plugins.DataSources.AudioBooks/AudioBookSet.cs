@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.DataSets;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
@@ -17,6 +18,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             _changedAudioBookGroups = new ConcurrentQueue<AudioBookGroup>();
 
         private readonly ConcurrentQueue<AudioBook> _changedAudioBooks = new ConcurrentQueue<AudioBook>();
+
+        private IReadOnlyCollection<IAudioBook> _recordsCache;
 
         public AudioBookSet(string path, ExecuteWithLock executeWithLockDelegate, bool vacuum)
             : base(path, executeWithLockDelegate, vacuum)
@@ -58,10 +61,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public IAudioBookGroup GetRecordGroupByKey(string key)
         {
-            return ExecuteWithLock(() =>
-            {
-                return Table<AudioBookGroup>().FirstOrDefault(group => group.Key == key);
-            });
+            return ExecuteWithLock(() => { return Table<AudioBookGroup>().FirstOrDefault(group => group.Key == key); });
         }
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsAll()
@@ -71,10 +71,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsByIds(HashSet<int> groupIds)
         {
-            return ExecuteWithLock(() =>
-            {
-                return Table<AudioBookGroup>().Where(group => groupIds.Contains(group.Id));
-            });
+            return ExecuteWithLock(
+                () => { return Table<AudioBookGroup>().Where(group => groupIds.Contains(group.Id)); });
         }
 
         public IEnumerable<IAudioBookGroup> GetRecordGroupsUpdatedBefore(DateTime lastUpdate)
@@ -93,7 +91,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                 while (_addedAudioBookGroups.Any())
                 {
-                    if (_addedAudioBookGroups.TryDequeue(out var @group))
+                    if (_addedAudioBookGroups.TryDequeue(out var group))
                     {
                         bookGroups4Add.Add(group);
                     }
@@ -103,7 +101,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                 while (_changedAudioBookGroups.Any())
                 {
-                    if (_changedAudioBookGroups.TryDequeue(out var @group))
+                    if (_changedAudioBookGroups.TryDequeue(out var group))
                     {
                         bookGroups4Replace.Add(group);
                     }
@@ -142,18 +140,26 @@ WHERE Key IN({keys})");
             return new AudioBook();
         }
 
-        private IReadOnlyCollection<IAudioBook> _recordsCache;
+        private void SetRecordsCache(IReadOnlyCollection<IAudioBook> newCache)
+        {
+            ExecuteWithLock(() =>
+            {
+                _recordsCache = newCache;
+            });
+
+            Context.I.EventAggregator.PublishOnUIThread(new RecordsCacheUpdatedMessage());
+        }
 
         public IReadOnlyCollection<IAudioBook> GetRecordsAllWithCache()
         {
-            return _recordsCache ?? GetRecordsAll();
+            return ExecuteWithLock(() => _recordsCache ?? GetRecordsAll());
         }
 
         public IReadOnlyCollection<IAudioBook> GetRecordsAll()
         {
             return ExecuteWithLock(() =>
             {
-                _recordsCache = Table<AudioBook>().ToArray();
+                SetRecordsCache(Table<AudioBook>().ToArray());
                 return _recordsCache;
             });
         }
@@ -203,8 +209,6 @@ AND abg.WebSiteId = ?", webSiteId));
         {
             ExecuteWithLock(() =>
             {
-                _recordsCache = null;
-
                 var books4Add = new List<AudioBook>();
 
                 while (_addedAudioBooks.Count > 0)
@@ -237,6 +241,8 @@ WHERE Key IN({keys})");
 
                     InsertAll(books4Add.Union(books4Replace).GroupBy(item => item.Key).Select(item => item.First()));
                 });
+
+                SetRecordsCache(null);
             });
         }
 
@@ -265,14 +271,6 @@ WHERE Key IN({keys})");
             }
         }
 
-        public IAudioBook GetRecordByKey(string key)
-        {
-            return ExecuteWithLock(() => FindWithQuery<AudioBook>(@"
-SELECT * FROM AudioBook
-WHERE Key = ?
-LIMIT 1;", key));
-        }
-
         public void AddWebSite(IAudioBookWebSite webSite)
         {
             ExecuteWithLock(() => { Insert(webSite); });
@@ -286,6 +284,14 @@ LIMIT 1;", key));
         public IEnumerable<IAudioBookWebSite> GetWebSitesAll()
         {
             return Table<AudioBookWebSite>();
+        }
+
+        public IAudioBook GetRecordByKey(string key)
+        {
+            return ExecuteWithLock(() => FindWithQuery<AudioBook>(@"
+SELECT * FROM AudioBook
+WHERE Key = ?
+LIMIT 1;", key));
         }
     }
 }
