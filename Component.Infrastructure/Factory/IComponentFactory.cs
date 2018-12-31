@@ -12,6 +12,8 @@ namespace Component.Infrastructure.Factory
         IEnumerable<ComponentCreatorBase> GetCreators<T>()
             where T : IExtComponent;
 
+        IReadOnlyCollection<T> CreateAll<T>() where T : IExtComponent;
+
         void Init();
 
         IEnumerable<Type> GetConfigAttributes();

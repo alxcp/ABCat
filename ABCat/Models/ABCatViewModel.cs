@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using ABCat.Shared;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
@@ -16,11 +17,12 @@ using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using ABCat.Shared.Plugins.UI;
 using ABCat.Shared.ViewModels;
+using Caliburn.Micro;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class AbCatViewModel : ViewModelBase, IDisposable
+    public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>
     {
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;
@@ -39,8 +41,7 @@ namespace ABCat.UI.WPF.Models
             SiteParserModel = new WebSiteParserViewModel(this, () => SelectedItems);
 
             RecordTargetDownloaderModel = new RecordTargetDownloaderViewModel(StatusBarStateModel,
-                Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems,
-                async () => await Filter.UpdateCache(UpdateTypes.Loaded));
+                Context.I.ComponentFactory.CreateActual<IRecordTargetDownloaderPlugin>(), () => SelectedItems);
             Filter =
                 Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>();
             Filter.PropertyChanged += FilterPropertyChanged;
@@ -127,7 +128,7 @@ namespace ABCat.UI.WPF.Models
 
         [UsedImplicitly] public ICommand RefreshCommand => CommandFactory.Get(RefreshRecordsListData);
 
-        public IEnumerable<IAudioBook> SelectedItems => RecordsListUc.SelectedItems;
+        public IReadOnlyCollection<IAudioBook> SelectedItems => RecordsListUc.SelectedItems;
 
         [UsedImplicitly]
         public ICommand SetReplacementCommand => CommandFactory.Get(SetReplacement, IsCanSetReplacement);
@@ -347,6 +348,11 @@ namespace ABCat.UI.WPF.Models
             {
                 ShowInBrowser(e.Target).ContinueWith(task => { });
             }
+        }
+
+        public void Handle(RecordLoadedMessage message)
+        {
+            Filter.UpdateCache(UpdateTypes.Loaded);
         }
     }
 }

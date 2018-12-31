@@ -46,7 +46,7 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
             }
         }
 
-        public IEnumerable<IAudioBook> SelectedItems => Grid.SelectedItems.Cast<IAudioBook>();
+        public IReadOnlyCollection<IAudioBook> SelectedItems => Grid.SelectedItems.Cast<IAudioBook>().ToArray();
 
         public bool CheckForConfig(bool correct, out Config incorrectConfig)
         {

@@ -169,17 +169,8 @@ WHERE GroupKey = ?;", linkedObjectString));
         {
             return ExecuteWithLock(() =>
             {
-                var result = new List<IAudioBook>();
-                var count = 0;
-
-                while (count * 500 < recordsKeys.Count)
-                {
-                    var part = new HashSet<string>(recordsKeys.Skip(count * 500).Take(500));
-                    result.AddRange(Table<AudioBook>().Where(audioBook => part.Contains(audioBook.Key)));
-                    count++;
-                }
-
-                return result;
+                var recordsAll = GetRecordsAllWithCache();
+                return recordsAll.Where(item => recordsKeys.Contains(item.Key));
             });
         }
 

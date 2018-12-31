@@ -93,6 +93,7 @@
     <Compile Include="LoginInfo.cs" />
     <Compile Include="MainConfig.cs" />
     <Compile Include="Messages\DBOperationMessage.cs" />
+    <Compile Include="Messages\RecordLoadedMessage.cs" />
     <Compile Include="ModernWindowBehavior.cs" />
     <Compile Include="ObjectPool.cs" />
     <Compile Include="ObjectPoolItem.cs" />
@@ -104,9 +105,8 @@
     <Compile Include="Plugins\Catalog\GroupingLogics\GroupingLogicPluginBase.cs" />
     <Compile Include="Plugins\Catalog\GroupingLogics\IGrouppingLogicPlugin.cs" />
     <Compile Include="Plugins\Catalog\GroupingLogics\WebSiteGroup.cs" />
-    <Compile Include="Plugins\Catalog\INormalizationLogicPlugin.cs" />
-    <Compile Include="Plugins\Catalog\ISymbolicDistance.cs" />
-    <Compile Include="Plugins\Catalog\ISymbolicDistanceResult.cs" />
+    <Compile Include="Plugins\Catalog\Normalizing\INormalizationLogicPlugin.cs" />
+    <Compile Include="Plugins\Catalog\Normalizing\IRecordsTagNormalizer.cs" />
     <Compile Include="Plugins\Catalog\ParsingLogics\INaturalBitrateParserPlugin.cs" />
     <Compile Include="Plugins\Catalog\ParsingLogics\INaturalTimeSpanParserPlugin.cs" />
     <Compile Include="Plugins\DataProviders\IDbContainer.cs" />

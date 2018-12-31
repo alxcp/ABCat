@@ -64,6 +64,9 @@ namespace ABCat.Plugins.Parsers.Audioboo
             pageHeader?.ParentNode.RemoveChild(pageHeader);
             var noIndex = document.DocumentNode.Descendants("noindex").FirstOrDefault();
             noIndex?.ParentNode.RemoveChild(noIndex);
+            var relatedNews = document.DocumentNode.Descendants("div")
+                .FirstOrDefault(item => item.HasClass("relative"));
+            relatedNews?.ParentNode.RemoveChild(relatedNews);
 
             var main = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("main"));
             var mainElements = main?.ChildNodes.ToArray();
