@@ -17,10 +17,8 @@ namespace ABCat.Shared.Plugins.Sites
         /// <param name="cancellationToken"></param>
         Task DownloadRecordGroups(HashSet<string> recordGroupsIds, CancellationToken cancellationToken);
 
-        Task DownloadRecords(HashSet<string> recordsIds, PageSources pageSource,
+        Task DownloadRecords(IReadOnlyCollection<string> recordsIds, PageSources pageSource,
             CancellationToken cancellationToken);
-
-        Task OrganizeKeywords(CancellationToken cancellationToken);
 
         Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
 

@@ -259,6 +259,11 @@ public static class ToolsExt
         return String.IsNullOrEmpty(value);
     }
 
+    public static string ReplaceAll(this string value, string newString, params string[] oldStrings)
+    {
+        return ReplaceAll(value, oldStrings, newString);
+    }
+
     public static string ReplaceAll(this string value, IReadOnlyCollection<string> oldStrings, string newString)
     {
         foreach (var oldString in oldStrings)

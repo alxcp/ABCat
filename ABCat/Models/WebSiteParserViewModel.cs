@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
+using ABCat.Shared.Plugins.Catalog.Normalizing;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 
@@ -16,7 +17,7 @@ namespace ABCat.UI.WPF.Models
         private readonly AbCatViewModel _owner;
         private readonly IReadOnlyCollection<IWebSiteParserPlugin> _siteParserPlugins;
 
-        public WebSiteParserViewModel(AbCatViewModel owner, Func<IEnumerable<IAudioBook>> getSelectedItems)
+        public WebSiteParserViewModel(AbCatViewModel owner, Func<IReadOnlyCollection<IAudioBook>> getSelectedItems)
             : base(owner.StatusBarStateModel)
         {
             _owner = owner;
@@ -56,16 +57,21 @@ namespace ABCat.UI.WPF.Models
 
                 if (plugin != null)
                 {
-                    await plugin.OrganizeKeywords(CancellationTokenSource.Token);
+                    await plugin.DownloadRecords(
+                        audioBooks.Value,
+                        PageSources.CacheOnly,
+                        CancellationTokenSource.Token);
 
-                    //    await plugin.DownloadRecords(
-                    //        audioBooks.Value,
-                    //        PageSources.CacheOnly,
-                    //        CancellationTokenSource.Token);
-
-                    //    await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
-                    //        .UpdateCache(UpdateTypes.Values);
+                    await Context.I.ComponentFactory.CreateActual<IFilteringLogicPlugin>()
+                        .UpdateCache(UpdateTypes.Values);
                 }
+            }
+
+            var normalizers = Context.I.ComponentFactory.CreateAll<IRecordsTagNormalizer>();
+
+            foreach (var recordsTagNormalizer in normalizers)
+            {
+                await recordsTagNormalizer.Normalize(_getSelectedItems().Select(item => item.Key).ToArray(), CancellationTokenSource.Token);
             }
 
             Executor.OnUiThread(() =>

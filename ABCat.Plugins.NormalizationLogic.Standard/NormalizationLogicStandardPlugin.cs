@@ -8,10 +8,12 @@ using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
+using JetBrains.Annotations;
 
 namespace ABCat.Plugins.NormalizationLogic.Standard
 {
     [SingletoneComponentInfo("1.0")]
+    [UsedImplicitly]
     public class NormalizationLogicStandardPlugin : INormalizationLogicPlugin
     {
         private readonly ConcurrentDictionary<string, string> _authors =

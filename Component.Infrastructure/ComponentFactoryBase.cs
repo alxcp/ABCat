@@ -59,6 +59,11 @@ namespace Component.Infrastructure
             return _creators.Where(IsAcceptableCreator<T>);
         }
 
+        public IReadOnlyCollection<T> CreateAll<T>() where T : IExtComponent
+        {
+            return GetCreators<T>().Select(item => item.GetInstance<T>()).ToArray();
+        }
+
         public void Init()
         {
             LoadComponents(ComponentsFolderPath, ComponentAssemblyNamePattern + ".dll");

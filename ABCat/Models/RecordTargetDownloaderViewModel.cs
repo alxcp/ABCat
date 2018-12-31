@@ -4,8 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
+using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using JetBrains.Annotations;
@@ -15,21 +14,20 @@ namespace ABCat.UI.WPF.Models
     public class RecordTargetDownloaderViewModel : AsyncOperationViewModelBase
     {
         private readonly Func<IEnumerable<IAudioBook>> _getSelectedRecordsFunc;
-        private readonly Action _recordDownloadedCallback;
         private readonly IRecordTargetDownloaderPlugin _recordTargetDownloaderPlugin;
 
         public RecordTargetDownloaderViewModel([NotNull] StatusBarStateViewModel statusBarStateModel,
             [NotNull] IRecordTargetDownloaderPlugin recordTargetDownloaderPlugin,
-            [NotNull] Func<IEnumerable<IAudioBook>> getSelectedRecordsFunc,
-            [NotNull] Action recordDownloadedCallback)
+            [NotNull] Func<IReadOnlyCollection<IAudioBook>> getSelectedRecordsFunc)
             : base(statusBarStateModel)
         {
             _recordTargetDownloaderPlugin = recordTargetDownloaderPlugin;
             _getSelectedRecordsFunc = getSelectedRecordsFunc;
-            _recordDownloadedCallback = recordDownloadedCallback;
         }
 
-        [UsedImplicitly] public ICommand DownloadRecordTargetCommand => CommandFactory.Get(async ()=> await OnDownloadRecordTarget(),
+        [UsedImplicitly]
+        public ICommand DownloadRecordTargetCommand => CommandFactory.Get(
+            async () => { await OnDownloadRecordTarget(); },
             () => CancellationTokenSource == null);
 
         public async Task OnDownloadRecordTarget()
@@ -43,7 +41,7 @@ namespace ABCat.UI.WPF.Models
             {
                 OnAsynOperationCompleted();
                 CommandManager.InvalidateRequerySuggested();
-                _recordDownloadedCallback();
+                Context.I.EventAggregator.PublishOnUIThread(new RecordLoadedMessage());
             });
         }
     }

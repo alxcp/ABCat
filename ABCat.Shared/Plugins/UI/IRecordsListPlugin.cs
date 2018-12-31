@@ -11,7 +11,7 @@ namespace ABCat.Shared.Plugins.UI
         ContextMenu ContextMenu { get; set; }
         IEnumerable<IAudioBook> Data { get; set; }
         Dispatcher Dispatcher { get; }
-        IEnumerable<IAudioBook> SelectedItems { get; }
+        IReadOnlyCollection<IAudioBook> SelectedItems { get; }
         event EventHandler<ItemDoubleClickRowEventArgs> ItemDoubleClick;
     }
 }
