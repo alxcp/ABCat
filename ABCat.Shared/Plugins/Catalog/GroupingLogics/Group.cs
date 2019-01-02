@@ -1,9 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using ABCat.Shared.Plugins.DataProviders;
-using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.ViewModels;
 
 namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
@@ -18,9 +13,10 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         /// <summary>Логика группировки, создавшая группу</summary>
         public readonly GroupingLogicPluginBase OwnerLogic;
 
+        private readonly List<Group> _children = new List<Group>();
+
         private bool _isExpanded;
         private bool _isSelected;
-        private List<Group> _children = new List<Group>();
 
         /// <summary>
         ///     Группа записей каталога
@@ -82,17 +78,6 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         ///     Родительская группа
         /// </summary>
         public Group Parent { get; private set; }
-
-        /// <summary>
-        ///     Начать асинхронное получение записей
-        /// </summary>
-        /// <param name="dbContainer">Контейнер БД</param>
-        /// <param name="cancellationToken">Токен отмены операции</param>
-        public async Task<IEnumerable<IAudioBook>> GetRecords(IDbContainer dbContainer,
-            CancellationToken cancellationToken)
-        {
-            return await OwnerLogic.GetRecords(dbContainer, this, cancellationToken);
-        }
 
         public void Add(Group child)
         {

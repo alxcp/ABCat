@@ -66,32 +66,32 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
                 }, cancellationToken);
         }
 
-        /// <summary>
-        ///     Начать асинхронное получение записей, включенных в группу
-        /// </summary>
-        /// <param name="dbContainer">Контейнер БД</param>
-        /// <param name="group">Группа записей</param>
-        /// <param name="cancellationToken">Токен отмены операции</param>
-        public async Task<IEnumerable<IAudioBook>> GetRecords(
-            IDbContainer dbContainer,
-            Group group,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                IsOnUpdate = true;
+        ///// <summary>
+        /////     Начать асинхронное получение записей, включенных в группу
+        ///// </summary>
+        ///// <param name="dbContainer">Контейнер БД</param>
+        ///// <param name="group">Группа записей</param>
+        ///// <param name="cancellationToken">Токен отмены операции</param>
+        //public async Task<IEnumerable<IAudioBook>> GetRecords(
+        //    IDbContainer dbContainer,
+        //    Group group,
+        //    CancellationToken cancellationToken)
+        //{
+        //    try
+        //    {
+        //        IsOnUpdate = true;
 
-                return
-                    await
-                        Task.Factory.StartNew(
-                            () => GetRecordsInner(dbContainer, group, cancellationToken),
-                            cancellationToken);
-            }
-            finally
-            {
-                IsOnUpdate = false;
-            }
-        }
+        //        return
+        //            await
+        //                Task.Factory.StartNew(
+        //                    () => GetRecordsInner(dbContainer, group, cancellationToken),
+        //                    cancellationToken);
+        //    }
+        //    finally
+        //    {
+        //        IsOnUpdate = false;
+        //    }
+        //}
 
         public abstract bool CheckForConfig(bool correct, out Config incorrectConfig);
 

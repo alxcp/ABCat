@@ -4,6 +4,8 @@ using System.Windows.Threading;
 // ReSharper disable once CheckNamespace
 public interface IEventAggregatorShared
 {
+    Dispatcher Dispatcher { get; set; }
+
     /// <summary>
     ///     Searches the subscribed handlers to check if we have a handler for
     ///     the message type supplied.
@@ -34,6 +36,4 @@ public interface IEventAggregatorShared
     void Publish(object message, Action<Action> marshal);
 
     void PublishOnUIThread(object message);
-
-    Dispatcher Dispatcher { get; set; }
 }

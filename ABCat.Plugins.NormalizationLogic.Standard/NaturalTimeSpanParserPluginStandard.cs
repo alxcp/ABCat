@@ -36,7 +36,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public TimeSpan Parse(string timeSpanString)
         {
-            TimeSpan result = TimeSpan.Zero;
+            var result = TimeSpan.Zero;
 
             var parts = timeSpanString.Split("+", " и ");
             if (parts.Length > 1)

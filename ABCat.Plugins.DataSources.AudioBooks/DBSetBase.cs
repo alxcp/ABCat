@@ -6,12 +6,13 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 {
     public abstract class DBSetBase : SQLiteConnection
     {
-        protected ExecuteWithLock ExecuteWithLockDelegate { get; }
-
-        protected DBSetBase(string path, ExecuteWithLock executeWithLockDelegate, bool vacuum) : base(new SQLitePlatformWin32(), path)
+        protected DBSetBase(string path, ExecuteWithLock executeWithLockDelegate, bool vacuum) : base(
+            new SQLitePlatformWin32(), path)
         {
             ExecuteWithLockDelegate = executeWithLockDelegate;
         }
+
+        protected ExecuteWithLock ExecuteWithLockDelegate { get; }
 
         protected void ExecuteWithLock(Action action)
         {
@@ -20,7 +21,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         protected T ExecuteWithLock<T>(Func<T> action)
         {
-            T result = default(T);
+            var result = default(T);
             ExecuteWithLockDelegate(() => { result = action(); });
             return result;
         }

@@ -92,13 +92,13 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             if (group == null || group.Level == 0)
                 return dbContainer.AudioBookSet.GetRecordsAllWithCache();
 
-            if (@group.Level == 1)
-                return dbContainer.AudioBookSet.GetRecordsByWebSite(((WebSiteGroup)@group).WebSite.Id).ToArray();
+            if (group.Level == 1)
+                return dbContainer.AudioBookSet.GetRecordsByWebSite(((WebSiteGroup) group).WebSite.Id).ToArray();
 
-            if (@group.Level == 2)
-                return dbContainer.AudioBookSet.GetRecordsByGroup(@group.LinkedObjectString).ToArray();
+            if (group.Level == 2)
+                return dbContainer.AudioBookSet.GetRecordsByGroup(group.LinkedObjectString).ToArray();
 
-            return dbContainer.AudioBookSet.GetRecordsByKeys(@group.LinkedRecords).ToArray();
+            return dbContainer.AudioBookSet.GetRecordsByKeys(group.LinkedRecords).ToArray();
         }
     }
 }

@@ -94,8 +94,7 @@
     <Compile Include="MainConfig.cs" />
     <Compile Include="Messages\DBOperationMessage.cs" />
     <Compile Include="Messages\RecordLoadedMessage.cs" />
-    <Compile Include="Messages\RecordsCacheUpdatedMessage.cs" />
-    <Compile Include="Messages\SelectedGroupChangedMessage.cs" />
+    <Compile Include="Messages\RecordsTransformationCompletedMessage.cs" />
     <Compile Include="ModernWindowBehavior.cs" />
     <Compile Include="ObjectPool.cs" />
     <Compile Include="ObjectPoolItem.cs" />

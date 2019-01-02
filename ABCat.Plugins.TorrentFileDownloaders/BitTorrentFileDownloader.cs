@@ -8,9 +8,12 @@ namespace ABCat.Plugins.TorrentFileDownloaders
     [PerCallComponentInfo("2.2")]
     public class BitTorrentFileDownloader : UBitTorrentFileDownloaderBase
     {
+        public override string DisplayName => "BitTorrent";
+
         protected override string GetExternalAppPath()
         {
-            var ia = Extensions.GetInstalledApplications().FirstOrDefault(item => item.DisplayName.ToLower().Contains(DisplayName.ToLower()));
+            var ia = Extensions.GetInstalledApplications()
+                .FirstOrDefault(item => item.DisplayName.ToLower().Contains(DisplayName.ToLower()));
             if (ia != null)
             {
                 return Path.Combine(ia.InstallLocation, "bittorrent.exe");
@@ -18,7 +21,5 @@ namespace ABCat.Plugins.TorrentFileDownloaders
 
             return null;
         }
-
-        public override string DisplayName => "BitTorrent";
     }
 }

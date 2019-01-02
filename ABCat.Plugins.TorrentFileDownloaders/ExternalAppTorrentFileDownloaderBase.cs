@@ -8,10 +8,6 @@ namespace ABCat.Plugins.TorrentFileDownloaders
 {
     public abstract class ExternalAppTorrentFileDownloaderBase : ITorrentFileDownloaderPlugin
     {
-        protected abstract string GetCommandLineArguments(string target, string destinationFolder);
-        [CanBeNull]
-        protected abstract string GetExternalAppPath();
-
         public abstract string DisplayName { get; }
 
         public virtual void Download(string target, string destinationFolder)
@@ -33,5 +29,10 @@ namespace ABCat.Plugins.TorrentFileDownloaders
             incorrectConfig = null;
             return true;
         }
+
+        protected abstract string GetCommandLineArguments(string target, string destinationFolder);
+
+        [CanBeNull]
+        protected abstract string GetExternalAppPath();
     }
 }

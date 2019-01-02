@@ -5,6 +5,7 @@ namespace Component.Infrastructure.Factory
 {
     public interface IComponentFactory : IDisposable
     {
+        string ComponentsFolderPath { get; }
         T CreateActual<T>() where T : IExtComponent;
 
         ComponentCreatorBase GetActualCreator<T>() where T : IExtComponent;
@@ -17,7 +18,5 @@ namespace Component.Infrastructure.Factory
         void Init();
 
         IEnumerable<Type> GetConfigAttributes();
-
-        string ComponentsFolderPath { get; }
     }
 }

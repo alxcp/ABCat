@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,7 +37,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
         /// </summary>
         /// <param name="records">Записи</param>
         /// <param name="cancellationToken">Токен для отмены операции</param>
-        Task<IEnumerable<IAudioBook>> Filter(IEnumerable<IAudioBook> records,
+        IReadOnlyCollection<IAudioBook> Filter(IReadOnlyCollection<IAudioBook> records,
             CancellationToken cancellationToken);
 
         /// <summary>

@@ -11,10 +11,7 @@ namespace ABCat.Shared.ViewModels
         {
             get
             {
-                return CommandFactory.Get(() =>
-                {
-                    CloseWindow?.Invoke(this, EventArgs.Empty);
-                }, "CloseWindowCommand");
+                return CommandFactory.Get(() => { CloseWindow?.Invoke(this, EventArgs.Empty); }, "CloseWindowCommand");
             }
         }
 
@@ -22,10 +19,8 @@ namespace ABCat.Shared.ViewModels
         {
             get
             {
-                return CommandFactory.Get(() =>
-                {
-                    CollapseWindow?.Invoke(this, EventArgs.Empty);
-                }, "CollapseWindowCommand");
+                return CommandFactory.Get(() => { CollapseWindow?.Invoke(this, EventArgs.Empty); },
+                    "CollapseWindowCommand");
             }
         }
 

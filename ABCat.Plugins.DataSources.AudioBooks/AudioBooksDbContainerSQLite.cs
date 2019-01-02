@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
@@ -11,7 +10,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 {
     [UsedImplicitly]
     [PerCallComponentInfo("1.0")]
-    public class AudioBooksDbContainerSqLite : IDbContainer 
+    public class AudioBooksDbContainerSqLite : IDbContainer
     {
         private readonly Lazy<AudioBookSet> _audioBooks;
         private readonly Lazy<BinaryDataSet> _binaryDataSet;
@@ -57,6 +56,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public Config Config { get; set; }
 
+        public Queue<string> WaitForParse { get; } = new Queue<string>();
+
         public IAudioBookSet AudioBookSet => _audioBooks.Value;
 
         public IAudioBookGroupSet AudioBookGroupSet => (IAudioBookGroupSet) AudioBookSet;
@@ -77,8 +78,6 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         public IReplacementStringSet ReplacementStringSet => _replacementStringSet.Value;
 
         public IUserDataSet UserDataSet => _userDataSet.Value;
-
-        public Queue<string> WaitForParse { get; } = new Queue<string>();
 
         public bool CheckForConfig(bool correct, out Config incorrectConfig)
         {

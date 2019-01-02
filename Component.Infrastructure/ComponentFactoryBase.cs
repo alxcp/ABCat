@@ -71,6 +71,10 @@ namespace Component.Infrastructure
             InitInternal();
         }
 
+        public virtual void Dispose()
+        {
+        }
+
         protected virtual bool AssemblyNameFilter(string assemblyName)
         {
             return assemblyName.IndexOf("vshost.exe", StringComparison.OrdinalIgnoreCase) == -1;
@@ -145,10 +149,6 @@ namespace Component.Infrastructure
                     _creators.Add(new SingletoneComponentCreator(componentType, componentInfoAttribute));
                     break;
             }
-        }
-
-        public virtual void Dispose()
-        {
         }
     }
 }

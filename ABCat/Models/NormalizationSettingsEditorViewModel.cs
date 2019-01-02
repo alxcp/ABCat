@@ -1,10 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.UI;
 using ABCat.Shared.ViewModels;
-using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {

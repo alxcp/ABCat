@@ -75,7 +75,8 @@
                         Background="#FFF0F0F0"
                         BorderBrush="#FF999999"
                         BorderThickness="1">
-                        <ScrollViewer x:Name="SubMenuScrollViewer" Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                        <ScrollViewer x:Name="SubMenuScrollViewer"
+                                      Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
                             <Grid x:Name="ContainerGrid" RenderOptions.ClearTypeHint="Enabled">
                                 <Canvas
                                     Width="0"
@@ -126,8 +127,10 @@
                 <Setter TargetName="templateRoot" Property="Opacity" Value="0.2" />
             </Trigger>
             <Trigger SourceName="SubMenuScrollViewer" Property="CanContentScroll" Value="False">
-                <Setter TargetName="OpaqueRect" Property="Canvas.Top" Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}" />
-                <Setter TargetName="OpaqueRect" Property="Canvas.Left" Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}" />
+                <Setter TargetName="OpaqueRect" Property="Canvas.Top"
+                        Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}" />
+                <Setter TargetName="OpaqueRect" Property="Canvas.Left"
+                        Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
@@ -422,12 +425,14 @@
                                 <VisualState x:Name="Determinate" />
                                 <VisualState x:Name="Indeterminate">
                                     <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Animation"
+                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
                                             <EasingDoubleKeyFrame KeyTime="0" Value="0.25" />
                                             <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.25" />
                                             <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0.25" />
                                         </DoubleAnimationUsingKeyFrames>
-                                        <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation" Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
+                                        <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation"
+                                                                      Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
                                             <EasingPointKeyFrame KeyTime="0" Value="-0.5,0.5" />
                                             <EasingPointKeyFrame KeyTime="0:0:1" Value="0.5,0.5" />
                                             <EasingPointKeyFrame KeyTime="0:0:2" Value="1.5,0.5" />

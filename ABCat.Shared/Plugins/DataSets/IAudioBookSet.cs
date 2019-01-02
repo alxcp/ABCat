@@ -11,7 +11,7 @@ namespace ABCat.Shared.Plugins.DataSets
         IReadOnlyCollection<IAudioBook> GetRecordsAllWithCache();
         IReadOnlyCollection<IAudioBook> GetRecordsAll();
         IEnumerable<IAudioBook> GetRecordsByGroup(string linkedObjectString);
-        IEnumerable<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys);
+        IReadOnlyCollection<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys);
         IEnumerable<IAudioBook> GetRecordsUpdatedBefore(int webSiteId, DateTime lastUpdate);
         IEnumerable<IAudioBook> GetRecordsByWebSite(int webSiteId);
 

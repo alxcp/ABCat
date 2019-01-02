@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text.RegularExpressions;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.ParsingLogics;
 using ABCat.Shared.Plugins.DataSets;
 using SQLite.Net.Attributes;
@@ -16,8 +14,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         private static readonly INaturalTimeSpanParserPlugin TimeSpanParser;
         private static readonly INaturalBitrateParserPlugin BitrateParser;
         private string _lastParsedLength;
-        private TimeSpan _parsedLength;
         private int _parsedBitrate;
+        private TimeSpan _parsedLength;
+
+        private TimeSpan _parsedLengthByBitrate;
 
         static AudioBook()
         {
@@ -78,8 +78,6 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         [Column("Size")] public long Size { get; set; }
 
-        private TimeSpan _parsedLengthByBitrate;
-
         public TimeSpan ParsedLengthByBitrate
         {
             get
@@ -130,7 +128,8 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             if (Genre.IsNullOrEmpty())
                 return new string[0];
 
-            return Genre.Split(',', '/', '.', '>', '|', ';').Select(item => item.Trim().ReplaceAll(new[] {"\"", "="}, ""))
+            return Genre.Split(',', '/', '.', '>', '|', ';')
+                .Select(item => item.Trim().ReplaceAll(new[] {"\"", "="}, ""))
                 .Where(item => !item.IsNullOrEmpty()).ToArray();
         }
 
@@ -152,18 +151,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
                 return new string[0];
 
             if (GetWordsCount(Reader) <= 2)
-                return new[] { Reader };
+                return new[] {Reader};
 
             return Reader.Split(',', '/', '>', '|').Select(item => item.Trim()).Where(item => !item.IsNullOrEmpty())
                 .ToArray();
-        }
-
-        private int GetWordsCount(string value)
-        {
-            if (value.IsNullOrEmpty())
-                return 0;
-
-            return value.Split(' ').Select(item => !item.Trim().IsNullOrEmpty()).Count();
         }
 
         public void ClearMetaInfo()
@@ -182,6 +173,14 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         {
             //ToDo: Group.Key!!! Not ID
             return $"TP_{GroupKey}_{Key}";
+        }
+
+        private int GetWordsCount(string value)
+        {
+            if (value.IsNullOrEmpty())
+                return 0;
+
+            return value.Split(' ').Select(item => !item.Trim().IsNullOrEmpty()).Count();
         }
 
         public override string ToString()

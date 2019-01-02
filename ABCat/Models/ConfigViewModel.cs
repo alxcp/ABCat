@@ -33,11 +33,6 @@ namespace ABCat.UI.WPF.Models
             SelectedItem = mainConfig;
         }
 
-        private void Config_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            CommandFactory.UpdateAll();
-        }
-
         public ObservableCollection<Config> Configs { get; } = new ObservableCollection<Config>();
 
         public Config CurrentConfig
@@ -75,6 +70,11 @@ namespace ABCat.UI.WPF.Models
         }
 
         public Window TargetWindow { get; set; }
+
+        private void Config_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            CommandFactory.UpdateAll();
+        }
 
         public static void ShowConfigWindow(Config targetConfigs)
         {

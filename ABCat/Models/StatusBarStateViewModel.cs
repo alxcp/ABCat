@@ -1,10 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
-using ABCat.Shared;
-using ABCat.Shared.Commands;
 using ABCat.Shared.Messages;
 using ABCat.Shared.ViewModels;
 using Caliburn.Micro;
@@ -13,6 +9,7 @@ namespace ABCat.UI.WPF.Models
 {
     public sealed class StatusBarStateViewModel : ViewModelBase, IHandle<DBOperationMessage>
     {
+        private bool _isOnDbOperation;
         private string _message;
         private int _progressBarSmallMaximum;
         private string _progressBarSmallMessage;
@@ -22,7 +19,6 @@ namespace ABCat.UI.WPF.Models
         private string _progressBarTotalMessage;
         private int _progressBarTotalMinimum;
         private int _progressBarTotalValue = -1;
-        private bool _isOnDbOperation;
 
         public StatusBarStateViewModel(Func<bool> isCanCancelAsyncOperation,
             Action cancelAsyncOperation)

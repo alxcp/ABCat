@@ -11,8 +11,6 @@ namespace ABCat.Shared.Messages
         private static readonly TimeSpan MinIntervalSmall = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan MinIntervalComplex = TimeSpan.FromSeconds(5);
 
-        public bool IsComplexProgress { get; }
-
         protected ProgressMessage(int completed, int total, bool isComplexProgress, [CanBeNull] string message = null)
         {
             IsComplexProgress = isComplexProgress;
@@ -20,6 +18,8 @@ namespace ABCat.Shared.Messages
             Total = total;
             Message = message.IsNullOrEmpty() ? $"{completed} / {total}" : message;
         }
+
+        public bool IsComplexProgress { get; }
 
         public int Completed { get; }
         public int Total { get; }
@@ -34,6 +34,8 @@ namespace ABCat.Shared.Messages
 
                 Context.I.EventAggregator.PublishOnUIThread(new ProgressMessage(completed, total, true, message));
                 SwComplex.Restart();
+                if (completed == total)
+                    Context.I.EventAggregator.PublishOnUIThread(new RecordsTransformationCompletedMessage());
             }
         }
 

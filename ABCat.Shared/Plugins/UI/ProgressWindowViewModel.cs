@@ -1,7 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using ABCat.Shared.ViewModels;
-using JetBrains.Annotations;
+﻿using ABCat.Shared.ViewModels;
 
 namespace ABCat.Shared.Plugins.UI
 {

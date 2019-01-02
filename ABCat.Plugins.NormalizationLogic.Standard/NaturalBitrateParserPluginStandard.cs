@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using ABCat.Shared.Plugins.Catalog.ParsingLogics;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
@@ -11,10 +10,13 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
     [UsedImplicitly]
     public class NaturalBitrateParserPluginStandard : INaturalBitrateParserPlugin
     {
-        private static readonly string[] BitrateJunkStrings = { "~", "vbr", "cbr" };
+        private static readonly string[] BitrateJunkStrings = {"~", "vbr", "cbr"};
 
         private static readonly string[] BitrateKbpsStrings =
-            {"kbps", "kbts", "kbit / sec", "kbit / s", "kbs", "kbp / s", "kb / s", "кb / s", "кbps", "kbit", "кбит / сек", "кбит / с", "кб / с", "к / с", "кбит", "кбс", "kpbs"};
+        {
+            "kbps", "kbts", "kbit / sec", "kbit / s", "kbs", "kbp / s", "kb / s", "кb / s", "кbps", "kbit",
+            "кбит / сек", "кбит / с", "кб / с", "к / с", "кбит", "кбс", "kpbs"
+        };
 
         public void Dispose()
         {

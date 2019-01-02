@@ -34,7 +34,6 @@ namespace ABCat.Shared.Plugins.Sites
                         z++;
                     }
                 }
-
             }, cancellationToken);
         }
 
@@ -47,7 +46,8 @@ namespace ABCat.Shared.Plugins.Sites
 
         public event EventHandler Disposed;
 
-        public abstract void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer, CancellationToken cancellationToken);
+        public abstract void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer,
+            CancellationToken cancellationToken);
 
         public abstract string GetAbsoluteLibraryPath(IAudioBook record);
 

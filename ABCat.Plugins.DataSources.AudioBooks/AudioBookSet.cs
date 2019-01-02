@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.DataSets;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
@@ -140,16 +139,6 @@ WHERE Key IN({keys})");
             return new AudioBook();
         }
 
-        private void SetRecordsCache(IReadOnlyCollection<IAudioBook> newCache)
-        {
-            ExecuteWithLock(() =>
-            {
-                _recordsCache = newCache;
-            });
-
-            Context.I.EventAggregator.PublishOnUIThread(new RecordsCacheUpdatedMessage());
-        }
-
         public IReadOnlyCollection<IAudioBook> GetRecordsAllWithCache()
         {
             return ExecuteWithLock(() => _recordsCache ?? GetRecordsAll());
@@ -171,12 +160,12 @@ SELECT * FROM AudioBook
 WHERE GroupKey = ?;", linkedObjectString));
         }
 
-        public IEnumerable<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys)
+        public IReadOnlyCollection<IAudioBook> GetRecordsByKeys(HashSet<string> recordsKeys)
         {
             return ExecuteWithLock(() =>
             {
                 var recordsAll = GetRecordsAllWithCache();
-                return recordsAll.Where(item => recordsKeys.Contains(item.Key));
+                return recordsAll.Where(item => recordsKeys.Contains(item.Key)).ToArray();
             });
         }
 
@@ -284,6 +273,13 @@ WHERE Key IN({keys})");
         public IEnumerable<IAudioBookWebSite> GetWebSitesAll()
         {
             return Table<AudioBookWebSite>();
+        }
+
+        private void SetRecordsCache(IReadOnlyCollection<IAudioBook> newCache)
+        {
+            ExecuteWithLock(() => { _recordsCache = newCache; });
+
+            //Context.I.EventAggregator.PublishOnUIThread(new RecordsCacheUpdatedMessage());
         }
 
         public IAudioBook GetRecordByKey(string key)

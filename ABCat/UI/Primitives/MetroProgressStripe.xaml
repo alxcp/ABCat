@@ -31,35 +31,40 @@
                 x:Key="AnimationStoryBoard"
                 x:Name="AnimationStoryBoard"
                 RepeatBehavior="Forever">
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip0" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip0"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.8" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:3" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip1" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip1"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.6" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.8" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip2" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip2"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.4" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.6" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip3" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip3"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.2" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.4" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip0" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip0"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0">
@@ -73,7 +78,8 @@
                         </EasingDoubleKeyFrame.EasingFunction>
                     </EasingDoubleKeyFrame>
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip1" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip1"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.8" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="0">
@@ -87,7 +93,8 @@
                         </EasingDoubleKeyFrame.EasingFunction>
                     </EasingDoubleKeyFrame>
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip2" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip2"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.6" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.6" Value="0">
@@ -101,7 +108,8 @@
                         </EasingDoubleKeyFrame.EasingFunction>
                     </EasingDoubleKeyFrame>
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip3" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip3"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.4" Value="0">
@@ -115,18 +123,21 @@
                         </EasingDoubleKeyFrame.EasingFunction>
                     </EasingDoubleKeyFrame>
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="ProgressBar"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-50" />
                     <EasingDoubleKeyFrame KeyTime="0:0:3" Value="50" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip4" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip4"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.4" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2.2" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip4" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip4"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.2" Value="0">
@@ -140,13 +151,15 @@
                         </EasingDoubleKeyFrame.EasingFunction>
                     </EasingDoubleKeyFrame>
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip5" Storyboard.TargetProperty="(UIElement.Opacity)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip5"
+                                               Storyboard.TargetProperty="(UIElement.Opacity)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="0" />
                     <EasingDoubleKeyFrame KeyTime="0:0:0.2" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1.8" Value="1" />
                     <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0" />
                 </DoubleAnimationUsingKeyFrames>
-                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip5" Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Elip5"
+                                               Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[3].(TranslateTransform.X)">
                     <EasingDoubleKeyFrame KeyTime="0" Value="-100" />
                     <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0">
                         <EasingDoubleKeyFrame.EasingFunction>
