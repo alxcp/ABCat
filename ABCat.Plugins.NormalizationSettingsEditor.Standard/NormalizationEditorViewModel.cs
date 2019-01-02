@@ -28,10 +28,6 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
         private PropertyForSelect _selectedProperty;
         private IEnumerable<IAudioBook> _targetRecords;
 
-        public NormalizationEditorViewModel()
-        {
-        }
-
         public IEnumerable<PropertyForSelect> AvailableProperties => _availableProperties;
 
         public ICommand CancelCommand => CommandFactory.Get(() =>

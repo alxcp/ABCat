@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
-using ABCat.Shared.Plugins.DataProviders;
-using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
 
 namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
@@ -26,13 +23,13 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
         /// <param name="cancellationToken">Токен отмены операции</param>
         Task<Group> GenerateGroups(CancellationToken cancellationToken);
 
-        /// <summary>
-        ///     Начать асинхронное получение записей, включенных в группу
-        /// </summary>
-        /// <param name="dbContainer">Контейнер БД</param>
-        /// <param name="group">Группа записей</param>
-        /// <param name="cancellationToken">Токен отмены операции</param>
-        Task<IEnumerable<IAudioBook>> GetRecords(IDbContainer dbContainer, Group group,
-            CancellationToken cancellationToken);
+        ///// <summary>
+        /////     Начать асинхронное получение записей, включенных в группу
+        ///// </summary>
+        ///// <param name="dbContainer">Контейнер БД</param>
+        ///// <param name="group">Группа записей</param>
+        ///// <param name="cancellationToken">Токен отмены операции</param>
+        //Task<IEnumerable<IAudioBook>> GetRecords(IDbContainer dbContainer, Group group,
+        //    CancellationToken cancellationToken);
     }
 }

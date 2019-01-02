@@ -25,7 +25,8 @@ namespace ABCat.Shared.Commands
             return result;
         }
 
-        public ICommand Get([NotNull] Action action, [NotNull] Func<bool> canExecute, [CallerMemberName] string commandName = null)
+        public ICommand Get([NotNull] Action action, [NotNull] Func<bool> canExecute,
+            [CallerMemberName] string commandName = null)
         {
             commandName.AgainstNullOrEmpty();
 
@@ -44,7 +45,8 @@ namespace ABCat.Shared.Commands
             return Get<object>(action, commandName);
         }
 
-        public ICommand Get([NotNull] Action<object> action, [NotNull] Func<object, bool> canExecute, [CallerMemberName] string commandName = null)
+        public ICommand Get([NotNull] Action<object> action, [NotNull] Func<object, bool> canExecute,
+            [CallerMemberName] string commandName = null)
         {
             return Get<object>(action, canExecute, commandName);
         }
@@ -64,7 +66,8 @@ namespace ABCat.Shared.Commands
             return result;
         }
 
-        public ICommand Get<T>([NotNull] Action<T> action, [NotNull] Func<T, bool> canExecute, [CallerMemberName] string commandName = null)
+        public ICommand Get<T>([NotNull] Action<T> action, [NotNull] Func<T, bool> canExecute,
+            [CallerMemberName] string commandName = null)
         {
             commandName.AgainstNullOrEmpty();
 

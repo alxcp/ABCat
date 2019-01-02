@@ -256,7 +256,7 @@ public static class ToolsExt
 
     public static bool IsNullOrEmpty(this string value)
     {
-        return String.IsNullOrEmpty(value);
+        return string.IsNullOrEmpty(value);
     }
 
     public static string ReplaceAll(this string value, string newString, params string[] oldStrings)
@@ -274,7 +274,8 @@ public static class ToolsExt
         return value;
     }
 
-    public static bool ContainsAny(this string value, IReadOnlyCollection<string> valuesForSearch, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    public static bool ContainsAny(this string value, IReadOnlyCollection<string> valuesForSearch,
+        StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
     {
         return valuesForSearch.Any(v => value.IndexOf(v, comparison) >= 0);
     }
@@ -397,8 +398,9 @@ public static class ToolsExt
         return obj == null ? Empty : obj.ToString();
     }
 
-    public static bool Compare(this string value1, string value2, StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
+    public static bool Compare(this string value1, string value2,
+        StringComparison comparison = StringComparison.InvariantCultureIgnoreCase)
     {
-        return String.Compare(value1, value2, comparison) == 0;
+        return string.Compare(value1, value2, comparison) == 0;
     }
 }

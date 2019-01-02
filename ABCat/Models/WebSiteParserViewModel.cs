@@ -27,18 +27,19 @@ namespace ABCat.UI.WPF.Models
         }
 
         public ICommand DownloadRecordGroupsCommand =>
-            CommandFactory.Get(async ()=> await OnDownloadRecordGroups(), () => CancellationTokenSource == null);
+            CommandFactory.Get(async () => await OnDownloadRecordGroups(), () => CancellationTokenSource == null);
 
         public ICommand DownloadRecordsCommand =>
-            CommandFactory.Get(async ()=> await OnDownloadRecords(), () => CancellationTokenSource == null);
+            CommandFactory.Get(async () => await OnDownloadRecords(), () => CancellationTokenSource == null);
 
-        public ICommand ReparseCommand => CommandFactory.Get(async ()=> await Reparse(), ()=> CancellationTokenSource == null);
+        public ICommand ReparseCommand =>
+            CommandFactory.Get(async () => await Reparse(), () => CancellationTokenSource == null);
 
         private async Task Reparse()
         {
             CancellationTokenSource = new CancellationTokenSource();
 
-            Dictionary<string, int> allGroups = new Dictionary<string, int>();
+            var allGroups = new Dictionary<string, int>();
 
             foreach (var siteParserPlugin in _siteParserPlugins)
             {
@@ -53,7 +54,7 @@ namespace ABCat.UI.WPF.Models
 
             foreach (var audioBooks in forReparse)
             {
-                var plugin = _siteParserPlugins.FirstOrDefault(item=>item.WebSiteId == audioBooks.Key);
+                var plugin = _siteParserPlugins.FirstOrDefault(item => item.WebSiteId == audioBooks.Key);
 
                 if (plugin != null)
                 {
@@ -71,7 +72,8 @@ namespace ABCat.UI.WPF.Models
 
             foreach (var recordsTagNormalizer in normalizers)
             {
-                await recordsTagNormalizer.Normalize(_getSelectedItems().Select(item => item.Key).ToArray(), CancellationTokenSource.Token);
+                await recordsTagNormalizer.Normalize(_getSelectedItems().Select(item => item.Key).ToArray(),
+                    CancellationTokenSource.Token);
             }
 
             Executor.OnUiThread(OnAsynOperationCompleted);
@@ -106,7 +108,7 @@ namespace ABCat.UI.WPF.Models
         public async Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken)
         {
             var groupKey = record.GroupKey;
-            var plugin = _siteParserPlugins.FirstOrDefault(item=>item.GetGroupKeys(false).Contains(groupKey));
+            var plugin = _siteParserPlugins.FirstOrDefault(item => item.GetGroupKeys(false).Contains(groupKey));
 
             if (plugin != null)
             {

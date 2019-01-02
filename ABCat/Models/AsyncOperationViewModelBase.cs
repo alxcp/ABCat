@@ -21,6 +21,18 @@ namespace ABCat.UI.WPF.Models
 
         protected StatusBarStateViewModel StatusBarStateModel { get; set; }
 
+        public void Handle(ProgressMessage message)
+        {
+            if (message.IsComplexProgress)
+            {
+                ReportProgressTotal(message.Completed, message.Total, message.Message);
+            }
+            else
+            {
+                ReportProgressSmall(message.Completed, message.Total, message.Message);
+            }
+        }
+
         public void CancelAsyncOperation()
         {
             var cts = CancellationTokenSource;
@@ -50,18 +62,6 @@ namespace ABCat.UI.WPF.Models
             StatusBarStateModel.ProgressBarTotalMaximum = total;
             StatusBarStateModel.ProgressBarTotalMessage = message;
             StatusBarStateModel.ProgressBarTotalValue = current;
-        }
-
-        public void Handle(ProgressMessage message)
-        {
-            if (message.IsComplexProgress)
-            {
-                ReportProgressTotal(message.Completed, message.Total, message.Message);
-            }
-            else
-            {
-                ReportProgressSmall(message.Completed, message.Total, message.Message);
-            }
         }
     }
 }

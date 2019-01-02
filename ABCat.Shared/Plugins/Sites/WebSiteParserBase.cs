@@ -4,14 +4,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog;
-using ABCat.Shared.Plugins.Catalog.Normalizing;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using Component.Infrastructure;
@@ -19,16 +16,16 @@ using HtmlAgilityPack;
 
 namespace ABCat.Shared.Plugins.Sites
 {
-    static class LevenshteinDistance
+    internal static class LevenshteinDistance
     {
         /// <summary>
-        /// Compute the distance between two strings.
+        ///     Compute the distance between two strings.
         /// </summary>
         public static int Compute(string s, string t)
         {
-            int n = s.Length;
-            int m = t.Length;
-            int[,] d = new int[n + 1, m + 1];
+            var n = s.Length;
+            var m = t.Length;
+            var d = new int[n + 1, m + 1];
 
             // Step 1
             if (n == 0)
@@ -42,22 +39,22 @@ namespace ABCat.Shared.Plugins.Sites
             }
 
             // Step 2
-            for (int i = 0; i <= n; d[i, 0] = i++)
+            for (var i = 0; i <= n; d[i, 0] = i++)
             {
             }
 
-            for (int j = 0; j <= m; d[0, j] = j++)
+            for (var j = 0; j <= m; d[0, j] = j++)
             {
             }
 
             // Step 3
-            for (int i = 1; i <= n; i++)
+            for (var i = 1; i <= n; i++)
             {
                 //Step 4
-                for (int j = 1; j <= m; j++)
+                for (var j = 1; j <= m; j++)
                 {
                     // Step 5
-                    int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
+                    var cost = t[j - 1] == s[i - 1] ? 0 : 1;
 
                     // Step 6
                     d[i, j] = Math.Min(
@@ -65,6 +62,7 @@ namespace ABCat.Shared.Plugins.Sites
                         d[i - 1, j - 1] + cost);
                 }
             }
+
             // Step 7
             return d[n, m];
         }
@@ -72,9 +70,12 @@ namespace ABCat.Shared.Plugins.Sites
 
     public abstract class WebSiteParserBase : IWebSiteParserPlugin
     {
-        public Config Config { get; set; }
-        private int _webSiteId = -1;
+        private static readonly Regex HtmlSpecCharRegex = new Regex("&#[0-9]+;");
+        private static readonly Regex HtmlEscCharRegex = new Regex("&[A-Za-z]+;");
         private HashSet<string> _groupKeys;
+        private int _webSiteId = -1;
+        public Config Config { get; set; }
+        protected abstract string[] RecordPageJunkIdList { get; }
 
         public int WebSiteId
         {
@@ -153,8 +154,10 @@ namespace ABCat.Shared.Plugins.Sites
                             // ignored
                         }
                     }
-                }
 
+                    ProgressMessage.ReportComplex(groups.Length, groups.Length,
+                        $"{DisplayName}: {z} / {groups.Length}");
+                }
             }, cancellationToken);
         }
 
@@ -167,7 +170,7 @@ namespace ABCat.Shared.Plugins.Sites
             {
                 var recordActualityPeriod = mainConfig.RecordActualityPeriod;
 
-                using(var autoSave = Context.I.DbContainerAutoSave)
+                using (var autoSave = Context.I.DbContainerAutoSave)
                 {
                     var dbContainer = autoSave.DBContainer;
 
@@ -235,6 +238,9 @@ namespace ABCat.Shared.Plugins.Sites
                         }
                     }
 
+                    ProgressMessage.ReportComplex(records.Length, records.Length,
+                        $"{DisplayName}: {records.Length} / {records.Length}");
+
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         dbContainer.SaveChanges();
@@ -244,15 +250,30 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
+        public async Task<string> DownloadRecordSourcePage(IAudioBook audioBook, CancellationToken cancellationToken)
+        {
+            return await Task.Factory.StartNew(
+                () => GetRecordSourcePageString(audioBook, PageSources.CacheOrWeb, cancellationToken),
+                cancellationToken);
+        }
+
+        public abstract bool CheckForConfig(bool correct, out Config incorrectConfigs);
+
+        public void Dispose()
+        {
+            Disposed?.Invoke(this, EventArgs.Empty);
+        }
+
         protected virtual long GetSizeInBytes(string sizeString)
         {
             long result = 0;
             var subSize = sizeString.Split(' ');
             subSize[0] = subSize[0].Replace(',', '.');
 
-            if (subSize.Length >= 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture.NumberFormat, out var size))
+            if (subSize.Length >= 2 && float.TryParse(subSize[0], NumberStyles.AllowDecimalPoint,
+                    CultureInfo.InvariantCulture.NumberFormat, out var size))
             {
-                int multiplier = 0;
+                var multiplier = 0;
 
                 switch (subSize[1])
                 {
@@ -273,30 +294,15 @@ namespace ABCat.Shared.Plugins.Sites
                         break;
                 }
 
-                result = (long)(size * multiplier);
+                result = (long) (size * multiplier);
             }
 
             return result;
         }
 
-        public async Task<string> DownloadRecordSourcePage(IAudioBook audioBook, CancellationToken cancellationToken)
-        {
-            return await Task.Factory.StartNew(() => GetRecordSourcePageString(audioBook, PageSources.CacheOrWeb, cancellationToken), cancellationToken);
-        }
-
-        public abstract bool CheckForConfig(bool correct, out Config incorrectConfigs);
-        protected abstract string[] RecordPageJunkIdList { get; }
-
-        public void Dispose()
-        {
-            Disposed?.Invoke(this, EventArgs.Empty);
-        }
-
         public event EventHandler Disposed;
 
         public abstract IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer container);
-        private static readonly Regex HtmlSpecCharRegex = new Regex("&#[0-9]+;");
-        private static readonly Regex HtmlEscCharRegex = new Regex("&[A-Za-z]+;");
 
         protected virtual string CleanupRecordValue(string value, bool allowMultiLine, int maxLength)
         {
@@ -325,7 +331,7 @@ namespace ABCat.Shared.Plugins.Sites
                 .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
         }
 
-        static string HtmlSpecCharRegexReplacer(Match m)
+        private static string HtmlSpecCharRegexReplacer(Match m)
         {
             return WebUtility.HtmlDecode(m.Value);
         }
@@ -344,9 +350,11 @@ namespace ABCat.Shared.Plugins.Sites
             document.RemoveNodesByIds(RecordPageJunkIdList);
         }
 
-        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken);
+        protected abstract void DownloadRecord(IDbContainer db, IAudioBook record, PageSources pageSource,
+            CancellationToken cancellationToken);
 
-        protected abstract void DownloadRecordGroup(IDbContainer db, IAudioBookGroup recordGroup, CancellationToken cancellationToken);
+        protected abstract void DownloadRecordGroup(IDbContainer db, IAudioBookGroup recordGroup,
+            CancellationToken cancellationToken);
 
         protected abstract string GetRecordSourcePageString(IAudioBook audioBook, PageSources pageSource,
             CancellationToken cancellationToken);

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -23,7 +22,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
     {
         private const int RecordsOnPageCount = 50;
 
-        private static readonly string[] GroupKeys = {
+        private static readonly string[] GroupKeys =
+        {
             "2388", "2387", "1036", "399", "400", "402", "490", "499", "574", "403", "716", "2165", "695",
             "661", "2348", "1279"
         };
@@ -31,6 +31,12 @@ namespace ABCat.Plugins.Parsers.Rutracker
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
 
         public override string DisplayName => "Rutracker";
+
+        protected override string[] RecordPageJunkIdList { get; } =
+        {
+            "page_header", "page_footer", "ajax-loading", "ajax-error", "bb-alert-box", "modal-blocker", "pagination",
+            "misc-hidden-elements", "pg-jump", "old-browser-warn", "invisible-heap", "preload"
+        };
 
         public override Uri GetRecordPageUrl(IAudioBook record)
         {
@@ -50,12 +56,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
-        protected override string[] RecordPageJunkIdList { get; } =
-        {
-            "page_header", "page_footer", "ajax-loading", "ajax-error", "bb-alert-box", "modal-blocker", "pagination",
-            "misc-hidden-elements", "pg-jump", "old-browser-warn", "invisible-heap", "preload"
-        };
-
         protected override void CleanupRecordPage(HtmlDocument document)
         {
             base.CleanupRecordPage(document);
@@ -67,13 +67,15 @@ namespace ABCat.Plugins.Parsers.Rutracker
             var charSet = document.DocumentNode.GetNodes("meta", "charset", "Windows-1251").FirstOrDefault();
             charSet?.SetAttributeValue("charset", "utf-8");
 
-            foreach (var hideForPrintNode in document.DocumentNode.Descendants().Where(item => item.HasClass("hide-for-print")).ToArray())
+            foreach (var hideForPrintNode in document.DocumentNode.Descendants()
+                .Where(item => item.HasClass("hide-for-print")).ToArray())
             {
                 hideForPrintNode.ParentNode.RemoveChild(hideForPrintNode);
             }
 
             var textNodes = document.DocumentNode.Descendants("#text")
-                .Where(item => item.InnerHtml.ReplaceAll(new[] {"\n", "\t"}, string.Empty).Trim() == string.Empty).ToArray();
+                .Where(item => item.InnerHtml.ReplaceAll(new[] {"\n", "\t"}, string.Empty).Trim() == string.Empty)
+                .ToArray();
 
             foreach (var textNode in textNodes)
             {
@@ -97,7 +99,9 @@ namespace ABCat.Plugins.Parsers.Rutracker
             {
                 var dbContainer = autoSave.DBContainer;
                 var recordPageKey = audioBook.GetPageKey();
-                var pageData = pageSource == PageSources.WebOnly ? null : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
+                var pageData = pageSource == PageSources.WebOnly
+                    ? null
+                    : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
 
                 if (pageData != null)
                 {
@@ -144,7 +148,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return result;
         }
 
-        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken)
+        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource,
+            CancellationToken cancellationToken)
         {
             string pageHtml = null;
 
@@ -157,7 +162,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 //    pageHtml = metaPage.GetString();
                 //}
 
-                IBinaryData page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
+                var page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
 
                 if (page != null)
                 {
@@ -203,8 +208,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
             do
             {
-                string progressMessage = audioBookGroup.Title +
-                                         (pageCount > 0 ? $": {pageIndex} / {pageCount}" : string.Empty);
+                var progressMessage = audioBookGroup.Title +
+                                      (pageCount > 0 ? $": {pageIndex} / {pageCount}" : string.Empty);
 
                 ProgressMessage.Report(pageIndex, pageCount, progressMessage);
 

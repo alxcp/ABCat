@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using ABCat.UI.WPF.Models;
 using Component.Infrastructure;
 using Xceed.Wpf.AvalonDock.Layout.Serialization;
@@ -14,12 +15,13 @@ namespace ABCat.UI.WPF.UI
             InitializeComponent();
         }
 
-        public void Init()
+        public async Task Init()
         {
             _abCatModel = new AbCatViewModel();
             DataContext = _abCatModel;
             FilterUc.FilteringLogicStandard = _abCatModel.Filter;
             StatusBarStateUc.DataContext = _abCatModel.StatusBarStateModel;
+            await _abCatModel.RefreshAll();
         }
 
         public void RestoreLayouts()

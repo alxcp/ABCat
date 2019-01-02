@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.UI;
 using Component.Infrastructure;

@@ -10,6 +10,9 @@ namespace ABCat.Shared.Plugins.Sites
 {
     public interface IWebSiteParserPlugin : IExtComponent
     {
+        int WebSiteId { get; }
+        string DisplayName { get; }
+
         /// <summary>
         ///     Начать обновление списка записей
         /// </summary>
@@ -22,10 +25,7 @@ namespace ABCat.Shared.Plugins.Sites
 
         Task<string> DownloadRecordSourcePage(IAudioBook record, CancellationToken cancellationToken);
 
-        int WebSiteId { get; }
-
         HashSet<string> GetGroupKeys(bool forceRefresh);
         Uri GetRecordPageUrl([NotNull] IAudioBook record);
-        string DisplayName { get; }
     }
 }

@@ -17,16 +17,6 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     {
         private static readonly object ExecuteWithLockObj = new object();
 
-        public static void ExecuteWithLockDelegate(Action action)
-        {
-            lock (ExecuteWithLockObj)
-            {
-                Context.I.EventAggregator.PublishOnUIThread(new DBOperationMessage(DBOperationMessage.OperationStates.Started));
-                action();
-                Context.I.EventAggregator.PublishOnUIThread(new DBOperationMessage(DBOperationMessage.OperationStates.Finished));
-            }
-        }
-
         private string _databaseFolder;
 
         [Browsable(false)] public string AudioBooksFileName => "AudioBooks.sqlite";
@@ -63,6 +53,18 @@ namespace ABCat.Plugins.DataSources.AudioBooks
         [Browsable(false)] public string UserDataFileName => "UserData.sqlite";
 
         [Browsable(false)] public string UserDataFilePath => Path.Combine(DatabaseFolder, UserDataFileName);
+
+        public static void ExecuteWithLockDelegate(Action action)
+        {
+            lock (ExecuteWithLockObj)
+            {
+                Context.I.EventAggregator.PublishOnUIThread(
+                    new DBOperationMessage(DBOperationMessage.OperationStates.Started));
+                action();
+                Context.I.EventAggregator.PublishOnUIThread(
+                    new DBOperationMessage(DBOperationMessage.OperationStates.Finished));
+            }
+        }
 
         public override bool Check(bool correct)
         {

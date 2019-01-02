@@ -21,17 +21,17 @@ namespace ABCat.Plugins.FilteringLogics.Standard
     {
         private static readonly INaturalTimeSpanParserPlugin TimeSpanParser;
 
-        static FilteringLogicStandard()
-        {
-            TimeSpanParser = Context.I.ComponentFactory.CreateActual<INaturalTimeSpanParserPlugin>();
-        }
-
         private readonly ConcurrentDictionary<string, ObservableCollection<string>> _filterValuesCache =
             new ConcurrentDictionary<string, ObservableCollection<string>>();
 
         private IReadOnlyCollection<IAudioBook> _booksCache;
         private Dictionary<string, bool> _hiddenCache;
         private Dictionary<string, bool> _loadedCache;
+
+        static FilteringLogicStandard()
+        {
+            TimeSpanParser = Context.I.ComponentFactory.CreateActual<INaturalTimeSpanParserPlugin>();
+        }
 
         [UsedImplicitly]
         public FilteringLogicStandard()
@@ -431,8 +431,8 @@ namespace ABCat.Plugins.FilteringLogics.Standard
 
             return allGenres
                 .OrderByDescending(item => item.Value)
-                .Where(item=>!item.Key.IsNullOrEmpty())
-                .Select(item=>item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false))
+                .Where(item => !item.Key.IsNullOrEmpty())
+                .Select(item => item.Key.ChangeCase(Extensions.CaseTypes.FirstWord, true, false))
                 .ToArray();
         }
 

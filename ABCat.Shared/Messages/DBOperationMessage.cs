@@ -5,9 +5,13 @@ namespace ABCat.Shared.Messages
 {
     public class DBOperationMessage
     {
-        private readonly Stopwatch _sw = new Stopwatch();
+        public enum OperationStates
+        {
+            Started,
+            Finished
+        }
 
-        public TimeSpan Elapsed => _sw.Elapsed;
+        private readonly Stopwatch _sw = new Stopwatch();
 
         public DBOperationMessage(OperationStates operationState)
         {
@@ -15,12 +19,8 @@ namespace ABCat.Shared.Messages
             OperationState = operationState;
         }
 
-        public OperationStates OperationState { get; }
+        public TimeSpan Elapsed => _sw.Elapsed;
 
-        public enum OperationStates
-        {
-            Started,
-            Finished
-        }
+        public OperationStates OperationState { get; }
     }
 }

@@ -14,20 +14,20 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 {
     public abstract class GroupingLogicByPropertyAlphabet : GroupingLogicPluginBase
     {
+        private readonly Regex _isLetterRegex = new Regex("[A-Za-zА-Яа-я]+");
+
         public override bool CheckForConfig(bool correct, out Config incorrectConfig)
         {
             incorrectConfig = null;
             return true;
         }
 
-        private readonly Regex _isLetterRegex = new Regex("[A-Za-zА-Яа-я]+");
-
         protected abstract IReadOnlyCollection<string> GetPropertyValues(IAudioBook audioBook);
 
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
             var dbContainer = Context.I.DbContainer;
-            var root = new Group(this) { Caption = "Все группы произведений", Level = 0 };
+            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
 
             var records = dbContainer.AudioBookSet.GetRecordsAllWithCache();
             var recordsByProperty = new Dictionary<string, Group>(StringComparer.InvariantCultureIgnoreCase);
@@ -36,7 +36,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             var emptyPropertyGroup = new Group(this)
             {
                 Caption = "<Не задано>",
-                Level = 1,
+                Level = 1
             };
             root.Add(emptyPropertyGroup);
             alphabetGroups.Add("<Ну задано>", emptyPropertyGroup);
@@ -61,7 +61,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                             alphabetGroup = new Group(this)
                             {
                                 Caption = firstLetter,
-                                Level = 1,
+                                Level = 1
                             };
                             alphabetGroups.Add(firstLetter.ToUpper(), alphabetGroup);
                             root.Add(alphabetGroup);
@@ -70,7 +70,8 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                         if (!recordsByProperty.TryGetValue(propertyValue, out var group))
                         {
                             var propertyValueForDisplay =
-                                (propertyValue.Length <= 40 ? propertyValue : propertyValue.Substring(0, 39) + "…").ChangeCase(
+                                (propertyValue.Length <= 40 ? propertyValue : propertyValue.Substring(0, 39) + "…")
+                                .ChangeCase(
                                     Extensions.CaseTypes.AllWords, false, false);
 
                             group = new Group(this)
@@ -95,7 +96,8 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
             foreach (var propertyValueGroup in recordsByProperty)
             {
-                propertyValueGroup.Value.Caption = $"{propertyValueGroup.Value.Caption} [{propertyValueGroup.Value.LinkedRecords.Count}]";
+                propertyValueGroup.Value.Caption =
+                    $"{propertyValueGroup.Value.Caption} [{propertyValueGroup.Value.LinkedRecords.Count}]";
             }
 
             foreach (var alphabetGroup in alphabetGroups)

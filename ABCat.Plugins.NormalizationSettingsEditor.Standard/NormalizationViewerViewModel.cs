@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.ViewModels;
 

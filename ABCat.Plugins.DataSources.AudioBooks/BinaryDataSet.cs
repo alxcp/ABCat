@@ -11,10 +11,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     {
         private readonly ConcurrentQueue<BinaryData> _addedBinaryData = new ConcurrentQueue<BinaryData>();
         private readonly ConcurrentQueue<BinaryData> _changedBinaryData = new ConcurrentQueue<BinaryData>();
+        private readonly TimeSpan _savePeriod = TimeSpan.FromSeconds(30);
+        private readonly Timer _saveTimer;
 
         private volatile bool _isTablesCreated;
-        private readonly Timer _saveTimer;
-        private readonly TimeSpan _savePeriod = TimeSpan.FromSeconds(30);
 
         public BinaryDataSet(string databasePath, ExecuteWithLock executeWithLockDelegate)
             : base(databasePath, executeWithLockDelegate, false)
@@ -53,12 +53,6 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 SELECT * FROM BinaryData
 WHERE Key = ?
 LIMIT 1;", key));
-        }
-
-        private void SaveBinaryDataByTimer(object o = null)
-        {
-            if (_addedBinaryData.Any() || _changedBinaryData.Any())
-                SaveBinaryData();
         }
 
         public void SaveBinaryData()
@@ -122,6 +116,12 @@ WHERE Key IN({keys})");
                     }
                 }
             }
+        }
+
+        private void SaveBinaryDataByTimer(object o = null)
+        {
+            if (_addedBinaryData.Any() || _changedBinaryData.Any())
+                SaveBinaryData();
         }
 
         public void AddBinaryData(IBinaryData binaryData)

@@ -40,20 +40,13 @@ namespace ABCat.Core
             DbContainer = CreateDbContainer(true);
         }
 
+        public ILoggerFactory LoggerFactory { get; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ILog MainLog { get; }
 
         public IComponentFactory ComponentFactory { get; }
-
-        public ILoggerFactory LoggerFactory { get; }
-
-        private IDbContainer CreateDbContainer(bool autoSave)
-        {
-            var result = _dbPluginCreatorAttribute.GetInstance<IDbContainer>();
-            result.AutoSaveChanges = autoSave;
-            return result;
-        }
 
         public IDbContainer DbContainer { get; }
 
@@ -70,6 +63,13 @@ namespace ABCat.Core
         public IEventAggregatorShared EventAggregator { get; } = new EventAggregatorShared();
 
         public Encoding DefaultEncoding { get; } = Encoding.GetEncoding(1251);
+
+        private IDbContainer CreateDbContainer(bool autoSave)
+        {
+            var result = _dbPluginCreatorAttribute.GetInstance<IDbContainer>();
+            result.AutoSaveChanges = autoSave;
+            return result;
+        }
 
         [NotifyPropertyChangedInvocator]
         public void OnPropertyChanged([CallerMemberName] string propertyName = null)

@@ -73,7 +73,8 @@
             Margin="4"
             VerticalAlignment="Center">
             <ContentPresenter Content="{StaticResource DataBaseIcon}" Opacity="0.1" />
-            <ContentPresenter Content="{StaticResource DataBaseIcon}" Visibility="{Binding IsOnDbOperation, Converter={StaticResource Bool2VisibilityConverter}}" />
+            <ContentPresenter Content="{StaticResource DataBaseIcon}"
+                              Visibility="{Binding IsOnDbOperation, Converter={StaticResource Bool2VisibilityConverter}}" />
         </Grid>
     </Grid>
 </UserControl>

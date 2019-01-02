@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -29,13 +28,15 @@ namespace ABCat.Plugins.Parsers.Audioboo
             "povest", "poznaem", "postapakalipsis", "poezia", "pritch", "prikluchenia", "proza", "psihologia",
             "publicictika", "rellign", "roman", "skazka", "ssstihi", "triller", "tresh", "ugas", "uchebnik",
             "fantastika", "filosophi", "fenezi", "horror", "ezoterika", "entogenez", "umor", "litrpg", "stalker",
-            "warhammer-40000",
+            "warhammer-40000"
         };
         // ReSharper restore StringLiteralTypo
 
         private readonly Stopwatch _lastLoadFromInternet = new Stopwatch();
 
         public override string DisplayName => "Audioboo";
+
+        protected override string[] RecordPageJunkIdList { get; } = {"loading-layer"};
 
         public override Uri GetRecordPageUrl(IAudioBook record)
         {
@@ -48,8 +49,6 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return true;
         }
 
-        protected override string[] RecordPageJunkIdList { get; } = {"loading-layer"};
-
         public override IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer dbContainer)
         {
             var result = GroupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));
@@ -60,7 +59,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
         protected override void CleanupRecordPage(HtmlDocument document)
         {
             base.CleanupRecordPage(document);
-            var pageHeader = document.DocumentNode.Descendants("div").FirstOrDefault(item=>item.HasClass("header"));
+            var pageHeader = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("header"));
             pageHeader?.ParentNode.RemoveChild(pageHeader);
             var noIndex = document.DocumentNode.Descendants("noindex").FirstOrDefault();
             noIndex?.ParentNode.RemoveChild(noIndex);
@@ -85,7 +84,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
             var fullNewsContentElements = fullNewsContentNode?.ChildNodes.ToArray();
             if (fullNewsContentElements != null)
             {
-                bool startDeletion = false;
+                var startDeletion = false;
                 foreach (var fullNewsContentElement in fullNewsContentElements)
                 {
                     if (startDeletion)
@@ -100,10 +99,13 @@ namespace ABCat.Plugins.Parsers.Audioboo
             var footer = document.DocumentNode.Descendants("div").FirstOrDefault(item => item.HasClass("footer"));
             footer?.ParentNode.RemoveChild(footer);
 
-            var charSet = document.DocumentNode.GetNodes("meta", "content", item=>item.Contains("charset=")).FirstOrDefault();
-            charSet?.SetAttributeValue("content", charSet.GetAttributeValue("content", "").Replace("windows-1251", "utf-8"));
+            var charSet = document.DocumentNode.GetNodes("meta", "content", item => item.Contains("charset="))
+                .FirstOrDefault();
+            charSet?.SetAttributeValue("content",
+                charSet.GetAttributeValue("content", "").Replace("windows-1251", "utf-8"));
 
-            var textNodes = document.DocumentNode.Descendants("#text").Where(item=>item.InnerHtml.Replace("\n","").Trim() == string.Empty).ToArray();
+            var textNodes = document.DocumentNode.Descendants("#text")
+                .Where(item => item.InnerHtml.Replace("\n", "").Trim() == string.Empty).ToArray();
             foreach (var textNode in textNodes)
             {
                 textNode.ParentNode.RemoveChild(textNode);
@@ -120,7 +122,9 @@ namespace ABCat.Plugins.Parsers.Audioboo
             {
                 var dbContainer = autoSave.DBContainer;
                 var recordPageKey = audioBook.GetPageKey();
-                var pageData = pageSource == PageSources.WebOnly ? null : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
+                var pageData = pageSource == PageSources.WebOnly
+                    ? null
+                    : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
 
                 if (pageData != null)
                 {
@@ -167,13 +171,14 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return result;
         }
 
-        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource, CancellationToken cancellationToken)
+        protected override void DownloadRecord(IDbContainer dbContainer, IAudioBook record, PageSources pageSource,
+            CancellationToken cancellationToken)
         {
             string pageHtml = null;
 
             if (pageSource != PageSources.WebOnly)
             {
-                IBinaryData page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
+                var page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
 
                 if (page != null)
                 {
@@ -207,7 +212,8 @@ namespace ABCat.Plugins.Parsers.Audioboo
             ParseRecord(dbContainer, record, pageHtml);
         }
 
-        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup, CancellationToken cancellationToken)
+        protected override void DownloadRecordGroup(IDbContainer dbContainer, IAudioBookGroup audioBookGroup,
+            CancellationToken cancellationToken)
         {
             dbContainer.SaveChanges();
 
@@ -218,8 +224,8 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
             do
             {
-                string progressMessage = audioBookGroup.Title +
-                                         (pageCount > 0 ? $": {pageIndex} / {pageCount}" : string.Empty);
+                var progressMessage = audioBookGroup.Title +
+                                      (pageCount > 0 ? $": {pageIndex} / {pageCount}" : string.Empty);
 
                 ProgressMessage.Report(pageIndex, pageCount, progressMessage);
 

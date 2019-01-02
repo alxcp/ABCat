@@ -5,18 +5,16 @@ namespace ABCat.Shared
 {
     public class DbContainerAutoSave : IDisposable
     {
-        private readonly IDbContainer _dbContainer;
-
         public DbContainerAutoSave(IDbContainer dbContainer)
         {
-            _dbContainer = dbContainer;
+            DBContainer = dbContainer;
         }
 
-        public IDbContainer DBContainer => _dbContainer;
+        public IDbContainer DBContainer { get; }
 
         public void Dispose()
         {
-            _dbContainer.SaveChanges();
+            DBContainer.SaveChanges();
         }
     }
 }

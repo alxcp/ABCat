@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;

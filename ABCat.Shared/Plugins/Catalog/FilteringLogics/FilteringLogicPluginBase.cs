@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -16,12 +15,11 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
 {
     public abstract class FilteringLogicPluginBase : ViewModelBase, IFilteringLogicPlugin
     {
+        private static readonly string FilterFilePath = Path.Combine(Config.ConfigFolderPath, "Filter.bin");
         private bool _enabled = true;
 
         private FilterFields _filterFields;
         private volatile bool _isOnUpdate;
-
-        private static readonly string FilterFilePath = Path.Combine(Config.ConfigFolderPath, "Filter.bin");
 
         protected FilteringLogicPluginBase()
         {
@@ -43,6 +41,10 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
                 }
             }
         }
+
+        [Browsable(false)]
+        public ICommand ClearFilterCommand =>
+            CommandFactory.Get(() => { FilterFields = new FilterFields(); }, () => !IsEmpty);
 
         [Browsable(false)] public abstract bool IsEmpty { get; }
 
@@ -72,47 +74,28 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
             }
         }
 
-        [Browsable(false)]
-        public ICommand ClearFilterCommand => CommandFactory.Get(() =>
-        {
-            FilterFields = new FilterFields();
-        }, () => !IsEmpty);
-
-        public virtual async Task<IEnumerable<IAudioBook>> Filter(IEnumerable<IAudioBook> records,
+        public virtual IReadOnlyCollection<IAudioBook> Filter(IReadOnlyCollection<IAudioBook> records,
             CancellationToken cancellationToken)
         {
             IsOnUpdate = true;
+            IAudioBook[] result;
 
-            var asyncResult = await Task.Factory.StartNew(
-                () =>
-                {
-                    try
-                    {
-                        IAudioBook[] result;
-                        try
-                        {
-                            IsOnUpdate = true;
-                            result =
-                                records.TakeWhile(record => !cancellationToken.IsCancellationRequested)
-                                    .Where(FilterRecord)
-                                    .ToArray();
-                        }
-                        finally
-                        {
-                            IsOnUpdate = false;
-                        }
-
-                        return result;
-                    }
-                    finally
-                    {
-                        IsOnUpdate = false;
-                    }
-                }, cancellationToken);
+            try
+            {
+                IsOnUpdate = true;
+                result =
+                    records.TakeWhile(record => !cancellationToken.IsCancellationRequested)
+                        .Where(FilterRecord)
+                        .ToArray();
+            }
+            finally
+            {
+                IsOnUpdate = false;
+            }
 
             SaveFilter();
 
-            return asyncResult;
+            return result;
         }
 
         public virtual async Task UpdateCache(UpdateTypes updateType)
@@ -157,7 +140,7 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
 
         private FilterFields LoadFilter()
         {
-            FilterFields result = new FilterFields();
+            var result = new FilterFields();
 
             if (File.Exists(FilterFilePath))
             {

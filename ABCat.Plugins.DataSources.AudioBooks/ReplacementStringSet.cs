@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ABCat.Shared;
 using ABCat.Shared.Plugins.DataSets;
-using SQLite.Net;
-using SQLite.Net.Platform.Win32;
 
 namespace ABCat.Plugins.DataSources.AudioBooks
 {

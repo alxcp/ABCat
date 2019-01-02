@@ -7,7 +7,12 @@ namespace ABCat.Plugins.DataSources.AudioBooks
     public class AudioBookWebSite : IAudioBookWebSite
     {
         [Column("WebSiteParserPluginName")] public string WebSiteParserPluginName { get; set; }
-        [PrimaryKey] [AutoIncrement] [Column("Id")] public int Id { get; set; }
+
+        [PrimaryKey]
+        [AutoIncrement]
+        [Column("Id")]
+        public int Id { get; set; }
+
         [Column("DisplayName")] public string DisplayName { get; set; }
     }
 }

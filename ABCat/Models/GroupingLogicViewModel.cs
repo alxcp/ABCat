@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.ViewModels;
-using Caliburn.Micro;
 using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
@@ -67,7 +64,6 @@ namespace ABCat.UI.WPF.Models
             {
                 if (Equals(value, _selectedGroup)) return;
                 _selectedGroup = value;
-                Context.I.EventAggregator.PublishOnUIThread(new SelectedGroupChangedMessage(value));
                 OnPropertyChanged();
             }
         }

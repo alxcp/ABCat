@@ -134,7 +134,8 @@
                                                 <ContextMenu.ItemContainerStyle>
                                                     <Style TargetType="{x:Type MenuItem}">
                                                         <!--  <Setter Property="Command" Value="{Binding Command}" />  -->
-                                                        <Setter Property="CommandParameter" Value="{Binding SelectedItems}" />
+                                                        <Setter Property="CommandParameter"
+                                                                Value="{Binding SelectedItems}" />
                                                     </Style>
                                                 </ContextMenu.ItemContainerStyle>
                                                 <MenuItem
@@ -182,7 +183,8 @@
                                 CanClose="False"
                                 CanHide="False"
                                 ContentId="4">
-                                <ContentPresenter Content="{Binding NormalizationSettingsEditorModel.NormalizationSettingsEditorPlugin.Control}" />
+                                <ContentPresenter
+                                    Content="{Binding NormalizationSettingsEditorModel.NormalizationSettingsEditorPlugin.Control}" />
                             </xcad:LayoutAnchorable>
                         </xcad:LayoutAnchorablePane>
                     </xcad:LayoutAnchorablePaneGroup>

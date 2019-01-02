@@ -47,11 +47,11 @@ namespace ABCat.UI.WPF
             Application.Current.Shutdown();
         }
 
-        private void MainWindowLoaded(object sender, RoutedEventArgs e)
+        private async void MainWindowLoaded(object sender, RoutedEventArgs e)
         {
             if (!DesignerProperties.GetIsInDesignMode(this))
             {
-                CatalogViewerUc.Init();
+                await CatalogViewerUc.Init();
                 CatalogViewerUc.RestoreLayouts();
             }
         }

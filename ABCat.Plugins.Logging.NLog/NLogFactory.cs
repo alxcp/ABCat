@@ -12,7 +12,8 @@ namespace ABCat.Plugins.Logging.NLog
     {
         public override void Init()
         {
-            File.Copy(Path.Combine(Context.I.ComponentFactory.ComponentsFolderPath, "NLog.config"), Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NLog.config"), true);
+            File.Copy(Path.Combine(Context.I.ComponentFactory.ComponentsFolderPath, "NLog.config"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "NLog.config"), true);
             LogManager.Configuration = LogManager.Configuration.Reload();
             LogManager.ReconfigExistingLoggers();
             var tar = (FileTarget) LogManager.Configuration.FindTargetByName("run_log");

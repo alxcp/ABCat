@@ -7,7 +7,6 @@ using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Xml;
-using ABCat.Shared;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.UI;
 using Component.Infrastructure;
@@ -37,7 +36,7 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
             get => (IEnumerable<IAudioBook>) Grid.ItemsSource;
             set
             {
-                var currentRecords = this.SelectedItems.Select(item => item.Key).ToHashSet();
+                var currentRecords = SelectedItems.Select(item => item.Key).ToHashSet();
                 if (Grid.ItemsSource != null) StoreLayout();
                 Grid.ItemsSource = value;
                 RestoreLayout();

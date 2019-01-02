@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,7 +19,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
     {
         private RutrackerTorrentFilesDownloaderConfig _config;
 
-        public override void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer, CancellationToken cancellationToken)
+        public override void DownloadRecordTarget(string loginCoockies, IAudioBook record, IDbContainer dbContainer,
+            CancellationToken cancellationToken)
         {
             var config = Config.Load<RutrackerTorrentFilesDownloaderConfig>();
 

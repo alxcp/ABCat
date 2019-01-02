@@ -12,7 +12,6 @@ using ABCat.Shared;
 using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog.FilteringLogics;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
-using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
 using ABCat.Shared.Plugins.Sites;
 using ABCat.Shared.Plugins.UI;
@@ -22,7 +21,8 @@ using JetBrains.Annotations;
 
 namespace ABCat.UI.WPF.Models
 {
-    public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>, IHandle<RecordsCacheUpdatedMessage>, IHandle<SelectedGroupChangedMessage>
+    public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>,
+        IHandle<RecordsTransformationCompletedMessage> //, IHandle<SelectedGroupChangedMessage>
     {
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;
@@ -30,6 +30,8 @@ namespace ABCat.UI.WPF.Models
 
         private string _previousFileName;
         private IRecordsListPlugin _recordsListUc;
+
+        private Timer _updateTimer;
 
         public AbCatViewModel()
         {
@@ -51,6 +53,7 @@ namespace ABCat.UI.WPF.Models
                 new GroupingLogicViewModel(
                     Context.I.ComponentFactory.GetCreators<IGroupingLogicPlugin>()
                         .Select(item => item.GetInstance<IGroupingLogicPlugin>()));
+            GroupingLogicModel.PropertyChanged += GroupingLogicModel_PropertyChanged;
             Context.I.EventAggregator.Subscribe(this);
         }
 
@@ -66,7 +69,7 @@ namespace ABCat.UI.WPF.Models
                 }
             }, () => SelectedItems.AnySafe());
 
-        public ICommand ConfigCommand => CommandFactory.Get(()=> ConfigViewModel.ShowConfigWindow(null));
+        public ICommand ConfigCommand => CommandFactory.Get(() => ConfigViewModel.ShowConfigWindow(null));
 
         public IFilteringLogicPlugin Filter
         {
@@ -92,7 +95,8 @@ namespace ABCat.UI.WPF.Models
 
         [UsedImplicitly]
         public ICommand HideSelectedRecordsCommand =>
-            CommandFactory.Get(async ()=> await HideSelectedRecordsCommandExecute(), HideSelectedRecordsCommandCanExecute);
+            CommandFactory.Get(async () => await HideSelectedRecordsCommandExecute(),
+                HideSelectedRecordsCommandCanExecute);
 
         public NormalizationSettingsEditorViewModel NormalizationSettingsEditorModel { get; }
 
@@ -121,7 +125,8 @@ namespace ABCat.UI.WPF.Models
 
         [UsedImplicitly]
         public ICommand ShowCachedInBrowserCommand =>
-            CommandFactory.Get(async ()=> await ShowCachedInBrowserCommandExecute(), ShowCachedInBrowserCommandCanExecute);
+            CommandFactory.Get(async () => await ShowCachedInBrowserCommandExecute(),
+                ShowCachedInBrowserCommandCanExecute);
 
         public WebSiteParserViewModel SiteParserModel { get; }
         public StatusBarStateViewModel StatusBarStateModel { get; }
@@ -132,6 +137,31 @@ namespace ABCat.UI.WPF.Models
             _getRecordsCancellationTokenSource?.Dispose();
             _recordsListUc?.Dispose();
             NormalizationSettingsEditorModel?.Dispose();
+        }
+
+        public void Handle(RecordLoadedMessage message)
+        {
+            Filter.UpdateCache(UpdateTypes.Loaded);
+        }
+
+        public async void Handle(RecordsTransformationCompletedMessage message)
+        {
+            await RefreshAll();
+        }
+
+        private void GroupingLogicModel_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            var gl = (GroupingLogicViewModel) sender;
+            if (gl.IsOnUpdate)
+                return;
+
+            switch (e.PropertyName)
+            {
+                case "IsOnUpdate":
+                case "SelectedGroup":
+                    RefreshRecordsListData();
+                    break;
+            }
         }
 
         public void CancelAsyncOperation()
@@ -145,16 +175,25 @@ namespace ABCat.UI.WPF.Models
             return true;
         }
 
-        public async void RefreshRecordsListData()
+        public void RefreshRecordsListData()
         {
             try
             {
-                var records = await GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
+                _getRecordsCancellationTokenSource?.Cancel();
+                _getRecordsCancellationTokenSource = new CancellationTokenSource();
+
+                var records = GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
                     _getRecordsCancellationTokenSource.Token);
+                _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
                 SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
             }
             catch (OperationCanceledException)
             {
+            }
+            catch (AggregateException ex)
+            {
+                if (!ex.Flatten().InnerExceptions.OfType<TaskCanceledException>().Any())
+                    throw;
             }
         }
 
@@ -184,7 +223,7 @@ namespace ABCat.UI.WPF.Models
             Process.Start(_previousFileName);
         }
 
-        private async Task<IEnumerable<IAudioBook>> GetCurrentRecords(
+        private IReadOnlyCollection<IAudioBook> GetCurrentRecords(
             Group currentGroup,
             IFilteringLogicPlugin filteringLogicPlugin,
             CancellationToken cancellationToken)
@@ -193,21 +232,29 @@ namespace ABCat.UI.WPF.Models
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var groupedRecords = await currentGroup.GetRecords(Context.I.DbContainer, cancellationToken);
+            IReadOnlyCollection<IAudioBook> result;
+
+            if (currentGroup.Parent == null)
+            {
+                result = Context.I.DbContainer.AudioBookSet.GetRecordsAllWithCache();
+            }
+            else
+            {
+                var keys = currentGroup.LinkedRecords;
+                result = Context.I.DbContainer.AudioBookSet.GetRecordsByKeys(keys);
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
             if (filteringLogicPlugin.IsEnabled)
             {
-                var result = await filteringLogicPlugin.Filter(groupedRecords, cancellationToken);
+                result = filteringLogicPlugin.Filter(result, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 return result;
             }
 
-            return groupedRecords;
+            return result;
         }
-
-        private Timer _updateTimer;
 
         private void FilterPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
@@ -219,24 +266,7 @@ namespace ABCat.UI.WPF.Models
 
         private void FilterRecordsAsync(object o)
         {
-            try
-            {
-                _getRecordsCancellationTokenSource?.Cancel();
-                _getRecordsCancellationTokenSource = new CancellationTokenSource();
-
-                var records = GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
-                    _getRecordsCancellationTokenSource.Token).Result;
-                _getRecordsCancellationTokenSource.Token.ThrowIfCancellationRequested();
-                SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (AggregateException ex)
-            {
-                if (!ex.Flatten().InnerExceptions.OfType<TaskCanceledException>().Any())
-                    throw;
-            }
+            RefreshRecordsListData();
         }
 
         private bool HideSelectedRecordsCommandCanExecute()
@@ -336,43 +366,10 @@ namespace ABCat.UI.WPF.Models
             }
         }
 
-        public void Handle(RecordLoadedMessage message)
+        public async Task RefreshAll()
         {
-            Filter.UpdateCache(UpdateTypes.Loaded);
-        }
-
-        public async void Handle(RecordsCacheUpdatedMessage message)
-        {
-            await Filter.UpdateCache(UpdateTypes.Values | UpdateTypes.Hidden | UpdateTypes.Loaded);
-            _refreshTimer?.Dispose();
-            _refreshTimer = new Timer(RefreshAll, null, 1000, Timeout.Infinite);
-        }
-
-        private async void RefreshAll(object state)
-        {
-            _refreshTimer?.Dispose();
-            _refreshTimer = null;
-
             await Filter.UpdateCache(UpdateTypes.All);
             GroupingLogicModel.Refresh();
-        }
-
-        private Timer _refreshTimer;
-
-        public async void Handle(SelectedGroupChangedMessage message)
-        {
-            try
-            {
-                _getRecordsCancellationTokenSource?.Cancel();
-                _getRecordsCancellationTokenSource = new CancellationTokenSource();
-                var records = await GetCurrentRecords(GroupingLogicModel.SelectedGroup, Filter,
-                    _getRecordsCancellationTokenSource.Token);
-                SetCurrentRecords(records, _getRecordsCancellationTokenSource.Token);
-                OnPropertyChanged();
-            }
-            catch (OperationCanceledException)
-            {
-            }
         }
     }
 }
