@@ -43,7 +43,7 @@ namespace ABCat.Shared
             }
         }
 
-        public override bool Check(bool correct)
+        public override bool CheckAndFix()
         {
             if (RecordActualityPeriod == 0) RecordActualityPeriod = 365;
             if (GroupActualityPeriod == 0) GroupActualityPeriod = 1;

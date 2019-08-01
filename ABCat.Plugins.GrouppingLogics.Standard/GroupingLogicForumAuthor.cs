@@ -16,15 +16,9 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         public override string Name => "Форум → Автор";
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
-            var root = new Group(this) {Caption = "Все группы", Level = 0};
+            var root = new Group(this) {Caption = RootGroupCaption, Level = 0};
 
             var dbContainer = Context.I.DbContainer;
             var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()

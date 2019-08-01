@@ -43,12 +43,6 @@ namespace ABCat.Plugins.Parsers.Audioboo
             return new Uri($"http://audioboo.ru/{record.GroupKey}/{record.Key}");
         }
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         public override IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer dbContainer)
         {
             var result = GroupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));

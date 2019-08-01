@@ -47,15 +47,13 @@ namespace ABCat.Plugins.RecordsList.WpfToolKit
 
         public IReadOnlyCollection<IAudioBook> SelectedItems => Grid.SelectedItems.Cast<IAudioBook>().ToArray();
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         public void Dispose()
         {
             Disposed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void FixComponentConfig()
+        {
         }
 
         public void RestoreLayout()

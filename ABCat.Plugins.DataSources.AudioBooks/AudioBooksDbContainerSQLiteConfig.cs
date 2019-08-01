@@ -19,9 +19,16 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         private string _databaseFolder;
 
+        [Browsable(false)] public string RedistributableAudiobooksDbFilePath =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", AudioBooksFileName);
+
         [Browsable(false)] public string AudioBooksFileName => "AudioBooks.sqlite";
 
         [Browsable(false)] public string AudioBooksFilePath => Path.Combine(DatabaseFolder, AudioBooksFileName);
+
+        [Browsable(false)]
+        public string RedistributableBinaryDbFilePath =>
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", BinaryDataFileName);
 
         [Browsable(false)] public string BinaryDataFileName => "BinaryData.sqlite";
 
@@ -66,7 +73,7 @@ namespace ABCat.Plugins.DataSources.AudioBooks
             }
         }
 
-        public override bool Check(bool correct)
+        public override bool CheckAndFix()
         {
             var result = true;
 
@@ -80,22 +87,18 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
                 if (LastAudioBooksVacuum == DateTime.MinValue) LastAudioBooksVacuum = DateTime.Now;
 
-                if (correct)
-                {
-                    Directory.CreateDirectory(DatabaseFolder);
-                    if (!File.Exists(AudioBooksFilePath) &&
-                        File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", AudioBooksFileName)))
-                    {
-                        File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", AudioBooksFileName),
-                            AudioBooksFilePath);
-                    }
+                Directory.CreateDirectory(DatabaseFolder);
 
-                    if (!File.Exists(BinaryDataFilePath) &&
-                        File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", BinaryDataFileName)))
-                    {
-                        File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", BinaryDataFileName),
-                            BinaryDataFilePath);
-                    }
+                if (!File.Exists(AudioBooksFilePath) && File.Exists(RedistributableAudiobooksDbFilePath))
+                {
+                    File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", AudioBooksFileName),
+                        AudioBooksFilePath);
+                }
+
+                if (!File.Exists(BinaryDataFilePath) && File.Exists(RedistributableBinaryDbFilePath))
+                {
+                    File.Copy(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DB", BinaryDataFileName),
+                        BinaryDataFilePath);
                 }
             });
 

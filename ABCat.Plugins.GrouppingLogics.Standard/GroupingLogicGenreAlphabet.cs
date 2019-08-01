@@ -11,7 +11,6 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         public override string Name => "Жанр";
 
-
         protected override IReadOnlyCollection<string> GetPropertyValues(IAudioBook audioBook)
         {
             return audioBook.GetGenres();

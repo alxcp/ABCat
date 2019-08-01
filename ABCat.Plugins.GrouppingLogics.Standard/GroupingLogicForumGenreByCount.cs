@@ -4,7 +4,6 @@ using System.Threading;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
-using Component.Infrastructure;
 using Component.Infrastructure.Factory;
 using JetBrains.Annotations;
 
@@ -16,16 +15,10 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         public override string Name => "Форум → Жанр (↓Кол-во)";
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
             var dbContainer = Context.I.DbContainer;
-            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+            var root = new Group(this) {Caption = RootGroupCaption, Level = 0};
 
             var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
                 .ToDictionary(item => item.Key, item => item);
@@ -38,19 +31,23 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             {
                 if (cancellationToken.IsCancellationRequested) return null;
                 var title = grouping.Key == null ? "" : recordGroups[grouping.Key].Title;
+
                 var recordGroupGroup = new Group(this)
                 {
                     LinkedObjectString = grouping.Key ?? "",
                     Level = 1,
                     Caption = $"{title} [{grouping.Count()}]"
                 };
+
                 root.Add(recordGroupGroup);
 
-                var genreRecords = grouping.GroupBy(record => record.Genre).ToArray();
+                var genreRecords = grouping
+                    .GroupBy(record => record.Genre)
+                    .OrderByDescending(item => item.Count())
+                    .ThenBy(item => item.Key)
+                    .ToArray();
 
-                foreach (
-                    var genreRecord in genreRecords.OrderByDescending(item => item.Count()).ThenBy(item => item.Key)
-                )
+                foreach (var genreRecord in genreRecords)
                 {
                     if (cancellationToken.IsCancellationRequested) return null;
                     var groupCaption = $"{genreRecord.Key} [{genreRecord.Count()}]";
@@ -61,8 +58,13 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                         Level = 2,
                         LinkedObjectString = genreRecord.Key
                     };
+
                     foreach (var audioBookKey in genreRecord.Select(item => item.Key))
+                    {
                         recordGenreGroup.LinkedRecords.Add(audioBookKey);
+                        recordGenreGroup.LinkedRecords.Add(audioBookKey);
+                    }
+
                     recordGroupGroup.Add(recordGenreGroup);
                 }
             }

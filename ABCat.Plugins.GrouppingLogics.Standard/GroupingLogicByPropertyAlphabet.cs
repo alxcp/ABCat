@@ -7,7 +7,6 @@ using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog.GroupingLogics;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
-using Component.Infrastructure;
 using Group = ABCat.Shared.Plugins.Catalog.GroupingLogics.Group;
 
 namespace ABCat.Plugins.GroupingLogics.Standard
@@ -16,18 +15,12 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         private readonly Regex _isLetterRegex = new Regex("[A-Za-zА-Яа-я]+");
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         protected abstract IReadOnlyCollection<string> GetPropertyValues(IAudioBook audioBook);
 
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
             var dbContainer = Context.I.DbContainer;
-            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+            var root = new Group(this) {Caption = RootGroupCaption, Level = 0};
 
             var records = dbContainer.AudioBookSet.GetRecordsAllWithCache();
             var recordsByProperty = new Dictionary<string, Group>(StringComparer.InvariantCultureIgnoreCase);
@@ -35,11 +28,11 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
             var emptyPropertyGroup = new Group(this)
             {
-                Caption = "<Не задано>",
+                Caption = ValueNotSetCaption,
                 Level = 1
             };
             root.Add(emptyPropertyGroup);
-            alphabetGroups.Add("<Ну задано>", emptyPropertyGroup);
+            alphabetGroups.Add(ValueNotSetCaption, emptyPropertyGroup);
 
             foreach (var audioBook in records)
             {
@@ -53,7 +46,7 @@ namespace ABCat.Plugins.GroupingLogics.Standard
 
                         if (!isLetter)
                         {
-                            firstLetter = "<Другое...>";
+                            firstLetter = OtherValuesCaption;
                         }
 
                         if (!alphabetGroups.TryGetValue(firstLetter, out var alphabetGroup))
@@ -70,9 +63,9 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                         if (!recordsByProperty.TryGetValue(propertyValue, out var group))
                         {
                             var propertyValueForDisplay =
-                                (propertyValue.Length <= 40 ? propertyValue : propertyValue.Substring(0, 39) + "…")
-                                .ChangeCase(
-                                    Extensions.CaseTypes.AllWords, false, false);
+                                propertyValue
+                                    .TrimToLength(40)
+                                    .ChangeCase(Extensions.CaseTypes.AllWords, false, false);
 
                             group = new Group(this)
                             {

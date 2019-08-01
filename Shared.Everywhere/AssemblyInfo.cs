@@ -2,7 +2,7 @@
 {
     public static class AssemblyInfoContainer
     {
-        public const string AssemblyCompany = "Dialog";
+        public const string AssemblyCompany = "alx.cp";
         public const string AssemblyCopyright = "Copyright ©  2013";
         public const string AssemblyName = "ABCat";
         public const string AssemblyProduct = "ABCat";

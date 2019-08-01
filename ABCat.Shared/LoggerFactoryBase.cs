@@ -46,10 +46,8 @@ namespace ABCat.Shared
         {
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
     }
 }

@@ -22,7 +22,7 @@ using JetBrains.Annotations;
 namespace ABCat.UI.WPF.Models
 {
     public sealed class AbCatViewModel : ViewModelBase, IDisposable, IHandle<RecordLoadedMessage>,
-        IHandle<RecordsTransformationCompletedMessage> //, IHandle<SelectedGroupChangedMessage>
+        IHandle<RecordsTransformationCompletedMessage>
     {
         private IFilteringLogicPlugin _filter;
         private CancellationTokenSource _getRecordsCancellationTokenSource;

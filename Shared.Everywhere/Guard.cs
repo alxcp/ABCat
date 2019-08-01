@@ -128,24 +128,24 @@ public static class Guard
             throw new ArgumentException(message, variableName);
     }
 
-    public static void AgainstLessZerro(this int value, [InvokerParameterName] string variableName)
+    public static void AgainstLessZero(this int value, [InvokerParameterName] string variableName)
     {
-        Against(value < 0).With<ArgumentException>(string.Format("{0} cannot be negative.", variableName));
+        Against(value < 0).With<ArgumentException>($"{variableName} cannot be negative.");
     }
 
-    public static void AgainstLessOrEqualsZerro(this int value, [InvokerParameterName] string variableName)
+    public static void AgainstLessOrEqualsZero(this int value, [InvokerParameterName] string variableName)
     {
-        Against(value <= 0).With<ArgumentException>(string.Format("{0} cannot be negative or zerro.", variableName));
+        Against(value <= 0).With<ArgumentException>($"{variableName} cannot be negative or zero.");
     }
 
-    public static void AgainstLessZerro(this long value, [InvokerParameterName] string variableName)
+    public static void AgainstLessZero(this long value, [InvokerParameterName] string variableName)
     {
-        Against(value < 0).With<ArgumentException>(string.Format("{0} cannot be negative.", variableName));
+        Against(value < 0).With<ArgumentException>($"{variableName} cannot be negative.");
     }
 
-    public static void AgainstLessOrEqualsZerro(this long value, [InvokerParameterName] string variableName)
+    public static void AgainstLessOrEqualsZero(this long value, [InvokerParameterName] string variableName)
     {
-        Against(value <= 0).With<ArgumentException>(string.Format("{0} cannot be negative or zerro.", variableName));
+        Against(value <= 0).With<ArgumentException>($"{variableName} cannot be negative or zero.");
     }
 
     /// <summary>

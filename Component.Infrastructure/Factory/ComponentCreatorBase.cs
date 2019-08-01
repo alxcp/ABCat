@@ -19,7 +19,7 @@ namespace Component.Infrastructure.Factory
         protected IExtComponent CreateNewInstance()
         {
             var result = (IExtComponent) Activator.CreateInstance(ComponentType);
-            result.CheckForConfig(true, out _);
+            result.FixComponentConfig();
             return result;
         }
     }
