@@ -194,13 +194,6 @@ namespace ABCat.Plugins.FilteringLogics.Standard
             }
         }
 
-
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         public override bool FilterRecord(IAudioBook audioBook)
         {
             var fields = FilterFields;

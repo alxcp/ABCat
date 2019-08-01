@@ -11,23 +11,18 @@ using JetBrains.Annotations;
 
 namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
 {
-    /// <summary>
-    ///     Базовый класс логики группировки записей
-    /// </summary>
     public abstract class GroupingLogicPluginBase : IGroupingLogicPlugin
     {
+        protected static string RootGroupCaption => "Все группы произведений";
+        protected static string ValueNotSetCaption => "<Не задано>";
+        protected static string OtherValuesCaption => "<Другое…>";
+
         private bool _isOnUpdate;
 
         public Config Config { get; set; }
 
-        /// <summary>
-        ///     Значение свойства изменено
-        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        ///     В данный момент выполняется асинхронная операция
-        /// </summary>
         public bool IsOnUpdate
         {
             get => _isOnUpdate;
@@ -39,15 +34,8 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
             }
         }
 
-        /// <summary>
-        ///     Название логики группировки
-        /// </summary>
         public abstract string Name { get; }
 
-        /// <summary>
-        ///     Начать асинхронную генерацию дерева групп
-        /// </summary>
-        /// <param name="cancellationToken">Токен отмены операции</param>
         public async Task<Group> GenerateGroups(CancellationToken cancellationToken)
         {
             IsOnUpdate = true;
@@ -66,46 +54,15 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
                 }, cancellationToken);
         }
 
-        ///// <summary>
-        /////     Начать асинхронное получение записей, включенных в группу
-        ///// </summary>
-        ///// <param name="dbContainer">Контейнер БД</param>
-        ///// <param name="group">Группа записей</param>
-        ///// <param name="cancellationToken">Токен отмены операции</param>
-        //public async Task<IEnumerable<IAudioBook>> GetRecords(
-        //    IDbContainer dbContainer,
-        //    Group group,
-        //    CancellationToken cancellationToken)
-        //{
-        //    try
-        //    {
-        //        IsOnUpdate = true;
+        public virtual void FixComponentConfig()
+        {
+        }
 
-        //        return
-        //            await
-        //                Task.Factory.StartNew(
-        //                    () => GetRecordsInner(dbContainer, group, cancellationToken),
-        //                    cancellationToken);
-        //    }
-        //    finally
-        //    {
-        //        IsOnUpdate = false;
-        //    }
-        //}
-
-        public abstract bool CheckForConfig(bool correct, out Config incorrectConfig);
-
-        /// <summary>
-        ///     Уничтожение экземпляра класса логики группировки
-        /// </summary>
         public void Dispose()
         {
             Disposed?.Invoke(this, EventArgs.Empty);
         }
 
-        /// <summary>
-        ///     Логика группировки уничтожена
-        /// </summary>
         public event EventHandler Disposed;
 
         public override string ToString()
@@ -113,20 +70,8 @@ namespace ABCat.Shared.Plugins.Catalog.GroupingLogics
             return Name;
         }
 
-        /// <summary>
-        ///     Логика формирования дерева групп
-        /// </summary>
-        /// <param name="cancellationToken">Токен отмены операции</param>
-        /// <returns>Корневая группа сформированного дерева</returns>
         protected abstract Group GenerateGroupsInternal(CancellationToken cancellationToken);
 
-        /// <summary>
-        ///     Логика получения списка записей, включенных в группу
-        /// </summary>
-        /// <param name="dbContainer">Контейнер БД</param>
-        /// <param name="group">Группа записей</param>
-        /// <param name="cancellationToken">Токен отмены операции</param>
-        /// <returns>Список записей, включенных в группу</returns>
         protected abstract IEnumerable<IAudioBook> GetRecordsInner(IDbContainer dbContainer, Group group,
             CancellationToken cancellationToken);
 

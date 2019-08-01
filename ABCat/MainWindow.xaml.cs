@@ -24,10 +24,7 @@ namespace ABCat.UI.WPF
             {
                 if (w.Key == Key.F12)
                 {
-                    var sfd = new SaveFileDialog();
-                    sfd.RestoreDirectory = true;
-                    sfd.DefaultExt = ".png";
-                    sfd.AddExtension = true;
+                    var sfd = new SaveFileDialog {RestoreDirectory = true, DefaultExt = ".png", AddExtension = true};
 
                     if (sfd.ShowDialog().Value)
                     {

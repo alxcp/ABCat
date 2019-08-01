@@ -149,7 +149,7 @@ namespace ABCat.Shared.Plugins.Sites
                             dbContainer.SaveChanges();
                             z++;
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
                             // ignored
                         }
@@ -257,7 +257,9 @@ namespace ABCat.Shared.Plugins.Sites
                 cancellationToken);
         }
 
-        public abstract bool CheckForConfig(bool correct, out Config incorrectConfigs);
+        public virtual void FixComponentConfig()
+        {
+        }
 
         public void Dispose()
         {
@@ -288,9 +290,6 @@ namespace ABCat.Shared.Plugins.Sites
                     case "Кб":
                     case "KB":
                         multiplier = 1024;
-                        break;
-                    default:
-                        var t = 0;
                         break;
                 }
 
@@ -327,7 +326,8 @@ namespace ABCat.Shared.Plugins.Sites
 
         protected virtual string CleanupHumanNameValue(string value, int maxLength)
         {
-            return CleanupRecordValue(value, false, maxLength).TrimStart('©', '…', '—', ' ', '๖', 'ۣ', 'ۜ')
+            return CleanupRecordValue(value, false, maxLength)
+                .TrimStart('©', '…', '—', ' ', '๖', 'ۣ', 'ۜ')
                 .ChangeCase(Extensions.CaseTypes.AllWords, true, true);
         }
 

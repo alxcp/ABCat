@@ -8,9 +8,6 @@ using System.Threading;
 
 namespace Component.Infrastructure
 {
-    /// <summary>
-    ///     Базовый класс для классов, поддерживающих автосохранение при редактировании
-    /// </summary>
     public abstract class Saveable : INotifyPropertyChanged
     {
         private static readonly ConcurrentQueue<Saveable> ChangedItems = new ConcurrentQueue<Saveable>();
@@ -26,63 +23,28 @@ namespace Component.Infrastructure
             ChangesTimer = new Timer(timerCallback, null, 1000, Timeout.Infinite);
         }
 
-        /// <summary>
-        ///     Можно сохранять в данный момент
-        /// </summary>
-        [Browsable(false)]
-        public virtual bool CanSave => true;
+        [Browsable(false)] public virtual bool CanSave => true;
 
-        /// <summary>
-        ///     Класс в данный момент находится в процессе инициализации
-        /// </summary>
-        [Browsable(false)]
-        public bool IsOnUpdate => _updateCount > 0;
+        [Browsable(false)] public bool IsOnUpdate => _updateCount > 0;
 
-        /// <summary>
-        ///     Код группы сохраняемых объектов.
-        ///     При SaveGroupId != null все объекты с одинаковым значением кода сохраняются групповым методом сохранения SaveGroup.
-        ///     Иначе каждый объект сохраняется индивидуально методом Save.
-        /// </summary>
-        [Browsable(false)]
-        public abstract string SaveGroupId { get; }
+        [Browsable(false)] public abstract string SaveGroupId { get; }
 
         public static bool AutoSaveEnabled { get; set; }
 
-        /// <summary>
-        ///     Событие изменения свойства класса
-        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        /// <summary>
-        ///     Начать инициализацию класса.
-        ///     Класс перестаёт реагировать на изменение свойств и не запускает таймер сохранения.
-        ///     Ведётся счетчик количества начала инициализаций.
-        /// </summary>
         public virtual void BeginUpdate()
         {
             _updateCount++;
         }
 
-        /// <summary>
-        ///     Закончить инициализацию класса.
-        ///     Класс начинается реагировать на изменение свойств.
-        ///     Ведётся счетчик количества начала инициализаций.
-        /// </summary>
-        /// <param name="force">Обнулить счётчик количества начала инициализаций (IsOnUpdate сразу становится True)</param>
         public virtual void EndUpdate(bool force = false)
         {
             _updateCount = force || _updateCount <= 0 ? 0 : --_updateCount;
         }
 
-        /// <summary>
-        ///     Сохранить объект
-        /// </summary>
         public abstract void Save();
 
-        /// <summary>
-        ///     Сохранить группу объектов
-        /// </summary>
-        /// <param name="group">Список объектов с одинаковым SaveGroupId</param>
         public virtual void SaveGroup(IEnumerable<Saveable> group)
         {
             throw new NotImplementedException();

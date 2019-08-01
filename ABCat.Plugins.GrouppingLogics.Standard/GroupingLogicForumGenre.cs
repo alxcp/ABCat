@@ -16,16 +16,10 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         public override string Name => "Форум → Жанр";
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
             var dbContainer = Context.I.DbContainer;
-            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+            var root = new Group(this) {Caption = RootGroupCaption, Level = 0};
 
             var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
                 .ToDictionary(item => item.Key, item => item);

@@ -15,13 +15,25 @@
     <Color x:Key="MenuItemBackgrounColor">#e7e8ec</Color>
 
 
-    <SolidColorBrush x:Key="WindowBackgroundColorBrush" Color="{StaticResource WindowBackgroundColor}" />
-    <SolidColorBrush x:Key="HighlightColorBrush" Color="{StaticResource HighlightColor}" />
-    <SolidColorBrush x:Key="BlueColorBrush" Color="{StaticResource BlueColor}" />
-    <SolidColorBrush x:Key="ForegroundColorBrush" Color="{StaticResource ForegroundColor}" />
-    <SolidColorBrush x:Key="MenuItemBackgroundColorBrush" Color="{StaticResource MenuItemBackgrounColor}" />
+    <SolidColorBrush
+        x:Key="WindowBackgroundColorBrush"
+        Color="{StaticResource WindowBackgroundColor}" />
+    <SolidColorBrush
+        x:Key="HighlightColorBrush"
+        Color="{StaticResource HighlightColor}" />
+    <SolidColorBrush
+        x:Key="BlueColorBrush"
+        Color="{StaticResource BlueColor}" />
+    <SolidColorBrush
+        x:Key="ForegroundColorBrush"
+        Color="{StaticResource ForegroundColor}" />
+    <SolidColorBrush
+        x:Key="MenuItemBackgroundColorBrush"
+        Color="{StaticResource MenuItemBackgrounColor}" />
 
-    <ControlTemplate x:Key="MenuItemTemplate" TargetType="{x:Type MenuItem}">
+    <ControlTemplate
+        x:Key="MenuItemTemplate"
+        TargetType="{x:Type MenuItem}">
         <Border
             x:Name="templateRoot"
             Background="{StaticResource WindowBackgroundColorBrush}"
@@ -75,9 +87,13 @@
                         Background="#FFF0F0F0"
                         BorderBrush="#FF999999"
                         BorderThickness="1">
-                        <ScrollViewer x:Name="SubMenuScrollViewer"
-                                      Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
-                            <Grid x:Name="ContainerGrid" RenderOptions.ClearTypeHint="Enabled">
+                        <ScrollViewer
+                            x:Name="SubMenuScrollViewer"
+                            Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer,
+                                                                          TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                            <Grid
+                                x:Name="ContainerGrid"
+                                RenderOptions.ClearTypeHint="Enabled">
                                 <Canvas
                                     Width="0"
                                     Height="0"
@@ -127,15 +143,15 @@
                 <Setter TargetName="templateRoot" Property="Opacity" Value="0.2" />
             </Trigger>
             <Trigger SourceName="SubMenuScrollViewer" Property="CanContentScroll" Value="False">
-                <Setter TargetName="OpaqueRect" Property="Canvas.Top"
-                        Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}" />
-                <Setter TargetName="OpaqueRect" Property="Canvas.Left"
-                        Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}" />
+                <Setter TargetName="OpaqueRect" Property="Canvas.Top" Value="{Binding VerticalOffset, ElementName=SubMenuScrollViewer}" />
+                <Setter TargetName="OpaqueRect" Property="Canvas.Left" Value="{Binding HorizontalOffset, ElementName=SubMenuScrollViewer}" />
             </Trigger>
         </ControlTemplate.Triggers>
     </ControlTemplate>
 
-    <Style x:Key="WindowButtonStyle" TargetType="{x:Type Button}">
+    <Style
+        x:Key="WindowButtonStyle"
+        TargetType="{x:Type Button}">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundColorBrush}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -170,7 +186,9 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="ModernWindowStyle" TargetType="Window">
+    <Style
+        x:Key="ModernWindowStyle"
+        TargetType="Window">
         <Setter Property="Foreground" Value="{DynamicResource ForegroundColorBrush}" />
         <Setter Property="Background" Value="{DynamicResource WindowBackgroundColorBrush}" />
         <Setter Property="ResizeMode" Value="CanResizeWithGrip" />
@@ -258,7 +276,9 @@
                                                     Style="{StaticResource WindowButtonStyle}"
                                                     ToolTip="maximize">
                                                     <Button.Content>
-                                                        <Grid Width="31" Height="25">
+                                                        <Grid
+                                                            Width="31"
+                                                            Height="25">
                                                             <Path
                                                                 Width="9"
                                                                 Height="8"
@@ -292,8 +312,12 @@
                                                 </Button.Content>
                                             </Button>
                                         </StackPanel>
-                                        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-                                            <Image Margin="4,4,0,0" Source="{TemplateBinding Icon}" />
+                                        <StackPanel
+                                            HorizontalAlignment="Left"
+                                            Orientation="Horizontal">
+                                            <Image
+                                                Margin="4,4,0,0"
+                                                Source="{TemplateBinding Icon}" />
                                             <TextBlock
                                                 x:Name="WindowTitleTextBlock"
                                                 Grid.Row="0"
@@ -356,8 +380,12 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <SolidColorBrush x:Key="Menu.Static.Background" Color="#FFF0F0F0" />
-    <Style x:Key="MenuStyle1" TargetType="{x:Type Menu}">
+    <SolidColorBrush
+        x:Key="Menu.Static.Background"
+        Color="#FFF0F0F0" />
+    <Style
+        x:Key="MenuStyle1"
+        TargetType="{x:Type Menu}">
         <Setter Property="Background" Value="{StaticResource WindowBackgroundColorBrush}" />
         <Setter Property="FontFamily" Value="{DynamicResource {x:Static SystemFonts.MenuFontFamilyKey}}" />
         <Setter Property="FontSize" Value="{DynamicResource {x:Static SystemFonts.MenuFontSizeKey}}" />
@@ -380,10 +408,18 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <SolidColorBrush x:Key="ProgressBar.Progress" Color="#FF06B025" />
-    <SolidColorBrush x:Key="ProgressBar.Background" Color="#FFE6E6E6" />
-    <SolidColorBrush x:Key="ProgressBar.Border" Color="#FFBCBCBC" />
-    <Style x:Key="MetroProgressBarStyle" TargetType="{x:Type ProgressBar}">
+    <SolidColorBrush
+        x:Key="ProgressBar.Progress"
+        Color="#FF06B025" />
+    <SolidColorBrush
+        x:Key="ProgressBar.Background"
+        Color="#FFE6E6E6" />
+    <SolidColorBrush
+        x:Key="ProgressBar.Border"
+        Color="#FFBCBCBC" />
+    <Style
+        x:Key="MetroProgressBarStyle"
+        TargetType="{x:Type ProgressBar}">
         <Setter Property="Foreground" Value="{StaticResource ProgressBar.Progress}" />
         <Setter Property="Background" Value="{StaticResource ProgressBar.Background}" />
         <Setter Property="BorderBrush" Value="{StaticResource ProgressBar.Border}" />
@@ -425,17 +461,31 @@
                                 <VisualState x:Name="Determinate" />
                                 <VisualState x:Name="Indeterminate">
                                     <Storyboard RepeatBehavior="Forever">
-                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="Animation"
-                                                                       Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
-                                            <EasingDoubleKeyFrame KeyTime="0" Value="0.25" />
-                                            <EasingDoubleKeyFrame KeyTime="0:0:1" Value="0.25" />
-                                            <EasingDoubleKeyFrame KeyTime="0:0:2" Value="0.25" />
+                                        <DoubleAnimationUsingKeyFrames
+                                            Storyboard.TargetName="Animation"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(TransformGroup.Children)[0].(ScaleTransform.ScaleX)">
+                                            <EasingDoubleKeyFrame
+                                                KeyTime="0"
+                                                Value="0.25" />
+                                            <EasingDoubleKeyFrame
+                                                KeyTime="0:0:1"
+                                                Value="0.25" />
+                                            <EasingDoubleKeyFrame
+                                                KeyTime="0:0:2"
+                                                Value="0.25" />
                                         </DoubleAnimationUsingKeyFrames>
-                                        <PointAnimationUsingKeyFrames Storyboard.TargetName="Animation"
-                                                                      Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
-                                            <EasingPointKeyFrame KeyTime="0" Value="-0.5,0.5" />
-                                            <EasingPointKeyFrame KeyTime="0:0:1" Value="0.5,0.5" />
-                                            <EasingPointKeyFrame KeyTime="0:0:2" Value="1.5,0.5" />
+                                        <PointAnimationUsingKeyFrames
+                                            Storyboard.TargetName="Animation"
+                                            Storyboard.TargetProperty="(UIElement.RenderTransformOrigin)">
+                                            <EasingPointKeyFrame
+                                                KeyTime="0"
+                                                Value="-0.5,0.5" />
+                                            <EasingPointKeyFrame
+                                                KeyTime="0:0:1"
+                                                Value="0.5,0.5" />
+                                            <EasingPointKeyFrame
+                                                KeyTime="0:0:2"
+                                                Value="1.5,0.5" />
                                         </PointAnimationUsingKeyFrames>
                                     </Storyboard>
                                 </VisualState>

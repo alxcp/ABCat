@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using ABCat.Shared.Plugins.Downloaders;
-using Component.Infrastructure;
 using JetBrains.Annotations;
 
 namespace ABCat.Plugins.TorrentFileDownloaders
@@ -24,10 +23,8 @@ namespace ABCat.Plugins.TorrentFileDownloaders
         {
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
         protected abstract string GetCommandLineArguments(string target, string destinationFolder);

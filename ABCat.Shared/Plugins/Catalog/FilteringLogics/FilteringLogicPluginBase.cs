@@ -116,7 +116,9 @@ namespace ABCat.Shared.Plugins.Catalog.FilteringLogics
             );
         }
 
-        public abstract bool CheckForConfig(bool correct, out Config incorrectConfig);
+        public virtual void FixComponentConfig()
+        {
+        }
 
         public virtual void Dispose()
         {

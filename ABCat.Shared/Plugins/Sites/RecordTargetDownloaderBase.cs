@@ -37,7 +37,9 @@ namespace ABCat.Shared.Plugins.Sites
             }, cancellationToken);
         }
 
-        public abstract bool CheckForConfig(bool correct, out Config incorrectConfig);
+        public virtual void FixComponentConfig()
+        {
+        }
 
         public void Dispose()
         {

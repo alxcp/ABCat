@@ -100,10 +100,8 @@ namespace ABCat.Plugins.Parsers.Rutracker
             }
         }
 
-        public override bool Check(bool correct)
+        public override bool CheckAndFix()
         {
-            var result = true;
-
             if (Extensions.IsNullOrEmpty(AudioCatalogFolder))
                 AudioCatalogFolder = SharedContext.I.GetAppDataFolderPath("AudioCatalog");
             if (Extensions.IsNullOrEmpty(TorrentFilesFolder))
@@ -125,19 +123,10 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 TorrentClientName = TorrentClientName.Split('[').First().Trim();
             }
 
-            if (!Directory.Exists(AudioCatalogFolder))
-            {
-                result = false;
-                if (correct) Directory.CreateDirectory(AudioCatalogFolder);
-            }
+            Directory.CreateDirectory(AudioCatalogFolder);
+            Directory.CreateDirectory(TorrentFilesFolder);
 
-            if (!Directory.Exists(TorrentFilesFolder))
-            {
-                result = false;
-                if (correct) Directory.CreateDirectory(TorrentFilesFolder);
-            }
-
-            result = result && CheckDirectory(AudioCatalogFolder) && CheckDirectory(TorrentFilesFolder);
+            var result = CheckDirectory(AudioCatalogFolder) && CheckDirectory(TorrentFilesFolder);
 
             if (TorrentFileAction == TorrentFileActionEnum.StartDownload)
             {

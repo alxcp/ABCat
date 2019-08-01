@@ -43,12 +43,6 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return new Uri($"http://rutracker.org/forum/viewtopic.php?t={record.Key}");
         }
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         public override IEnumerable<IAudioBookGroup> GetAllRecordGroups(IDbContainer dbContainer)
         {
             var result = GroupKeys.Select(groupKey => GetRecordGroup(groupKey, dbContainer));
@@ -378,7 +372,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
         private Dictionary<string, string> ParsePostBodyElementsByRows([NotNull] string postBodyHtml)
         {
-            var result = new Dictionary<string, string>();
+            var result = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             var rows = postBodyHtml
                 .Split(new[] {"<br>", "<hr class=\"post-hr\">", "<span class=\"post-b\">"},
@@ -399,6 +393,10 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
                     if (!str.IsNullOrEmpty() && ParseKeyValue(str, out var key, out var value))
                     {
+                        if (result.TryGetValue(key, out var v))
+                        {
+
+                        }
                         result[key] = value;
                     }
                 }

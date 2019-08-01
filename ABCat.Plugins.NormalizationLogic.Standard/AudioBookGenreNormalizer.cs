@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ABCat.Shared;
 using ABCat.Shared.Messages;
 using ABCat.Shared.Plugins.Catalog.Normalizing;
-using Component.Infrastructure;
+
 using Component.Infrastructure.Factory;
 using JetBrains.Annotations;
 
@@ -531,10 +531,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
         {
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
         private static string CyrLatToCyrConverter(Match m)
@@ -597,7 +595,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
         {
             private const string StartString = "contains[";
 
-            public GenrePart(string referenceGenre, IReadOnlyCollection<string> parts, int priority)
+            private GenrePart(string referenceGenre, IReadOnlyCollection<string> parts, int priority)
             {
                 ReferenceGenre = referenceGenre;
                 Priority = priority;
@@ -606,7 +604,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
             public string ReferenceGenre { get; }
             public int Priority { get; }
-            public IReadOnlyCollection<string> Parts { get; }
+            private IReadOnlyCollection<string> Parts { get; }
 
             public bool IsFit(string value)
             {

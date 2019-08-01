@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using ABCat.Shared.Plugins.Catalog.ParsingLogics;
-using Component.Infrastructure;
 using Component.Infrastructure.Factory;
 using JetBrains.Annotations;
 
@@ -22,10 +21,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
         {
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public virtual void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
 

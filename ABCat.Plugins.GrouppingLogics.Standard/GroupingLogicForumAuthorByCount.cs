@@ -16,16 +16,10 @@ namespace ABCat.Plugins.GroupingLogics.Standard
     {
         public override string Name => "Форум → Автор (↓Кол-во)";
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
-        {
-            incorrectConfig = null;
-            return true;
-        }
-
         protected override Group GenerateGroupsInternal(CancellationToken cancellationToken)
         {
             var dbContainer = Context.I.DbContainer;
-            var root = new Group(this) {Caption = "Все группы произведений", Level = 0};
+            var root = new Group(this) {Caption = RootGroupCaption, Level = 0};
 
             var recordGroups = dbContainer.AudioBookGroupSet.GetRecordGroupsAll()
                 .ToDictionary(item => item.Key, item => item);
@@ -36,19 +30,23 @@ namespace ABCat.Plugins.GroupingLogics.Standard
             foreach (var grouping in records.OrderBy(item => recordGroups[item.Key].Title))
             {
                 if (cancellationToken.IsCancellationRequested) return null;
+
                 var recordGroupGroup = new Group(this)
                 {
                     LinkedObjectString = grouping.Key,
                     Level = 1,
                     Caption = $"{recordGroups[grouping.Key].Title} [{grouping.Count()}]"
                 };
+
                 root.Add(recordGroupGroup);
 
-                var authorRecords = grouping.GroupBy(record => record.Author).ToArray();
+                var authorRecords = grouping
+                    .GroupBy(record => record.Author)
+                    .OrderByDescending(item => item.Count())
+                    .ThenBy(item => item.Key)
+                    .ToArray();
 
-                foreach (
-                    var authorRecord in
-                    authorRecords.OrderByDescending(item => item.Count()).ThenBy(item => item.Key))
+                foreach (var authorRecord in authorRecords)
                 {
                     if (cancellationToken.IsCancellationRequested) return null;
 
@@ -62,7 +60,10 @@ namespace ABCat.Plugins.GroupingLogics.Standard
                     };
 
                     foreach (var audioBookKey in authorRecord.Select(item => item.Key))
+                    {
                         recordAuthorGroup.LinkedRecords.Add(audioBookKey);
+                        recordGroupGroup.LinkedRecords.Add(audioBookKey);
+                    }
 
                     recordGroupGroup.Add(recordAuthorGroup);
                 }

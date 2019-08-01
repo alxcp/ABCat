@@ -18,7 +18,7 @@ namespace ABCat.UI.WPF.Models
         public ConfigViewModel()
         {
             var mainConfig = Config.Load<MainConfig>();
-            mainConfig.Check(false);
+            mainConfig.CheckAndFix();
             mainConfig.PropertyChanged += Config_PropertyChanged;
             Configs.Add(mainConfig);
 
@@ -26,7 +26,7 @@ namespace ABCat.UI.WPF.Models
             {
                 var config = Config.Load(configCreatorAttribute);
                 config.PropertyChanged += Config_PropertyChanged;
-                config.Check(false);
+                config.CheckAndFix();
                 Configs.Add(config);
             }
 
@@ -50,7 +50,7 @@ namespace ABCat.UI.WPF.Models
         {
             foreach (var pluginConfig in Configs)
             {
-                pluginConfig.Check(true);
+                pluginConfig.CheckAndFix();
                 pluginConfig.Save();
             }
 

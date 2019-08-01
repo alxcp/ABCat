@@ -34,6 +34,11 @@ namespace ABCat.Shared
             return value != null && (predicate == null ? value.Any() : value.Any(predicate));
         }
 
+        public static string TrimToLength(this string text, int maxLength)
+        {
+            return text.Length <= maxLength ? text : text.Substring(0, maxLength - 1) + "…";
+        }
+
         public static string ChangeCase(this string text, CaseTypes caseType, bool changeOnlyTargetChar, bool trim)
         {
             var sb =

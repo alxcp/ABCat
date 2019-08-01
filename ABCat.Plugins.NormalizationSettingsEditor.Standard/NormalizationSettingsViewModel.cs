@@ -105,10 +105,8 @@ namespace ABCat.Plugins.NormalizationSettingsEditor.Standard
             await NormalizationViewerViewModel.UpdateReplacementTreeSource();
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
         public void Dispose()

@@ -30,10 +30,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public Config Config { get; set; }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public virtual void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
         public void Dispose()

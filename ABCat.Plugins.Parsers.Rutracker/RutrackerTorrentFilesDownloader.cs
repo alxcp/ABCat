@@ -72,12 +72,10 @@ namespace ABCat.Plugins.Parsers.Rutracker
             return sb.ToString();
         }
 
-        public override bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public override void FixComponentConfig()
         {
             _config = Config.Load<RutrackerTorrentFilesDownloaderConfig>();
-            var checkResult = _config.Check(correct);
-            incorrectConfig = checkResult ? null : _config;
-            return checkResult;
+            _config.CheckAndFix();
         }
     }
 }

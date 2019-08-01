@@ -79,12 +79,10 @@ namespace ABCat.Plugins.DataSources.AudioBooks
 
         public IUserDataSet UserDataSet => _userDataSet.Value;
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public void FixComponentConfig()
         {
             _config = Config.Load<AudioBooksDbContainerSQLiteConfig>();
-            var configCheckResult = _config.Check(correct);
-            incorrectConfig = configCheckResult ? null : _config;
-            return configCheckResult;
+            _config.CheckAndFix();
         }
 
         public void Dispose()

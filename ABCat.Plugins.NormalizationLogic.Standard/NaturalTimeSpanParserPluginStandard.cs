@@ -28,10 +28,8 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
         {
         }
 
-        public bool CheckForConfig(bool correct, out Config incorrectConfig)
+        public virtual void FixComponentConfig()
         {
-            incorrectConfig = null;
-            return true;
         }
 
         public TimeSpan Parse(string timeSpanString)

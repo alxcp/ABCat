@@ -108,7 +108,7 @@ namespace Component.Infrastructure
             return false;
         }
 
-        public abstract bool Check(bool correct);
+        public abstract bool CheckAndFix();
 
         public override void Save()
         {
