@@ -6,6 +6,7 @@
         public const string AssemblyCopyright = "Copyright ©  2013";
         public const string AssemblyName = "ABCat";
         public const string AssemblyProduct = "ABCat";
-        public const string AssemblyVersion = "2.2.*";
+        // Wildcard versions ("2.2.*") are incompatible with deterministic builds (CS8357)
+        public const string AssemblyVersion = "2.2.0.0";
     }
 }

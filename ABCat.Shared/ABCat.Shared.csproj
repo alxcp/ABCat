@@ -1,187 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1639E1B7-3160-4D42-A455-9D1B50968882}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ABCat.Shared</RootNamespace>
-    <AssemblyName>ABCat.Shared</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <TargetFramework>net481</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <IncludePackageReferencesDuringMarkupCompilation>true</IncludePackageReferencesDuringMarkupCompilation>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\Start\DEBUG\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <OutputPath>..\Start\Debug\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <OutputPath>..\Start\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'x86|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>x86</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>false</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>OpenKey.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="HtmlAgilityPack, Version=1.8.11.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
-      <HintPath>..\packages\HtmlAgilityPack.1.8.11\lib\Net45\HtmlAgilityPack.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Expression.Interactions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\Microsoft.Expression.Interactions.dll</HintPath>
-    </Reference>
-    <Reference Include="Monads">
-      <HintPath>..\packages\Monads.1.1.5.0\lib\net40\Monads.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Windows.Interactivity.WPF.2.0.20525\lib\net40\System.Windows.Interactivity.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="WindowsBase" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="ABCatException.cs" />
-    <Compile Include="Backup.cs" />
-    <Compile Include="Commands\CommandFactory.cs" />
-    <Compile Include="Commands\DelegateCommandBase.cs" />
-    <Compile Include="Commands\WeakEventHandlerManager.cs" />
-    <Compile Include="Context.cs" />
-    <Compile Include="Crypt.cs" />
-    <Compile Include="Commands\DelegateCommand.cs" />
-    <Compile Include="DbContainerAutoSave.cs" />
-    <Compile Include="Exceptions\DelegateCommandCannotBeNullException.cs" />
-    <Compile Include="ExceptionTypes.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="HtmlExtensions.cs" />
-    <Compile Include="IContext.cs" />
-    <Compile Include="ILog.cs" />
-    <Compile Include="ILoggerFactory.cs" />
-    <Compile Include="LevensteinDistance.cs" />
-    <Compile Include="LoggerFactoryBase.cs" />
-    <Compile Include="LoginInfo.cs" />
-    <Compile Include="MainConfig.cs" />
-    <Compile Include="Messages\DBOperationMessage.cs" />
-    <Compile Include="Messages\RecordLoadedMessage.cs" />
-    <Compile Include="Messages\RecordsTransformationCompletedMessage.cs" />
-    <Compile Include="ModernWindowBehavior.cs" />
-    <Compile Include="ObjectPool.cs" />
-    <Compile Include="ObjectPoolItem.cs" />
-    <Compile Include="Plugins\Catalog\FilteringLogics\FilterFields.cs" />
-    <Compile Include="Plugins\Catalog\FilteringLogics\FilteringLogicPluginBase.cs" />
-    <Compile Include="Plugins\Catalog\FilteringLogics\IFilteringLogicPlugin.cs" />
-    <Compile Include="Plugins\Catalog\FilteringLogics\UpdateTypes.cs" />
-    <Compile Include="Plugins\Catalog\GroupingLogics\Group.cs" />
-    <Compile Include="Plugins\Catalog\GroupingLogics\GroupingLogicPluginBase.cs" />
-    <Compile Include="Plugins\Catalog\GroupingLogics\IGrouppingLogicPlugin.cs" />
-    <Compile Include="Plugins\Catalog\GroupingLogics\WebSiteGroup.cs" />
-    <Compile Include="Plugins\Catalog\Normalizing\INormalizationLogicPlugin.cs" />
-    <Compile Include="Plugins\Catalog\Normalizing\IRecordsTagNormalizer.cs" />
-    <Compile Include="Plugins\Catalog\ParsingLogics\INaturalBitrateParserPlugin.cs" />
-    <Compile Include="Plugins\Catalog\ParsingLogics\INaturalTimeSpanParserPlugin.cs" />
-    <Compile Include="Plugins\DataProviders\IDbContainer.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBook.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBookGroup.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBookGroupSet.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBookSet.cs" />
-    <Compile Include="Plugins\DataSets\IAudioBookWebSiteSet.cs" />
-    <Compile Include="Plugins\DataSets\IBinaryData.cs" />
-    <Compile Include="Plugins\DataSets\IBinaryDataSet.cs" />
-    <Compile Include="Plugins\DataSets\IHiddenRecord.cs" />
-    <Compile Include="Plugins\DataSets\IHiddenRecordSet.cs" />
-    <Compile Include="Plugins\DataSets\IHiddenValue.cs" />
-    <Compile Include="Plugins\DataSets\IHiddenValueSet.cs" />
-    <Compile Include="Plugins\DataSets\IObjectSet.cs" />
-    <Compile Include="Plugins\DataSets\IRecord.cs" />
-    <Compile Include="Plugins\DataSets\IReplacementString.cs" />
-    <Compile Include="Plugins\DataSets\IReplacementStringSet.cs" />
-    <Compile Include="Plugins\DataSets\IUserData.cs" />
-    <Compile Include="Plugins\DataSets\IUserDataSet.cs" />
-    <Compile Include="Plugins\DataSets\IWebSite.cs" />
-    <Compile Include="Plugins\Downloaders\ITorrentFileDownloaderPlugin.cs" />
-    <Compile Include="Plugins\Sites\IRecordTargetDownloaderPlugin.cs" />
-    <Compile Include="Plugins\Sites\IWebSiteParserPlugin.cs" />
-    <Compile Include="Plugins\Sites\PageSources.cs" />
-    <Compile Include="Messages\ProgressMessage.cs" />
-    <Compile Include="Plugins\Sites\RecordTargetDownloaderBase.cs" />
-    <Compile Include="Plugins\Sites\WebSiteParserBase.cs" />
-    <Compile Include="Plugins\UI\INormalizationSettingsEditorPlugin.cs" />
-    <Compile Include="Plugins\UI\IRecordsListPlugin.cs" />
-    <Compile Include="Plugins\UI\ISupportLayoutPlugin.cs" />
-    <Compile Include="Plugins\UI\ItemDoubleClickRowEventArgs.cs" />
-    <Compile Include="Plugins\UI\ProgressWindowViewModel.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
+    <PackageReference Include="HtmlAgilityPack" Version="1.8.11" />
+    <PackageReference Include="Monads" Version="1.1.5.0" />
+    <PackageReference Include="System.Windows.Interactivity.WPF" Version="2.0.20525" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Component.Infrastructure\Component.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shared.Everywhere\Shared.Everywhere.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="SerializabeDictionary.cs" />
-    <Compile Include="ViewModels\ViewModelBase.cs" />
-    <Compile Include="ViewModels\WindowViewModelBase.cs" />
-    <Compile Include="WebClientPool.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebClientPoolItem.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="OpenKey.snk" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Component.Infrastructure\Component.Infrastructure.csproj">
-      <Project>{ce1868d3-a465-4cb6-a9a4-4bd7e546e08e}</Project>
-      <Name>Component.Infrastructure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Shared.Everywhere\Shared.Everywhere.csproj">
-      <Project>{F6C8C1F8-C4AC-46DE-9AB2-CC4D8556361B}</Project>
-      <Name>Shared.Everywhere</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
+    <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
