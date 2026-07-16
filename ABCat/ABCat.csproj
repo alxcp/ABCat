@@ -9,6 +9,11 @@
     <ApplicationIcon>ABCat.ico</ApplicationIcon>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- MSB3277: System.Windows.Interactivity 4.0 (compile, from the WPF package)
+         vs 4.5 (runtime copy shipped by Caliburn.Micro). Deliberate: App.config
+         redirects everything to 4.5 at runtime; compile stays on 4.0 because
+         pulling Caliburn.Micro.Platform into compile scope makes 'Action' ambiguous. -->
+    <MSBuildWarningsAsMessages>MSB3277</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
