@@ -102,6 +102,17 @@ namespace ABCat.Shared.Plugins.Sites
             }
         }
 
+        /// <summary>
+        ///     Storage key of a record's cached source page: "TP|{WebSiteId}|{RecordKey}".
+        ///     The page cache (BinaryData) is keyed by web site + record, not by group — the
+        ///     entity-level <see cref="IRecord.GetPageKey" /> uses a different, incompatible
+        ///     layout and must not be used for the page cache.
+        /// </summary>
+        protected string GetRecordPageKey(IRecord record)
+        {
+            return $"TP|{WebSiteId}|{record.Key}";
+        }
+
         public HashSet<string> GetGroupKeys(bool forceRefresh)
         {
             if (_groupKeys == null || forceRefresh)

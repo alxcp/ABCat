@@ -115,7 +115,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
             using (var autoSave = Context.I.DbContainerAutoSave)
             {
                 var dbContainer = autoSave.DBContainer;
-                var recordPageKey = audioBook.GetPageKey();
+                var recordPageKey = GetRecordPageKey(audioBook);
                 var pageData = pageSource == PageSources.WebOnly
                     ? null
                     : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
@@ -172,7 +172,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
 
             if (pageSource != PageSources.WebOnly)
             {
-                var page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
+                var page = dbContainer.BinaryDataSet.GetByKey(GetRecordPageKey(record));
 
                 if (page != null)
                 {
@@ -336,7 +336,7 @@ namespace ABCat.Plugins.Parsers.Audioboo
             page = document.DocumentNode.InnerHtml;
 
             var binaryData = dbContainer.BinaryDataSet.CreateBinaryData();
-            binaryData.Key = record.GetPageKey();
+            binaryData.Key = GetRecordPageKey(record);
             binaryData.SetString(page, true);
             dbContainer.BinaryDataSet.AddChangedBinaryData(binaryData);
 

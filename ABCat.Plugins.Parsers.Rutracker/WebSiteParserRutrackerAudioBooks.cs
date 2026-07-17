@@ -92,7 +92,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             using (var autoSave = Context.I.DbContainerAutoSave)
             {
                 var dbContainer = autoSave.DBContainer;
-                var recordPageKey = audioBook.GetPageKey();
+                var recordPageKey = GetRecordPageKey(audioBook);
                 var pageData = pageSource == PageSources.WebOnly
                     ? null
                     : dbContainer.BinaryDataSet.GetByKey(recordPageKey);
@@ -156,7 +156,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 //    pageHtml = metaPage.GetString();
                 //}
 
-                var page = dbContainer.BinaryDataSet.GetByKey(record.GetPageKey());
+                var page = dbContainer.BinaryDataSet.GetByKey(GetRecordPageKey(record));
 
                 if (page != null)
                 {
@@ -339,7 +339,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             //ClearRecordPage(document);
             page = document.DocumentNode.InnerHtml;
 
-            var pageKey = record.GetPageKey();
+            var pageKey = GetRecordPageKey(record);
 
             var binaryData = dbContainer.BinaryDataSet.CreateBinaryData();
             binaryData.Key = pageKey;
