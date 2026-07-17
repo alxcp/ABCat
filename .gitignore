@@ -343,3 +343,6 @@ DataBases/
 # Third-party binaries kept out of the repo (restored via NuGet / local build)
 Dlls/
 ~htmlAgilityPackOwnBuild/
+
+# Local ONNX models (downloaded, not committed)
+models/
