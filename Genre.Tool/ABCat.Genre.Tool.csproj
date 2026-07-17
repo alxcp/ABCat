@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.10" />
-    <ProjectReference Include="..\Matching\ABCat.Matching.csproj" />
+    <ProjectReference Include="..\Matching.Embedding\ABCat.Matching.Embedding.csproj" />
   </ItemGroup>
 
 </Project>

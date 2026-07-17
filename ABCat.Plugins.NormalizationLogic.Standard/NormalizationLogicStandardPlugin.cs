@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using ABCat.Shared;
 using ABCat.Shared.Plugins.Catalog;
 using ABCat.Shared.Plugins.DataProviders;
 using ABCat.Shared.Plugins.DataSets;
+using ABCat.Matching;
 using Component.Infrastructure;
 using Component.Infrastructure.Factory;
 using JetBrains.Annotations;
@@ -15,8 +18,16 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
     [UsedImplicitly]
     public class NormalizationLogicStandardPlugin : INormalizationLogicPlugin
     {
+        private const string MatcherVersion = "flibusta-lit-1";
+
         private readonly ConcurrentDictionary<string, string> _authors =
             new ConcurrentDictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+        private NormalizationLogicStandardConfig _config;
+        private ReferenceIndex _referenceIndex;
+        private LiteraryMatcher _matcher;
+        private NormalizationStore _store;
+        private bool _literaryInitTried;
 
         public NormalizationLogicStandardPlugin()
         {
@@ -32,10 +43,14 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         public virtual void FixComponentConfig()
         {
+            _config = Config.Load<NormalizationLogicStandardConfig>();
+            _config.CheckAndFix();
         }
 
         public void Dispose()
         {
+            _store?.Dispose();
+            _referenceIndex?.Dispose();
             Disposed?.Invoke(this, EventArgs.Empty);
         }
 
@@ -99,6 +114,67 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
                             string.Compare(str.PossibleValue, genreName, StringComparison.OrdinalIgnoreCase) == 0);
                 if (genreReplacement != null) record.Genre = genreReplacement.ReplaceValue;
                 else record.Genre = genreName;
+            }
+
+            // Literary stage: non-destructive overlay of Flibusta references. Runs on the
+            // mechanically-normalized fields; never mutates the records themselves.
+            RunLiteraryMatching(recordArray);
+        }
+
+        private void RunLiteraryMatching(IReadOnlyList<IAudioBook> records)
+        {
+            if (_config == null)
+            {
+                _config = Config.Load<NormalizationLogicStandardConfig>();
+                _config.CheckAndFix();
+            }
+
+            if (!_config.EnableLiteraryMatching || !EnsureLiterary()) return;
+
+            try
+            {
+                var batch = new List<(string, LiteraryMatch)>(records.Count);
+                foreach (var record in records)
+                {
+                    if (string.IsNullOrEmpty(record.Key)) continue;
+                    batch.Add((record.Key, _matcher.Match(record.Author, record.Title)));
+                }
+
+                if (batch.Count > 0) _store.UpsertBatch(batch, MatcherVersion);
+            }
+            catch (Exception ex)
+            {
+                Context.I.MainLog.Error(ex);
+            }
+        }
+
+        private bool EnsureLiterary()
+        {
+            if (_matcher != null) return true;
+            if (_literaryInitTried) return false;
+            _literaryInitTried = true;
+
+            try
+            {
+                if (!File.Exists(_config.ReferenceCatalogPath))
+                {
+                    Context.I.MainLog.Info(
+                        "Literary normalization is off: reference catalog not found at '" +
+                        _config.ReferenceCatalogPath + "'.");
+                    return false;
+                }
+
+                _referenceIndex = new ReferenceIndex(_config.ReferenceCatalogPath);
+                _matcher = new LiteraryMatcher(_referenceIndex);
+                _store = new NormalizationStore(_config.NormalizationDbPath);
+                Context.I.MainLog.Info(
+                    "Literary normalization is on: " + _referenceIndex.AuthorCount + " reference authors loaded.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Context.I.MainLog.Error(ex);
+                return false;
             }
         }
 

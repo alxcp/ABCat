@@ -54,7 +54,7 @@ var authorOnly = new List<string>();
 var misses = new List<string>();
 
 sw.Restart();
-foreach (var (author, title) in records)
+foreach (var (_, author, title) in records)
 {
     var m = matcher.Match(author, title);
 
@@ -107,20 +107,48 @@ foreach (var s in authorOnly) Console.WriteLine(s);
 Console.WriteLine("\n=== Sample: author NOT matched ===");
 foreach (var s in misses) Console.WriteLine(s);
 
+// Prove the overlay store roundtrips exactly as the plugin writes it.
+Console.WriteLine("\n=== Overlay store roundtrip (NormalizationStore) ===");
+var overlayPath = Path.Combine(Path.GetTempPath(), "abcat-normalization-test.sqlite");
+foreach (var ext in new[] { "", "-wal", "-shm" })
+    if (File.Exists(overlayPath + ext)) File.Delete(overlayPath + ext);
+using (var store = new NormalizationStore(overlayPath))
+{
+    var batch = new List<(string, LiteraryMatch)>(records.Count);
+    foreach (var (key, author, title) in records)
+        batch.Add((key, matcher.Match(author, title)));
+    store.UpsertBatch(batch, "flibusta-lit-1");
+    Console.WriteLine($"  wrote {store.Count():N0} rows -> {overlayPath}");
+
+    var shown = 0;
+    foreach (var (key, _, _) in records)
+    {
+        if (shown >= 6) break;
+        if (store.TryGet(key, out var row) && row.BookRef is { } br)
+        {
+            Console.WriteLine($"  key={key}  author_ref={row.AuthorRef} ({row.AuthorConf:F2})  " +
+                              $"book_ref={br} ({row.BookConf:F2})  «{Trim(row.BookTitle, 40)}»");
+            shown++;
+        }
+    }
+}
+
 return 0;
 
-static List<(string author, string title)> LoadRecords(string db, int sample)
+static List<(string key, string author, string title)> LoadRecords(string db, int sample)
 {
     var csb = new SqliteConnectionStringBuilder { DataSource = db, Mode = SqliteOpenMode.ReadOnly };
     using var conn = new SqliteConnection(csb.ToString());
     conn.Open();
     using var cmd = conn.CreateCommand();
-    cmd.CommandText = "SELECT Author, Title FROM AudioBook WHERE TRIM(Author) <> ''" +
+    cmd.CommandText = "SELECT Key, Author, Title FROM AudioBook WHERE TRIM(Author) <> ''" +
                       (sample < 0 ? "" : " ORDER BY RANDOM() LIMIT " + sample);
-    var list = new List<(string, string)>();
+    var list = new List<(string, string, string)>();
     using var r = cmd.ExecuteReader();
     while (r.Read())
-        list.Add((r.IsDBNull(0) ? "" : r.GetString(0), r.IsDBNull(1) ? "" : r.GetString(1)));
+        list.Add((r.IsDBNull(0) ? "" : r.GetString(0),
+            r.IsDBNull(1) ? "" : r.GetString(1),
+            r.IsDBNull(2) ? "" : r.GetString(2)));
     return list;
 }
 

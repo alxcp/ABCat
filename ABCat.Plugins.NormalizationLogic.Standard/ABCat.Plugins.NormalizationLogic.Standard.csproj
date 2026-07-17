@@ -22,6 +22,7 @@
     <ProjectReference Include="..\ABCat.Shared\ABCat.Shared.csproj" Private="false" />
     <ProjectReference Include="..\Component.Infrastructure\Component.Infrastructure.csproj" />
     <ProjectReference Include="..\Shared.Everywhere\Shared.Everywhere.csproj" />
+    <ProjectReference Include="..\Matching\ABCat.Matching.csproj" />
   </ItemGroup>
 
 </Project>
