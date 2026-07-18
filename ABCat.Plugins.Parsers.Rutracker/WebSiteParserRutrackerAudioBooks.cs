@@ -357,9 +357,16 @@ namespace ABCat.Plugins.Parsers.Rutracker
             if (result == null)
             {
                 result = dbContainer.AudioBookGroupSet.CreateRecordGroup();
-                dbContainer.AudioBookGroupSet.AddRecordGroup(result);
                 result.Key = recordGroupKey;
                 result.Title = recordGroupKey;
+                result.WebSiteId = WebSiteId;
+                dbContainer.AudioBookGroupSet.AddRecordGroup(result);
+            }
+            else if (result.WebSiteId != WebSiteId)
+            {
+                // Heal groups created before the web-site link was assigned.
+                result.WebSiteId = WebSiteId;
+                dbContainer.AudioBookGroupSet.AddChangedRecordGroups(result);
             }
 
             return result;
