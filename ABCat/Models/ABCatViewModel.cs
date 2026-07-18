@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -219,7 +220,8 @@ namespace ABCat.UI.WPF.Models
             _previousFileName = null;
 
             _previousFileName = Path.GetTempFileName() + ".html";
-            File.WriteAllText(_previousFileName, pageHtml);
+            // UTF-8 with BOM so the browser never has to guess the encoding.
+            File.WriteAllText(_previousFileName, pageHtml, Encoding.UTF8);
             Process.Start(_previousFileName);
         }
 

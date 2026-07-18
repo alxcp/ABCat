@@ -99,29 +99,27 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
                 if (pageData != null)
                 {
-                    var data = pageData.GetData();
-                    using (var ms = new MemoryStream(data))
-                    {
-                        var document = new HtmlDocument();
-                        document.Load(ms);
-                        if (cancellationToken.IsCancellationRequested) return null;
+                    // Decode the cached bytes with the known site encoding (Windows-1251);
+                    // Load(Stream) would re-guess and mis-read them (the stored meta says utf-8).
+                    var document = new HtmlDocument();
+                    document.LoadHtml(pageData.GetString());
+                    if (cancellationToken.IsCancellationRequested) return null;
 
-                        CleanupRecordPage(document);
-                        result = document.DocumentNode.InnerHtml;
+                    CleanupRecordPage(document);
+                    result = document.DocumentNode.InnerHtml;
 
-                        if (cancellationToken.IsCancellationRequested) return null;
-                        pageData = dbContainer.BinaryDataSet.CreateBinaryData();
-                        pageData.Key = recordPageKey;
-                        pageData.SetString(result, true);
-                        dbContainer.BinaryDataSet.AddChangedBinaryData(pageData);
-                    }
+                    if (cancellationToken.IsCancellationRequested) return null;
+                    pageData = dbContainer.BinaryDataSet.CreateBinaryData();
+                    pageData.Key = recordPageKey;
+                    pageData.SetString(result, true);
+                    dbContainer.BinaryDataSet.AddChangedBinaryData(pageData);
                 }
                 else if (pageSource != PageSources.CacheOnly)
                 {
                     using (var webClient = WebClientPool.GetPoolItem())
                     {
                         var pageUrl = GetRecordPageUrl(audioBook);
-                        result = webClient.Target.DownloadString(pageUrl);
+                        result = webClient.DownloadString(pageUrl);
 
                         var document = new HtmlDocument();
                         document.LoadHtml(result);
@@ -160,19 +158,16 @@ namespace ABCat.Plugins.Parsers.Rutracker
 
                 if (page != null)
                 {
-                    using (var ms = new MemoryStream(page.GetData()))
-                    {
-                        var doc = new HtmlDocument();
-                        doc.Load(ms);
-                        var savedHtml = doc.DocumentNode.OuterHtml;
-                        CleanupRecordPage(doc);
-                        pageHtml = doc.DocumentNode.InnerHtml;
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(page.GetString());
+                    var savedHtml = doc.DocumentNode.OuterHtml;
+                    CleanupRecordPage(doc);
+                    pageHtml = doc.DocumentNode.InnerHtml;
 
-                        if (savedHtml != pageHtml)
-                        {
-                            page.SetString(doc.DocumentNode.InnerHtml, true);
-                            dbContainer.BinaryDataSet.AddChangedBinaryData(page);
-                        }
+                    if (savedHtml != pageHtml)
+                    {
+                        page.SetString(doc.DocumentNode.InnerHtml, true);
+                        dbContainer.BinaryDataSet.AddChangedBinaryData(page);
                     }
                 }
             }
@@ -212,7 +207,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
                 using (var webClient = WebClientPool.GetPoolItem())
                 {
                     var pageUrl = $"{url}&start={pageIndex * RecordsOnPageCount}";
-                    pageHtml = webClient.Target.DownloadString(pageUrl);
+                    pageHtml = webClient.DownloadString(pageUrl);
                     if (cancellationToken.IsCancellationRequested) return;
                 }
 
@@ -327,7 +322,7 @@ namespace ABCat.Plugins.Parsers.Rutracker
             using (var webClient = WebClientPool.GetPoolItem())
             {
                 var pageUrl = GetRecordPageUrl(record);
-                page = webClient.Target.DownloadString(pageUrl);
+                page = webClient.DownloadString(pageUrl);
                 _lastLoadFromInternet.Restart();
                 if (cancellationToken.IsCancellationRequested) return null;
             }

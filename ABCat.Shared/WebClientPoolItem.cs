@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Text;
 
 namespace ABCat.Shared
 {
@@ -13,6 +14,28 @@ namespace ABCat.Shared
         }
 
         public WebClient Target { get; private set; }
+
+        /// <summary>
+        ///     Download a page and decode it with the client's configured <see cref="WebClient.Encoding" />
+        ///     (Windows-1251 for these sites). Uses raw bytes rather than
+        ///     <see cref="WebClient.DownloadString(string)" />, whose response-charset heuristic returns
+        ///     ISO-8859-1 after an http→https redirect and corrupts the Cyrillic text.
+        /// </summary>
+        public string DownloadString(string url)
+        {
+            return Decode(Target.DownloadData(url));
+        }
+
+        public string DownloadString(Uri url)
+        {
+            return Decode(Target.DownloadData(url));
+        }
+
+        private string Decode(byte[] data)
+        {
+            var encoding = Target.Encoding ?? Encoding.GetEncoding(1251);
+            return encoding.GetString(data);
+        }
 
         public void Dispose()
         {
