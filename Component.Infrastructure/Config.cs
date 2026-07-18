@@ -68,6 +68,11 @@ namespace Component.Infrastructure
                 result = CreateDefaultInstance(configType);
             }
 
+            // Always run the real default-fixing logic so every loaded config — the freshly
+            // created default and a file-loaded one alike — goes through the same path and holds
+            // the same values the settings form shows. Consumers therefore never see raw CLR
+            // defaults. The applied fixes must not mark the config dirty.
+            result.CheckAndFix();
             result.IsChanged = false;
 
             return result;
