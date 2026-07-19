@@ -18,6 +18,7 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
     {
         private bool _enableLiteraryMatching = true;
         private string _databaseFolder;
+        private string _referenceCatalogPath;
 
         [DisplayName("Сверять с эталонным каталогом")]
         [Description("Сопоставлять записи с каталогом Флибусты и сохранять референсы (автор, книга) в overlay-хранилище")]
@@ -48,7 +49,20 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
 
         [Browsable(false)] public string ReferenceCatalogFileName => "reference-catalog.sqlite";
 
-        [Browsable(false)] public string ReferenceCatalogPath => Path.Combine(DatabaseFolder ?? "", ReferenceCatalogFileName);
+        [DisplayName("Файл эталонного каталога")]
+        [Description("Путь к reference-catalog.sqlite (каталог Флибусты). Файл большой, поэтому его " +
+                     "можно не копировать в папку БД, а указать здесь. Без него сверка не выполняется.")]
+        [Editor(typeof(FilePathEditor), typeof(FilePathEditor))]
+        public string ReferenceCatalogPath
+        {
+            get => _referenceCatalogPath;
+            set
+            {
+                if (Equals(value, _referenceCatalogPath)) return;
+                _referenceCatalogPath = value;
+                OnPropertyChanged();
+            }
+        }
 
         [Browsable(false)] public string NormalizationDbFileName => "Normalization.sqlite";
 
@@ -66,6 +80,15 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
             }
 
             Directory.CreateDirectory(DatabaseFolder);
+
+            // Default to the reference catalog living next to the other databases; the user can
+            // point this anywhere, so the multi-gigabyte file need not be copied into DataBases.
+            if (string.IsNullOrEmpty(ReferenceCatalogPath))
+            {
+                result = false;
+                ReferenceCatalogPath = Path.Combine(DatabaseFolder, ReferenceCatalogFileName);
+            }
+
             return result;
         }
     }

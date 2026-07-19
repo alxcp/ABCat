@@ -158,9 +158,12 @@ namespace ABCat.Plugins.NormalizationLogic.Standard
             {
                 if (!File.Exists(_config.ReferenceCatalogPath))
                 {
-                    Context.I.MainLog.Info(
-                        "Literary normalization is off: reference catalog not found at '" +
-                        _config.ReferenceCatalogPath + "'.");
+                    // Warn, not Info: silently skipping the whole reference-catalog stage is the
+                    // kind of thing that must be visible in the log.
+                    Context.I.MainLog.Warn(
+                        "Literary normalization is OFF: reference catalog not found at '" +
+                        _config.ReferenceCatalogPath +
+                        "'. Set the path in settings (Нормализация: сверка с каталогом).");
                     return false;
                 }
 
