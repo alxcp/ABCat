@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using ABCat.Shared;
 using ABCat.Shared.Messages;
@@ -21,6 +22,16 @@ namespace ABCat.Plugins.Parsers.Rutracker
     public class WebSiteParserRutrackerAudioBooks : WebSiteParserBase
     {
         private const int RecordsOnPageCount = 50;
+
+        /// <summary>
+        ///     An attribute key inside a post body: a bold span immediately followed by a colon.
+        ///     Bold spans that are NOT followed by a colon are formatting inside a value.
+        /// </summary>
+        private static readonly Regex AttributeKeyRegex =
+            new Regex(@"<span\s+class=""post-b"">(?<key>[^<]*)</span>\s*:", RegexOptions.IgnoreCase);
+
+        /// <summary>Separator injected in front of each detected attribute key.</summary>
+        private static readonly string KeySentinel = ((char) 1).ToString();
 
         private static readonly string[] GroupKeys =
         {
@@ -376,31 +387,30 @@ namespace ABCat.Plugins.Parsers.Rutracker
         {
             var result = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
-            var rows = postBodyHtml
-                .Split(new[] {"<br>", "<hr class=\"post-hr\">", "<span class=\"post-b\">"},
-                    StringSplitOptions.RemoveEmptyEntries).Select(item => item.TrimStart('\n', '"'))
-                .Where(item => !item.IsNullOrEmpty() && item != "</span>").ToArray();
+            // An attribute key is a bold span immediately followed by a colon. Marking only
+            // those tells them apart from bold/colour spans used *inside* a value (posters
+            // format author names, and a nested <span class="post-b"> used to split the row
+            // and drop the value). Everything left is inline formatting, flattened by InnerText.
+            var marked = AttributeKeyRegex.Replace(postBodyHtml, KeySentinel + "${key}:");
 
+            var rows = marked.Split(new[] {KeySentinel, "<br>", "<hr class=\"post-hr\">"},
+                StringSplitOptions.RemoveEmptyEntries);
 
-            if (rows.Length > 1)
+            foreach (var row in rows)
             {
-                rows[1] = string.Join("", rows[1].Split("</var>").Skip(1));
+                // The leading fragment carries the poster image and post title; keep whatever
+                // follows the image block so a title is never mistaken for an attribute.
+                var fragment = row;
+                var imageEnd = fragment.LastIndexOf("</var>", StringComparison.OrdinalIgnoreCase);
+                if (imageEnd >= 0) fragment = fragment.Substring(imageEnd + "</var>".Length);
 
-                // Skip(1) - skip post title
-                foreach (var row in rows.Skip(1))
+                var doc = new HtmlDocument();
+                doc.LoadHtml(fragment);
+                var str = doc.DocumentNode.InnerText.TrimStart('\n', '"');
+
+                if (!str.IsNullOrEmpty() && ParseKeyValue(str, out var key, out var value))
                 {
-                    var doc = new HtmlDocument();
-                    doc.LoadHtml(row);
-                    var str = doc.DocumentNode.InnerText.TrimStart('\n', '"');
-
-                    if (!str.IsNullOrEmpty() && ParseKeyValue(str, out var key, out var value))
-                    {
-                        if (result.TryGetValue(key, out var v))
-                        {
-
-                        }
-                        result[key] = value;
-                    }
+                    result[key] = value;
                 }
             }
 
