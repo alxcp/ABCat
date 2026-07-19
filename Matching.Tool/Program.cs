@@ -107,11 +107,19 @@ foreach (var s in authorOnly) Console.WriteLine(s);
 Console.WriteLine("\n=== Sample: author NOT matched ===");
 foreach (var s in misses) Console.WriteLine(s);
 
-// Prove the overlay store roundtrips exactly as the plugin writes it.
-Console.WriteLine("\n=== Overlay store roundtrip (NormalizationStore) ===");
-var overlayPath = Path.Combine(Path.GetTempPath(), "abcat-normalization-test.sqlite");
-foreach (var ext in new[] { "", "-wal", "-shm" })
-    if (File.Exists(overlayPath + ext)) File.Delete(overlayPath + ext);
+// Write the overlay exactly as the plugin does. Pass a 4th arg to populate the real
+// store (e.g. %USERPROFILE%\Documents\ABCat\DataBases\Normalization.sqlite); without it
+// a throwaway temp file is used just to prove the roundtrip.
+var populate = args.Length > 3;
+Console.WriteLine(populate
+    ? "\n=== Populating overlay store ==="
+    : "\n=== Overlay store roundtrip (NormalizationStore) ===");
+var overlayPath = populate
+    ? Path.GetFullPath(args[3])
+    : Path.Combine(Path.GetTempPath(), "abcat-normalization-test.sqlite");
+if (!populate)
+    foreach (var ext in new[] { "", "-wal", "-shm" })
+        if (File.Exists(overlayPath + ext)) File.Delete(overlayPath + ext);
 using (var store = new NormalizationStore(overlayPath))
 {
     var batch = new List<(string, LiteraryMatch)>(records.Count);

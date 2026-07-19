@@ -168,6 +168,40 @@ ON CONFLICT(audiobook_key) DO UPDATE SET
             }
         }
 
+        /// <summary>All overlay rows keyed by audiobook key — for bulk consumers (catalog tree).</summary>
+        public Dictionary<string, NormalizationRow> GetAll()
+        {
+            var result = new Dictionary<string, NormalizationRow>(StringComparer.Ordinal);
+            using (var cmd = _conn.CreateCommand())
+            {
+                cmd.CommandText =
+                    "SELECT audiobook_key, author_ref, author_conf, author_canonical, book_ref, book_conf, " +
+                    "book_title, genre_ref, genre_conf, genre_descr FROM normalization";
+                using (var r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        var key = r.GetString(0);
+                        result[key] = new NormalizationRow
+                        {
+                            AudiobookKey = key,
+                            AuthorRef = r.IsDBNull(1) ? (int?) null : r.GetInt32(1),
+                            AuthorConf = r.IsDBNull(2) ? (double?) null : r.GetDouble(2),
+                            AuthorCanonical = r.IsDBNull(3) ? null : r.GetString(3),
+                            BookRef = r.IsDBNull(4) ? (int?) null : r.GetInt32(4),
+                            BookConf = r.IsDBNull(5) ? (double?) null : r.GetDouble(5),
+                            BookTitle = r.IsDBNull(6) ? null : r.GetString(6),
+                            GenreRef = r.IsDBNull(7) ? (int?) null : r.GetInt32(7),
+                            GenreConf = r.IsDBNull(8) ? (double?) null : r.GetDouble(8),
+                            GenreDescr = r.IsDBNull(9) ? null : r.GetString(9)
+                        };
+                    }
+                }
+            }
+
+            return result;
+        }
+
         public long Count()
         {
             using (var cmd = _conn.CreateCommand())
