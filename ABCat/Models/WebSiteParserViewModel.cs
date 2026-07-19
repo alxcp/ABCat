@@ -45,12 +45,38 @@ namespace ABCat.UI.WPF.Models
             {
                 foreach (var groupKey in siteParserPlugin.GetGroupKeys(false))
                 {
-                    allGroups.Add(groupKey, siteParserPlugin.WebSiteId);
+                    allGroups[groupKey] = siteParserPlugin.WebSiteId;
                 }
             }
 
-            var forReparse = _getSelectedItems().GroupBy(item => allGroups[item.GroupKey])
-                .ToDictionary(item => item.Key, values => values.Select(item => item.Key).ToHashSet());
+            var forReparse = new Dictionary<int, HashSet<string>>();
+
+            foreach (var record in _getSelectedItems())
+            {
+                // A record whose group is no longer served by an enabled parser is skipped
+                // instead of aborting the whole run.
+                if (record.GroupKey == null || !allGroups.TryGetValue(record.GroupKey, out var webSiteId))
+                    continue;
+
+                if (!forReparse.TryGetValue(webSiteId, out var keys))
+                {
+                    keys = new HashSet<string>();
+                    forReparse.Add(webSiteId, keys);
+                }
+
+                keys.Add(record.Key);
+            }
+
+            if (!forReparse.Any())
+            {
+                // Nothing selected means "reprocess the whole catalog": a null key set makes
+                // each parser re-read every record of its own web site from the page cache,
+                // so the pages are re-parsed without being downloaded again.
+                foreach (var siteParserPlugin in _siteParserPlugins)
+                {
+                    forReparse[siteParserPlugin.WebSiteId] = null;
+                }
+            }
 
             foreach (var audioBooks in forReparse)
             {
